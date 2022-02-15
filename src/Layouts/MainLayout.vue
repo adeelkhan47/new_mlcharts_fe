@@ -1,6 +1,6 @@
 <template>
   <div class="main-layout">
-    <md-app>
+    <md-app md-mode="fixed" class="app">
       <md-app-toolbar class="md-primary">
         <span class="md-title">ML App</span>
         <span class="links-wrapper">
@@ -18,7 +18,7 @@
         </span>
       </md-app-toolbar>
 
-      <md-app-content>
+      <md-app-content class="app-content">
         <router-view></router-view>
       </md-app-content>
     </md-app>
@@ -54,8 +54,13 @@ export default {
 
 <style scoped>
 .main-layout {
-  position: relative;
-  width: 100%;
+  position: absolute;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.app {
   height: 100%;
 }
 

@@ -3,8 +3,11 @@
     <div class="actions-wrapper">
       <ul class="actions">
         <li class="action">
-          <md-button class="md-default md-raised" @click="showAddDialog = true">
-            Add Data Value
+          <md-button
+            class="md-primary md-raised no-transform"
+            @click="showAddDialog = true"
+          >
+            Add Data Value(s)
           </md-button>
         </li>
       </ul>
@@ -14,7 +17,7 @@
       <div class="content-body">
         <div class="tables">
           <statistics-table />
-          <data-table />
+          <data-excel />
           <limits />
         </div>
         <div class="charts">
@@ -30,12 +33,12 @@
 </template>
 
 <script>
-import DataTable from "../components/tables/DataTable.vue";
 import StatisticsTable from "../components/tables/StatisticsTable.vue";
-import ChartX from "../components/charts/ChartX.vue";
-import ChartMr from "../components/charts/ChartMr.vue";
 import ChartHistogram from "../components/charts/HistogramChart.vue";
+import DataExcel from "../components/tables/DataExcel.vue";
+import ChartMr from "../components/charts/ChartMr.vue";
 import AddData from "../components/inputs/AddData.vue";
+import ChartX from "../components/charts/ChartX.vue";
 import Limits from "../components/inputs/Limits.vue";
 import userHelper from "../utils/userHelper.util";
 import { mapActions } from "vuex";
@@ -43,12 +46,12 @@ import { mapActions } from "vuex";
 export default {
   name: "Home",
   components: {
-    DataTable,
     StatisticsTable,
-    ChartX,
-    ChartMr,
     ChartHistogram,
+    DataExcel,
+    ChartMr,
     AddData,
+    ChartX,
     Limits
   },
 
@@ -117,6 +120,11 @@ export default {
   flex-direction: row;
   align-items: flex-start;
   justify-content: center;
+  flex-wrap: wrap;
+}
+
+.tables > * {
+  margin: 20px 5px;
 }
 
 .charts {
@@ -125,5 +133,9 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+
+.no-transform {
+  text-transform: none;
 }
 </style>

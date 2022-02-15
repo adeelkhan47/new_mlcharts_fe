@@ -103,6 +103,7 @@ export default {
 
     validateValues(val) {
       if (val && typeof val == "string" && val.length) {
+        val = val.replaceAll(" ", this.delimiter);
         this.error = null;
 
         this.num = [];

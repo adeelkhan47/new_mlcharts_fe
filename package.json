@@ -11,6 +11,8 @@
     "axios": "^0.22.0",
     "core-js": "^3.6.5",
     "viser-vue": "^2.4.8",
+    "jexcel": "^4.6.1",
+    "jspreadsheet-ce": "^4.10.1",
     "vue": "^2.6.11",
     "vue-material": "^1.0.0-beta-15",
     "vue-router": "^3.2.0",

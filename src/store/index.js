@@ -1,16 +1,17 @@
-import Vue from 'vue'
-import Vuex from 'vuex'
-import util from '../utils'
-import dataApi from '../api/data.api'
-import userHelper from '../utils/userHelper.util';
+import Vue from "vue";
+import Vuex from "vuex";
+import util from "../utils";
+import dataApi from "../api/data.api";
+import userHelper from "../utils/userHelper.util";
 
-Vue.use(Vuex)
+Vue.use(Vuex);
 
 const X_CONTROL_LIMITS_CONST = 1.128;
 const MR_UCL_CONST = 3.268;
 
 export default new Vuex.Store({
   state: {
+    loading: false,
     upperSpecLimit: 20,
     lowerSpecLimit: 10,
     dataList: [],
@@ -26,78 +27,78 @@ export default new Vuex.Store({
     cpk: 0
   },
   actions: {
-
     init: (ctx) => {
-
+      ctx.commit("loading", true);
       let appData = localStorage.getItem("appData");
       if (appData) {
         appData = JSON.parse(appData);
 
-        if (appData && typeof appData == "object" && Object.keys(appData).length) {
-
+        if (
+          appData &&
+          typeof appData == "object" &&
+          Object.keys(appData).length
+        ) {
           if (appData.hasOwnProperty("upperSpecLimit"))
             ctx.commit("upperSpecLimit", appData["upperSpecLimit"]);
 
           if (appData.hasOwnProperty("lowerSpecLimit"))
-            ctx.commit("lowerSpecLimit", appData["lowerSpecLimit"])
+            ctx.commit("lowerSpecLimit", appData["lowerSpecLimit"]);
         }
       }
 
-      dataApi.getData()
-        .then(res => {
+      dataApi
+        .getData()
+        .then((res) => {
           if (res && res.data && res.data.data) {
-
             ctx.commit("dataList", res.data.data);
 
             ctx.commit("setMovingRange");
 
             ctx.dispatch("populate");
-
           }
         })
-        .catch(err => {
+        .catch((err) => {
           console.error("Unable to get all data :: ", err);
+          ctx.commit("loading", false);
         });
     },
 
     populate: (ctx) => {
-
-      const dataValues = ctx.state.dataList.map(obj => obj.value);
+      ctx.commit("loading", true);
+      const dataValues = ctx.state.dataList.map((obj) => obj.value);
       ctx.commit("dataAverage", util.average(dataValues));
 
       let mrValues = Array.from(ctx.state.mr.values());
       if (mrValues.length) {
-        if (mrValues.length == 1)
-          mrValues = [];
-        else
-          mrValues = mrValues.slice(1);
+        if (mrValues.length == 1) mrValues = [];
+        else mrValues = mrValues.slice(1);
       }
       ctx.commit("mrAverage", util.average(mrValues));
 
       const std = ctx.state.mrAverage / X_CONTROL_LIMITS_CONST;
       ctx.commit("estimatedStdDev", std);
 
-      const ucl = ctx.state.dataAverage + (3 * std);
+      const ucl = ctx.state.dataAverage + 3 * std;
       ctx.commit("xControlLimits_UCL", ucl);
 
-      const lcl = ctx.state.dataAverage - (3 * std);
+      const lcl = ctx.state.dataAverage - 3 * std;
       ctx.commit("xControlLimits_LCL", lcl);
 
       const mr_UCL = MR_UCL_CONST * ctx.state.mrAverage;
       ctx.commit("mrControlLimits_UCL", mr_UCL);
 
-
       ctx.dispatch("populateCPX");
     },
 
     populateCPX: (ctx) => {
-
       const std = ctx.state.mrAverage / X_CONTROL_LIMITS_CONST;
 
-      const cpu = (ctx.state.upperSpecLimit - ctx.state.dataAverage) / (3 * std);
+      const cpu =
+        (ctx.state.upperSpecLimit - ctx.state.dataAverage) / (3 * std);
       ctx.commit("cpu", cpu);
 
-      const cpl = (ctx.state.dataAverage - ctx.state.lowerSpecLimit) / (3 * std);
+      const cpl =
+        (ctx.state.dataAverage - ctx.state.lowerSpecLimit) / (3 * std);
       ctx.commit("cpl", cpl);
 
       const cpk = Math.min(cpu, cpl);
@@ -111,16 +112,21 @@ export default new Vuex.Store({
       };
       localStorage.setItem("appData", JSON.stringify(appData));
 
+      ctx.commit("loading", false);
     },
 
     addDataItem: (ctx, numberList) => {
-
       const userId = userHelper.getUserId();
 
-      if (userId && numberList && numberList instanceof Array && numberList.length) {
-
+      if (
+        userId &&
+        numberList &&
+        numberList instanceof Array &&
+        numberList.length
+      ) {
+        ctx.commit("loading", true);
         let count = ctx.state.dataList.length;
-        const dataList = numberList.map(value => {
+        const dataList = numberList.map((value) => {
           const label = util.getID() + "-" + count++;
           return {
             userId,
@@ -129,41 +135,104 @@ export default new Vuex.Store({
           };
         });
 
-
-        dataApi.createData(dataList)
-          .then(res => {
+        dataApi
+          .createData(dataList)
+          .then(() => {
             ctx.dispatch("init");
           })
-          .catch(err => {
+          .catch((err) => {
             console.error("Unable to add data item", err);
+            ctx.commit("loading", false);
           });
       }
+    },
 
+    addDataItems: (ctx, itemList) => {
+      const userId = userHelper.getUserId();
+
+      if (userId && itemList && itemList instanceof Array && itemList.length) {
+        ctx.commit("loading", true);
+        let count = ctx.state.dataList.length;
+        const dataList = itemList.map((itemObj) => {
+          let label = itemObj.label;
+          if (!label) label = util.getID() + "-" + count++;
+          return {
+            userId,
+            label,
+            value: itemObj.value
+          };
+        });
+
+        dataApi
+          .createData(dataList)
+          .then(() => {
+            ctx.dispatch("init");
+          })
+          .catch((err) => {
+            console.error("Unable to add data item", err);
+            ctx.commit("loading", false);
+          });
+      }
     },
 
     updateDataItem: (ctx, { id, label, value }) => {
-      if (id, util.isString(label) && util.isNumber(value)) {
-
-        dataApi.updateData(id, label, value)
-          .then(res => {
+      if ((id, util.isString(label) && util.isNumber(value))) {
+        ctx.commit("loading", true);
+        dataApi
+          .updateData(id, label, value)
+          .then(() => {
             ctx.dispatch("init");
           })
-          .catch(err => {
+          .catch((err) => {
             console.error("Unable to update data item :: ", id);
             console.error(err);
+            ctx.commit("loading", false);
           });
       }
+    },
+
+    updateDataItems: (ctx, dataItems) => {
+      ctx.commit("loading", true);
+      dataApi
+        .updateMany(dataItems)
+        .then(() => {
+          ctx.dispatch("init");
+        })
+        .catch((err) => {
+          console.error("Unable to update data items");
+          console.error(err);
+          ctx.commit("loading", false);
+        });
     },
 
     removeDataItem: (ctx, dataId) => {
       if (dataId) {
-        dataApi.deleteData(dataId)
-          .then(res => {
+        ctx.commit("loading", true);
+        dataApi
+          .deleteData(dataId)
+          .then(() => {
             ctx.dispatch("init");
           })
-          .catch(err => {
+          .catch((err) => {
             console.error("Unable to update data item :: ", id);
             console.error(err);
+            ctx.commit("loading", false);
+          });
+      }
+    },
+
+    removeDataItems: (ctx, dataIds) => {
+      if (dataIds && dataIds.length) {
+        ctx.commit("loading", true);
+        dataApi
+          .deleteMany(dataIds)
+          .then(() => {
+            ctx.dispatch("init");
+          })
+          .catch((err) => {
+            console.error("Unable to update data items");
+            console.error(err);
+            ctx.commit("loading", false);
           });
       }
     },
@@ -195,10 +264,9 @@ export default new Vuex.Store({
 
     updateData: (state, { key, value }) => {
       // updating data
-      state.dataList = state.dataList.map(obj => {
-        if (obj.key === key)
-          obj.value = value;
-        return obj
+      state.dataList = state.dataList.map((obj) => {
+        if (obj.key === key) obj.value = value;
+        return obj;
       });
 
       // updating MR
@@ -207,7 +275,7 @@ export default new Vuex.Store({
 
     removeData: (state, key) => {
       // removing Data
-      state.dataList = state.dataList.filter(obj => obj.key != key);
+      state.dataList = state.dataList.filter((obj) => obj.key != key);
 
       // removing MR
       state.mr = util.getMrMap(state.dataList);
@@ -263,8 +331,11 @@ export default new Vuex.Store({
 
     lowerSpecLimit: (state, val) => {
       state.lowerSpecLimit = val;
+    },
+
+    loading: (state, val) => {
+      state.loading = val;
     }
   },
-  modules: {
-  }
-})
+  modules: {}
+});
