@@ -6,7 +6,7 @@
     <template v-if="chartData && chartData.length">
       <v-chart :forceFit="true" :height="400" :data="chartData" :scale="scale">
         <v-tooltip />
-        <!-- <v-axis :label="label" data-key="key" /> -->
+        <v-axis :label="label" data-key="key" /> 
         <v-line position="key*value" color="id" />
         <v-point position="key*value" color="id" />
         <v-legend position="bottom" />
