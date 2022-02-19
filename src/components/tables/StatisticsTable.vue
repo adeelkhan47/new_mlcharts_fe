@@ -1,5 +1,5 @@
 <template>
-  <div class="wrapper">
+  <div class="st-wrapper">
     <md-table v-model="data" md-card md-fixed-header>
       <md-table-row slot="md-table-row" slot-scope="{ item }">
         <md-table-cell md-label="Label">
@@ -32,7 +32,7 @@ export default {
     data() {
       return [
         {
-          key: "Average Moving Range",
+          key: "Avg. Moving Range",
           value: this.mrAverage
         },
         {
@@ -48,15 +48,15 @@ export default {
           value: this.dataList.length
         },
         {
-          key: "CPU",
+          key: "Cpu",
           value: this.cpu
         },
         {
-          key: "CPL",
+          key: "Cpl",
           value: this.cpl
         },
         {
-          key: "CPK",
+          key: "Cpk",
           value: this.cpk
         }
       ];
@@ -65,4 +65,8 @@ export default {
 };
 </script>
 
-<style scoped></style>
+<style scoped>
+.st-wrapper {
+  width: 350px;
+}
+</style>

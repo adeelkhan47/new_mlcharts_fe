@@ -1,5 +1,5 @@
 <template>
-  <md-card>
+  <md-card class="card">
     <div class="limits-wrapper">
       <h4 class="title">Upper Spec Limit: {{ upperSpecLimit }}</h4>
       <div class="editor">
@@ -108,6 +108,10 @@ export default {
 </script>
 
 <style scoped>
+.card {
+  width: 317px;
+}
+
 .limits-wrapper {
   padding: 10px 20px;
   display: flex;

@@ -16,9 +16,8 @@
     <div class="content-wrapper">
       <div class="content-body">
         <div class="tables">
-          <statistics-table />
+          <display-layout />
           <data-excel />
-          <limits />
         </div>
         <div class="charts">
           <chart-x />
@@ -33,26 +32,24 @@
 </template>
 
 <script>
-import StatisticsTable from "../components/tables/StatisticsTable.vue";
 import ChartHistogram from "../components/charts/HistogramChart.vue";
 import DataExcel from "../components/tables/DataExcel.vue";
+import displayLayout from "../Layouts/DisplayLayout.vue";
 import ChartMr from "../components/charts/ChartMr.vue";
 import AddData from "../components/inputs/AddData.vue";
 import ChartX from "../components/charts/ChartX.vue";
-import Limits from "../components/inputs/Limits.vue";
 import userHelper from "../utils/userHelper.util";
 import { mapActions } from "vuex";
 
 export default {
   name: "Home",
   components: {
-    StatisticsTable,
     ChartHistogram,
+    displayLayout,
     DataExcel,
     ChartMr,
     AddData,
-    ChartX,
-    Limits
+    ChartX
   },
 
   data() {

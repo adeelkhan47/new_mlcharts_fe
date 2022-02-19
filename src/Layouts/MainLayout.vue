@@ -2,7 +2,7 @@
   <div class="main-layout">
     <md-app md-mode="fixed" class="app">
       <md-app-toolbar class="md-primary">
-        <span class="md-title">ML App</span>
+        <span class="md-title">SPC Charts</span>
         <span class="links-wrapper">
           <ul class="links">
             <li class="link" :class="{ active: activeLink === 'Home' }">
@@ -11,9 +11,7 @@
             <li class="link" :class="{ active: activeLink === 'About' }">
               <router-link to="/about"> About</router-link>
             </li>
-            <li class="link" @click="logout">
-              Logout
-            </li>
+            <li class="link" @click="logout">Logout</li>
           </ul>
         </span>
       </md-app-toolbar>
@@ -39,7 +37,7 @@ export default {
     this.activeLink = this.$route.name;
   },
   watch: {
-    $route: function() {
+    $route: function () {
       this.activeLink = this.$route.name;
     }
   },

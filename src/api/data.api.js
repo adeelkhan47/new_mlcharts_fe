@@ -18,7 +18,7 @@ function createData(dataList) {
   return axios.post(URL, dataList);
 }
 
-function updateData(dataId, label, value) {
+function updateData(dataId, label, value, reference) {
   const userId = userHelper.getUserId();
 
   if (userId) {
@@ -27,7 +27,8 @@ function updateData(dataId, label, value) {
       userId,
       dataId,
       label,
-      value
+      value,
+      reference
     });
   } else {
     return Promise.reject(new Error("Authentication is required"));

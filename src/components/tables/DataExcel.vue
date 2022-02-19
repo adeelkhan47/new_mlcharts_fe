@@ -38,8 +38,9 @@ export default {
         allowToolbar: true,
         rowDrag: false,
         columns: [
-          { type: "text", title: "ID", width: "100px", readOnly: true },
-          { type: "text", title: "Label", width: "150px" },
+          { type: "text", title: "ID", width: "0px", readOnly: true },
+          { type: "text", title: "Reference 1", width: "150px" },
+          { type: "text", title: "Reference 2", width: "150px" },
           {
             type: "numeric",
             title: "Value",
@@ -55,7 +56,7 @@ export default {
           }
         ],
         tableOverflow: true,
-        tableHeight: "400px",
+        tableHeight: "795px",
         onpaste: this.handleChange,
         ondeleterow: this.handleChange,
         oneditionend: this.handleChange
@@ -73,12 +74,32 @@ export default {
         return {
           id: obj.id,
           label: obj.label,
+          reference: obj.reference,
           value: obj.value,
           mr: this.mr.get(obj.id)
         };
       });
 
       this.options.data = JSON.parse(JSON.stringify(this.records));
+
+      // hiding first mr
+      if (this.records.length > 0) this.options.data[0].mr = "";
+
+      let blankRows = 32;
+      if (this.records.length > 31) blankRows = 5;
+      else blankRows = blankRows - this.records.length;
+
+      // adding blank rows
+      for (let i = 0; i < blankRows; i++) {
+        this.options.data.push({
+          id: "",
+          label: "",
+          value: "",
+          reference: "",
+          mr: ""
+        });
+      }
+
       this.init();
     }
   },
@@ -105,8 +126,6 @@ export default {
       this.showEdit = true;
     },
 
-    handleDelete(el, index) {},
-
     handleChange() {
       const currentData = this.spreadsheet.getJson();
       const deletedRecords = this.getDeletedRecords(currentData);
@@ -132,7 +151,8 @@ export default {
         .map((obj) => ({
           id: obj.id,
           label: obj.label,
-          value: obj.value
+          value: obj.value,
+          reference: obj.reference
         }));
 
       return deletedRecords;
@@ -146,13 +166,16 @@ export default {
           );
           return !!(
             oldData &&
-            (oldData.label != currObj.label || oldData.value != currObj.value)
+            (oldData.label != currObj.label ||
+              oldData.value != currObj.value ||
+              oldData.reference != currObj.reference)
           );
         })
         .map((obj) => ({
           id: obj.id,
           label: obj.label,
-          value: this.getParsedValue(obj.value)
+          value: this.getParsedValue(obj.value),
+          reference: obj.reference
         }));
 
       return updatedRecords;
@@ -165,7 +188,8 @@ export default {
         .map((obj) => ({
           id: obj.id,
           label: obj.label,
-          value: this.getParsedValue(obj.value)
+          value: this.getParsedValue(obj.value),
+          reference: obj.reference
         }));
 
       return newRecords;
@@ -187,7 +211,7 @@ export default {
 <style scoped>
 .data-table {
   min-width: 500px;
-  min-height: 400px;
+  min-height: 795px;
   border-radius: 5px;
   background: #eee;
   position: relative;

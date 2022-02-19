@@ -1,9 +1,7 @@
 <template>
   <div class="wrapper">
     <md-dialog :md-active="visibility">
-      <md-dialog-title>
-        Input a +ve number value
-      </md-dialog-title>
+      <md-dialog-title> Input a +ve number value </md-dialog-title>
 
       <div class="input-container" v-if="item">
         <md-field :class="messageClass">
@@ -26,9 +24,7 @@
       </div>
 
       <md-dialog-actions>
-        <md-button class="md-primary" @click="hide">
-          Close
-        </md-button>
+        <md-button class="md-primary" @click="hide"> Close </md-button>
         <md-button
           class="md-primary"
           @click="addValue"
@@ -124,7 +120,8 @@ export default {
           this.updateDataItem({
             id: this.item.id,
             label: this.item.label,
-            value: this.num
+            value: this.num,
+            reference: this.item.reference
           });
         else this.addDataItem(this.num);
 

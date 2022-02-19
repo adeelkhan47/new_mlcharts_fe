@@ -8,6 +8,7 @@ Vue.use(Vuex);
 
 const X_CONTROL_LIMITS_CONST = 1.128;
 const MR_UCL_CONST = 3.268;
+const toFixed = 3;
 
 export default new Vuex.Store({
   state: {
@@ -125,13 +126,12 @@ export default new Vuex.Store({
         numberList.length
       ) {
         ctx.commit("loading", true);
-        let count = ctx.state.dataList.length;
         const dataList = numberList.map((value) => {
-          const label = util.getID() + "-" + count++;
           return {
             userId,
-            label,
-            value
+            label: "",
+            value,
+            reference: ""
           };
         });
 
@@ -152,14 +152,12 @@ export default new Vuex.Store({
 
       if (userId && itemList && itemList instanceof Array && itemList.length) {
         ctx.commit("loading", true);
-        let count = ctx.state.dataList.length;
         const dataList = itemList.map((itemObj) => {
-          let label = itemObj.label;
-          if (!label) label = util.getID() + "-" + count++;
           return {
             userId,
-            label,
-            value: itemObj.value
+            label: itemObj.label || "",
+            value: itemObj.value,
+            reference: itemObj.reference || ""
           };
         });
 
@@ -175,11 +173,11 @@ export default new Vuex.Store({
       }
     },
 
-    updateDataItem: (ctx, { id, label, value }) => {
-      if ((id, util.isString(label) && util.isNumber(value))) {
+    updateDataItem: (ctx, { id, label, value, reference }) => {
+      if (id && util.isNumber(value)) {
         ctx.commit("loading", true);
         dataApi
-          .updateData(id, label, value)
+          .updateData(id, label, value, reference)
           .then(() => {
             ctx.dispatch("init");
           })
@@ -294,31 +292,31 @@ export default new Vuex.Store({
     },
 
     estimatedStdDev: (state, val) => {
-      state.estimatedStdDev = val;
+      state.estimatedStdDev = Number.parseFloat(val).toFixed(toFixed);
     },
 
     xControlLimits_UCL: (state, val) => {
-      state.xControlLimits_UCL = val;
+      state.xControlLimits_UCL = Number.parseFloat(val).toFixed(toFixed);
     },
 
     xControlLimits_LCL: (state, val) => {
-      state.xControlLimits_LCL = val;
+      state.xControlLimits_LCL = Number.parseFloat(val).toFixed(toFixed);
     },
 
     mrControlLimits_UCL: (state, val) => {
-      state.mrControlLimits_UCL = val;
+      state.mrControlLimits_UCL = Number.parseFloat(val).toFixed(toFixed);
     },
 
     cpu: (state, val) => {
-      state.cpu = val;
+      state.cpu = Number.parseFloat(val).toFixed(toFixed);
     },
 
     cpl: (state, val) => {
-      state.cpl = val;
+      state.cpl = Number.parseFloat(val).toFixed(toFixed);
     },
 
     cpk: (state, val) => {
-      state.cpk = val;
+      state.cpk = Number.parseFloat(val).toFixed(toFixed);
     },
 
     dataList: (state, val) => {
