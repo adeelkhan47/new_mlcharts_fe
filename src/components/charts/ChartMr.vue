@@ -1,21 +1,17 @@
 <template>
   <div class="mr-chart">
-    <h3 class="chart-title">
-      MR Chart
-    </h3>
+    <h3 class="chart-title">MR Chart</h3>
     <template v-if="chartData && chartData.length">
       <v-chart :forceFit="true" :height="400" :data="chartData" :scale="scale">
         <v-tooltip />
-        <v-axis :label="label" data-key="key" /> 
+        <v-axis :label="label" data-key="key" />
         <v-line position="key*value" color="id" />
         <v-point position="key*value" color="id" />
         <v-legend position="bottom" />
       </v-chart>
     </template>
     <template v-else>
-      <h4 class="no-data">
-        No Data found
-      </h4>
+      <h4 class="no-data">No Data found</h4>
     </template>
   </div>
 </template>
@@ -39,8 +35,9 @@ export default {
         autoRotate: false,
         textStyle: {
           textBaseline: "top",
-          rotate: -25
-        }
+          rotate: 270
+        },
+        formatter: this.getLabel
       }
     };
   },
@@ -52,7 +49,7 @@ export default {
       let data = [];
       this.mr.forEach((value, key) => {
         data.push({
-          key: this.getLabel(key),
+          key: key + "",
           MR: value,
           CL: this.mrAverage,
           UCL: this.mrControlLimits_UCL
@@ -77,8 +74,8 @@ export default {
       if (this.dataList && this.dataList.length) {
         const found = this.dataList.find((obj) => obj.id == dataId);
         if (found) return found.label;
-        else return dataId;
-      } else return dataId;
+        else return "";
+      } else return "";
     }
   }
 };

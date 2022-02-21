@@ -94,8 +94,8 @@ export default {
         this.options.data.push({
           id: "",
           label: "",
-          value: "",
           reference: "",
+          value: "",
           mr: ""
         });
       }
