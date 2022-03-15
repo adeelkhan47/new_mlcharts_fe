@@ -43,7 +43,12 @@ export default {
   },
 
   computed: {
-    ...mapState(["dataList", "mr", "mrAverage", "mrControlLimits_UCL"]),
+    ...mapState("xmrChartDataModule", [
+      "dataList",
+      "mr",
+      "mrAverage",
+      "mrControlLimits_UCL"
+    ]),
 
     chartData() {
       let data = [];

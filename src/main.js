@@ -9,6 +9,10 @@ import "vue-material/dist/theme/default.css";
 import VueMaterial from "vue-material";
 Vue.use(VueMaterial);
 
+import VueLoading from "vue-loading-overlay";
+import "vue-loading-overlay/dist/vue-loading.css";
+Vue.use(VueLoading);
+
 import ViserVue from "viser-vue";
 Vue.use(ViserVue);
 

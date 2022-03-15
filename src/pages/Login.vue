@@ -3,9 +3,7 @@
     <md-content class="md-elevation-3">
       <div class="title">
         <div class="md-title">Log in</div>
-        <div class="md-body-1">
-          Enter your email and password
-        </div>
+        <div class="md-body-1">Enter your email and password</div>
       </div>
 
       <div class="form">
@@ -54,7 +52,7 @@
 
 <script>
 import userHelper from "../utils/userHelper.util";
-import userApi from "../api/user.api";
+import { userApi } from "../api";
 
 export default {
   name: "Login",
@@ -73,14 +71,14 @@ export default {
   },
   created() {
     const userObj = userHelper.getUserObj();
-    if (userObj) this.$router.push("/home");
+    if (userObj) this.$router.push("/dashboard");
   },
   methods: {
     navigateToRegister() {
       this.$router.push("/register");
     },
     navigateToHome() {
-      this.$router.push("/home");
+      this.$router.push("/dashboard");
     },
     reset() {
       this.login.email = "";

@@ -25,7 +25,13 @@
         <md-table-cell md-label="Delete">
           <md-button
             class="md-icon-button md-dense md-accent"
-            @click="removeDataItem(item.id)"
+            @click="
+              removeDataItem({
+                chartId,
+                password,
+                dataId: item.id
+              })
+            "
           >
             <md-icon>delete</md-icon>
           </md-button>
@@ -48,12 +54,14 @@ export default {
   data() {
     return {
       showEdit: false,
-      selectedItem: null
+      selectedItem: null,
+      chartId: "",
+      password: ""
     };
   },
 
   computed: {
-    ...mapState(["dataList", "mr"]),
+    ...mapState("xmrChartDataModule", ["dataList", "mr"]),
 
     data: {
       get() {
@@ -70,8 +78,25 @@ export default {
     }
   },
 
+  created() {
+    this.setPageData();
+  },
+
+  mounted() {
+    this.setPageData();
+  },
+
   methods: {
-    ...mapActions(["removeDataItem"]),
+    ...mapActions("xmrChartDataModule", ["removeDataItem"]),
+
+    setPageData() {
+      const urlParams = new URLSearchParams(window.location.search);
+      let pathname = window.location.pathname;
+      pathname = pathname.split("/");
+
+      this.chartId = pathname[pathname.length - 1] || "";
+      this.password = urlParams.get("password") || "";
+    },
 
     edit(item) {
       this.selectedItem = JSON.parse(JSON.stringify(item));

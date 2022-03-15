@@ -3,9 +3,7 @@
     <md-content class="md-elevation-3">
       <div class="title">
         <div class="md-title">Sign up</div>
-        <div class="md-body-1">
-          Register for a new account
-        </div>
+        <div class="md-body-1">Register for a new account</div>
       </div>
 
       <div class="form">
@@ -68,7 +66,7 @@
 </template>
 
 <script>
-import userApi from "../api/user.api";
+import { userApi } from "../api";
 
 export default {
   name: "Register",
@@ -90,7 +88,7 @@ export default {
   },
   created() {
     const userObj = userHelper.getUserObj();
-    if (userObj) this.$router.push("/home");
+    if (userObj) this.$router.push("/dashboard");
   },
   methods: {
     navigateToLogin() {

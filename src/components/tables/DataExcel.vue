@@ -23,6 +23,8 @@ export default {
 
   data() {
     return {
+      chartId: "",
+      password: "",
       mounted: false,
       excelId: "data-excel-spreadsheet",
       showEdit: false,
@@ -65,7 +67,7 @@ export default {
   },
 
   computed: {
-    ...mapState(["dataList", "mr", "loading"])
+    ...mapState("xmrChartDataModule", ["dataList", "mr", "loading"])
   },
 
   watch: {
@@ -104,13 +106,32 @@ export default {
     }
   },
 
+  created() {
+    this.setPageData();
+  },
+
+  mounted() {
+    this.setPageData();
+  },
+
   methods: {
-    ...mapActions([
+    ...mapActions("xmrChartDataModule", [
       "addDataItems",
       "updateDataItems",
       "removeDataItem",
       "removeDataItems"
     ]),
+
+    ...mapActions("responseMessageModule", ["setShow", "setMessage"]),
+
+    setPageData() {
+      const urlParams = new URLSearchParams(window.location.search);
+      let pathname = window.location.pathname;
+      pathname = pathname.split("/");
+
+      this.chartId = pathname[pathname.length - 1] || "";
+      this.password = urlParams.get("password") || "";
+    },
 
     init() {
       let el = document.getElementById(this.excelId);
@@ -134,13 +155,33 @@ export default {
 
       if (deletedRecords && deletedRecords.length) {
         const deletedRecordIds = deletedRecords.map((obj) => obj.id);
-        this.removeDataItems(deletedRecordIds);
+        this.removeDataItems({
+          chartId: this.chartId,
+          password: this.password,
+          dataIds: deletedRecordIds
+        });
       }
       if (updatedRecords && updatedRecords.length) {
-        this.updateDataItems(updatedRecords);
+        this.updateDataItems({
+          chartId: this.chartId,
+          password: this.password,
+          updatedRecords: dataObjectList
+        });
       }
       if (newRecords && newRecords.length) {
-        this.addDataItems(newRecords);
+        this.addDataItems({
+          itemList: newRecords,
+          chartId: this.chartId,
+          password: this.password,
+          cb: this.handleResponse
+        });
+      }
+    },
+
+    handleResponse(response) {
+      if (response && response.message) {
+        this.setMessage(response.message);
+        this.setShow(true);
       }
     },
 

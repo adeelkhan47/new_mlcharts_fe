@@ -39,10 +39,11 @@ import ChartMr from "../components/charts/ChartMr.vue";
 import AddData from "../components/inputs/AddData.vue";
 import ChartX from "../components/charts/ChartX.vue";
 import userHelper from "../utils/userHelper.util";
-import { mapActions } from "vuex";
+import { mapActions, mapState } from "vuex";
 
 export default {
-  name: "Home",
+  name: "XmrChart",
+
   components: {
     ChartHistogram,
     displayLayout,
@@ -54,19 +55,86 @@ export default {
 
   data() {
     return {
-      showAddDialog: false
+      loader: null,
+      showAddDialog: false,
+      chartId: "",
+      password: ""
     };
+  },
+
+  computed: {
+    ...mapState("dashboardChartModule", ["loading"])
+  },
+
+  watch: {
+    loading(val) {
+      if (val) {
+        this.loader = this.$loading.show({
+          loader: "dots",
+          opacity: 0.7
+        });
+      } else if (this.loader) {
+        this.loader.hide();
+        this.loader = null;
+      }
+    }
   },
 
   created() {
     const userObj = userHelper.getUserObj();
     if (!userObj) {
       this.$router.push("/login");
-    } else this.init();
+    } else {
+      this.setPageData(() => {
+        this.getChart({
+          chartId: this.chartId,
+          password: this.password,
+          cb: this.handleResponse
+        });
+        this.init({
+          chartId: this.chartId,
+          password: this.password
+        });
+      });
+    }
+  },
+
+  mounted() {
+    this.setPageData();
   },
 
   methods: {
-    ...mapActions(["init"])
+    ...mapActions("xmrChartDataModule", ["init"]),
+
+    ...mapActions("dashboardChartModule", ["getChart"]),
+
+    ...mapActions("responseMessageModule", ["setShow", "setMessage"]),
+
+    handleResponse(response) {
+      if (response && !response.success) {
+        if (response.message) {
+          this.setMessage(response.message);
+          this.setShow(true);
+        }
+
+        if (this.loader) {
+          this.loader.hide();
+          this.loader = null;
+        }
+        this.$router.push("/dashboard");
+      }
+    },
+
+    setPageData(cb = null) {
+      const urlParams = new URLSearchParams(window.location.search);
+      let pathname = window.location.pathname;
+      pathname = pathname.split("/");
+
+      this.chartId = pathname[pathname.length - 1] || "";
+      this.password = urlParams.get("password") || "";
+
+      if (cb) cb();
+    }
   }
 };
 </script>

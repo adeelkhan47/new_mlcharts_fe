@@ -57,7 +57,9 @@ export default {
       delimiter: ",",
       defaultVal: "",
       num: null,
-      error: null
+      error: null,
+      chartId: "",
+      password: ""
     };
   },
 
@@ -77,8 +79,27 @@ export default {
     }
   },
 
+  created() {
+    this.setPageData();
+  },
+
+  mounted() {
+    this.setPageData();
+  },
+
   methods: {
-    ...mapActions(["addDataItem", "updateDataItem"]),
+    ...mapActions("xmrChartDataModule", ["addDataItem", "updateDataItem"]),
+
+    ...mapActions("responseMessageModule", ["setShow", "setMessage"]),
+
+    setPageData() {
+      const urlParams = new URLSearchParams(window.location.search);
+      let pathname = window.location.pathname;
+      pathname = pathname.split("/");
+
+      this.chartId = pathname[pathname.length - 1] || "";
+      this.password = urlParams.get("password") || "";
+    },
 
     hide() {
       this.num = null;
@@ -114,16 +135,31 @@ export default {
       }
     },
 
+    handleResponse(response) {
+      if (response && response.message) {
+        this.setMessage(response.message);
+        this.setShow(true);
+      }
+    },
+
     addValue() {
       if (this.num != null && this.error == null) {
         if (this.item)
           this.updateDataItem({
+            chartId: this.chartId,
+            password: this.password,
             id: this.item.id,
             label: this.item.label,
             value: this.num,
             reference: this.item.reference
           });
-        else this.addDataItem(this.num);
+        else
+          this.addDataItem({
+            numberList: this.num,
+            chartId: this.chartId,
+            password: this.password,
+            cb: this.handleResponse
+          });
 
         this.num = null;
         this.error = null;

@@ -45,7 +45,7 @@ export default {
   },
 
   computed: {
-    ...mapState([
+    ...mapState("xmrChartDataModule", [
       "dataList",
       "dataAverage",
       "xControlLimits_UCL",

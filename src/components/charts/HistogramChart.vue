@@ -1,8 +1,6 @@
 <template>
   <div class="histogram">
-    <h3 class="chart-title">
-      Histogram Chart
-    </h3>
+    <h3 class="chart-title">Histogram Chart</h3>
     <template v-if="chartData && chartData.length">
       <v-chart
         :forceFit="true"
@@ -16,9 +14,7 @@
       </v-chart>
     </template>
     <template v-else>
-      <h4 class="no-data">
-        No Data found
-      </h4>
+      <h4 class="no-data">No Data found</h4>
     </template>
   </div>
 </template>
@@ -52,7 +48,7 @@ export default {
   },
 
   computed: {
-    ...mapState(["dataList", "estimatedStdDev"]),
+    ...mapState("xmrChartDataModule", ["dataList", "estimatedStdDev"]),
 
     chartData() {
       const values = this.dataList.map((obj) => obj.value);

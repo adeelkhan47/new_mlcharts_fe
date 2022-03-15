@@ -19,7 +19,7 @@ export default {
   name: "StatisticsTable",
 
   computed: {
-    ...mapState([
+    ...mapState("xmrChartDataModule", [
       "dataList",
       "dataAverage",
       "mrAverage",

@@ -10,12 +10,15 @@
     "@antv/data-set": "^0.11.8",
     "axios": "^0.22.0",
     "core-js": "^3.6.5",
-    "viser-vue": "^2.4.8",
     "jexcel": "^4.6.1",
     "jspreadsheet-ce": "^4.10.1",
+    "moment": "^2.29.1",
+    "viser-vue": "^2.4.8",
     "vue": "^2.6.11",
+    "vue-loading-overlay": "^3.4.2",
     "vue-material": "^1.0.0-beta-15",
     "vue-router": "^3.2.0",
+    "vuelidate": "^0.7.7",
     "vuex": "^3.4.0"
   },
   "devDependencies": {

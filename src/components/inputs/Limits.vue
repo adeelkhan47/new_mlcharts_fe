@@ -53,7 +53,7 @@ export default {
   },
 
   computed: {
-    ...mapState(["upperSpecLimit", "lowerSpecLimit"]),
+    ...mapState("xmrChartDataModule", ["upperSpecLimit", "lowerSpecLimit"]),
 
     messageUpperClass() {
       return {
@@ -68,7 +68,10 @@ export default {
   },
 
   methods: {
-    ...mapActions(["setUpperSpecLimit", "setLowerSpecLimit"]),
+    ...mapActions("xmrChartDataModule", [
+      "setUpperSpecLimit",
+      "setLowerSpecLimit"
+    ]),
 
     upper(val) {
       if (val && typeof val == "string" && !isNaN(val)) {
