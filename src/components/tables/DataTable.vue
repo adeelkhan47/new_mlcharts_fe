@@ -55,13 +55,13 @@ export default {
     return {
       showEdit: false,
       selectedItem: null,
-      chartId: "",
-      password: ""
+      chartId: ""
     };
   },
 
   computed: {
     ...mapState("xmrChartDataModule", ["dataList", "mr"]),
+    ...mapState("dashboardChartModule", ["password"]),
 
     data: {
       get() {
@@ -90,12 +90,10 @@ export default {
     ...mapActions("xmrChartDataModule", ["removeDataItem"]),
 
     setPageData() {
-      const urlParams = new URLSearchParams(window.location.search);
       let pathname = window.location.pathname;
       pathname = pathname.split("/");
 
       this.chartId = pathname[pathname.length - 1] || "";
-      this.password = urlParams.get("password") || "";
     },
 
     edit(item) {

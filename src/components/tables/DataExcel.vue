@@ -24,7 +24,6 @@ export default {
   data() {
     return {
       chartId: "",
-      password: "",
       mounted: false,
       excelId: "data-excel-spreadsheet",
       showEdit: false,
@@ -67,7 +66,9 @@ export default {
   },
 
   computed: {
-    ...mapState("xmrChartDataModule", ["dataList", "mr", "loading"])
+    ...mapState("xmrChartDataModule", ["dataList", "mr", "loading"]),
+
+    ...mapState("dashboardChartModule", ["password"])
   },
 
   watch: {
@@ -125,12 +126,10 @@ export default {
     ...mapActions("responseMessageModule", ["setShow", "setMessage"]),
 
     setPageData() {
-      const urlParams = new URLSearchParams(window.location.search);
       let pathname = window.location.pathname;
       pathname = pathname.split("/");
 
       this.chartId = pathname[pathname.length - 1] || "";
-      this.password = urlParams.get("password") || "";
     },
 
     init() {
@@ -165,7 +164,7 @@ export default {
         this.updateDataItems({
           chartId: this.chartId,
           password: this.password,
-          updatedRecords: dataObjectList
+          dataObjectList: updatedRecords
         });
       }
       if (newRecords && newRecords.length) {

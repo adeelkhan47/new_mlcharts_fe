@@ -38,7 +38,7 @@
 </template>
 
 <script>
-import { mapActions } from "vuex";
+import { mapActions, mapState } from "vuex";
 export default {
   name: "AddData",
   props: {
@@ -58,12 +58,13 @@ export default {
       defaultVal: "",
       num: null,
       error: null,
-      chartId: "",
-      password: ""
+      chartId: ""
     };
   },
 
   computed: {
+    ...mapState("dashboardChartModule", ["password"]),
+
     messageClass() {
       return {
         "md-invalid": this.error
@@ -93,12 +94,10 @@ export default {
     ...mapActions("responseMessageModule", ["setShow", "setMessage"]),
 
     setPageData() {
-      const urlParams = new URLSearchParams(window.location.search);
       let pathname = window.location.pathname;
       pathname = pathname.split("/");
 
       this.chartId = pathname[pathname.length - 1] || "";
-      this.password = urlParams.get("password") || "";
     },
 
     hide() {

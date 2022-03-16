@@ -28,6 +28,27 @@
     </div>
 
     <add-data :visibility="showAddDialog" @hide="showAddDialog = false" />
+
+    <md-dialog :md-active="askPassword">
+      <md-dialog-title> Password is required </md-dialog-title>
+
+      <div class="md-layout-item md-small-size-100 input-field">
+        <md-field>
+          <label for="chart-type">Password</label>
+          <md-input v-model="pagePassword" required />
+        </md-field>
+      </div>
+
+      <md-dialog-actions>
+        <md-button class="md-primary" @click="noPass">Close</md-button>
+        <md-button
+          class="md-primary"
+          @click="sendPassword"
+          :disabled="!pagePassword"
+          >Apply</md-button
+        >
+      </md-dialog-actions>
+    </md-dialog>
   </div>
 </template>
 
@@ -58,12 +79,14 @@ export default {
       loader: null,
       showAddDialog: false,
       chartId: "",
-      password: ""
+      pagePassword: "",
+      storeCB: null,
+      askPassword: false
     };
   },
 
   computed: {
-    ...mapState("dashboardChartModule", ["loading"])
+    ...mapState("dashboardChartModule", ["loading", "password"])
   },
 
   watch: {
@@ -88,12 +111,8 @@ export default {
       this.setPageData(() => {
         this.getChart({
           chartId: this.chartId,
-          password: this.password,
-          cb: this.handleResponse
-        });
-        this.init({
-          chartId: this.chartId,
-          password: this.password
+          cb: this.handleResponse,
+          getMeThePassword: this.handlePass
         });
       });
     }
@@ -109,6 +128,29 @@ export default {
     ...mapActions("dashboardChartModule", ["getChart"]),
 
     ...mapActions("responseMessageModule", ["setShow", "setMessage"]),
+
+    handlePass(storeCB) {
+      this.storeCB = storeCB;
+      this.askPassword = true;
+    },
+
+    noPass() {
+      this.setMessage("Access Denied");
+      this.setShow(true);
+      this.$router.push("/dashboard");
+    },
+
+    sendPassword() {
+      if (this.storeCB) {
+        this.storeCB(this.pagePassword);
+        this.storeCB = null;
+        this.askPassword = false;
+      } else {
+        this.setMessage("Access Denied");
+        this.setShow(true);
+        this.$router.push("/dashboard");
+      }
+    },
 
     handleResponse(response) {
       if (response && !response.success) {
@@ -126,12 +168,9 @@ export default {
     },
 
     setPageData(cb = null) {
-      const urlParams = new URLSearchParams(window.location.search);
       let pathname = window.location.pathname;
       pathname = pathname.split("/");
-
       this.chartId = pathname[pathname.length - 1] || "";
-      this.password = urlParams.get("password") || "";
 
       if (cb) cb();
     }
@@ -202,5 +241,9 @@ export default {
 
 .no-transform {
   text-transform: none;
+}
+
+.input-field {
+  padding: 5px 15px;
 }
 </style>

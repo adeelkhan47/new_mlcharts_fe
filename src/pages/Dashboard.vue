@@ -175,8 +175,6 @@ export default {
         let path = this.getCharTypePath(chartObj.chartType);
         if (chartId && path) {
           path = window.location.origin + path + "/" + chartId;
-          if (!chartObj.isPublic)
-            path = path + "?password=" + chartObj.password;
           return path;
         }
       }
@@ -188,7 +186,7 @@ export default {
       let path = this.getCharTypePath(chartObj.chartType);
       if (chartId && path) {
         path = path + "/" + chartId;
-        if (!chartObj.isPublic) path = path + "?password=" + chartObj.password;
+        if (!chartObj.isPublic) path = path;
         this.$router.push(path);
       }
     },

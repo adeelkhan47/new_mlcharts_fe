@@ -6,6 +6,15 @@ function getDashboardCharts() {
   return axios.get(URL);
 }
 
+function isPrivateChart(chartId) {
+  const URL =
+    constants.API_BASE_URL +
+    constants.DASHBOARD_CHART_PATH +
+    "/is-private/" +
+    chartId;
+  return axios.get(URL);
+}
+
 function getDashboardChartById(chartId, password) {
   const URL =
     constants.API_BASE_URL +
@@ -35,6 +44,7 @@ function deleteDashboardChart(chartId) {
 }
 
 const dashboardChartApi = Object.freeze({
+  isPrivateChart,
   getDashboardCharts,
   getDashboardChartById,
   createDashboardChart,

@@ -4,6 +4,8 @@ const dashboardChartModule = {
   namespaced: true,
 
   state: () => ({
+    privateChart: false,
+    password: "",
     currentChart: null,
     dashboardCharts: [],
     loading: false
@@ -26,22 +28,64 @@ const dashboardChartModule = {
         });
     },
 
-    getChart(ctx, { chartId, password, cb = () => {} }) {
+    getChart(ctx, { chartId, cb = () => {}, getMeThePassword = () => {} }) {
       ctx.commit("LOADING", true);
+      ctx.commit("CURRENT_CHART", null);
+      ctx.commit("LOADING", false);
+      ctx.commit("PRIVATE_CHART", false);
+      ctx.commit("PASSWORD", false);
+
+      dashboardChartApi
+        .isPrivateChart(chartId)
+        .then((res) => {
+          if (res && res.data && res.data.data) {
+            ctx.commit("PRIVATE_CHART", true);
+            getMeThePassword((pass) => {
+              ctx.commit("PASSWORD", pass);
+
+              ctx.dispatch("actuallyGetChart", {
+                chartId,
+                password: pass,
+                cb
+              });
+            });
+          } else {
+            ctx.dispatch("actuallyGetChart", {
+              chartId,
+              cb
+            });
+          }
+        })
+        .catch((error) => {
+          console.error("Unable to get chart :: ", error);
+          cb({
+            success: false,
+            message: error?.response?.data || "Page Not Found"
+          });
+        });
+    },
+
+    actuallyGetChart(ctx, { chartId, password = "", cb = () => {} }) {
       dashboardChartApi
         .getDashboardChartById(chartId, password)
         .then((res) => {
           ctx.commit("CURRENT_CHART", res.data.data[0]);
           ctx.commit("LOADING", false);
+          ctx.dispatch(
+            "xmrChartDataModule/init",
+            {
+              chartId,
+              password
+            },
+            { root: true }
+          );
           cb({
             success: true,
             message: ""
           });
         })
         .catch((error) => {
-          console.error("Unable to get charts :: ", error);
-          ctx.commit("CURRENT_CHART", null);
-          ctx.commit("LOADING", false);
+          console.error("Unable to get chart :: ", error);
           cb({
             success: false,
             message: error?.response?.data || "Page Not Found"
@@ -113,6 +157,14 @@ const dashboardChartModule = {
   mutations: {
     LOADING(state, val) {
       state.loading = val;
+    },
+
+    PRIVATE_CHART(state, val) {
+      state.privateChart = val;
+    },
+
+    PASSWORD(state, val) {
+      state.password = val;
     },
 
     DASHBOARD_CHARTS(state, charts) {

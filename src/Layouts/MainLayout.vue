@@ -5,18 +5,43 @@
         <span class="md-title">SPC Charts</span>
         <span class="links-wrapper">
           <ul class="links">
-            <li class="link" :class="{ active: activeLink === 'Home' }">
+            <!-- <li class="link" :class="{ active: activeLink === 'Home' }">
               <router-link to="/dashboard"> Dashboard</router-link>
             </li>
             <li class="link" :class="{ active: activeLink === 'About' }">
               <router-link to="/about"> About</router-link>
             </li>
-            <li class="link" @click="logout">Logout</li>
+            <li class="link" @click="logout">Logout</li> -->
             <li class="link text" v-if="username">{{ username }}</li>
             <li class="link text" v-if="initials">
-              <md-avatar class="md-avatar-icon md-medium">
-                <md-ripple class="initials">{{ initials }}</md-ripple>
-              </md-avatar>
+              <md-menu
+                md-size="small"
+                md-direction="bottom-end"
+                md-align-trigger
+              >
+                <md-button class="md-icon-button" md-menu-trigger>
+                  <md-avatar class="md-avatar-icon md-medium">
+                    <md-ripple class="initials">{{ initials }}</md-ripple>
+                  </md-avatar>
+                </md-button>
+
+                <md-menu-content>
+                  <md-menu-item class="header-menu-item">
+                    <md-icon>dashboard</md-icon>
+                    <router-link to="/dashboard"> Dashboard</router-link>
+                  </md-menu-item>
+
+                  <md-menu-item class="header-menu-item">
+                    <md-icon>info</md-icon>
+                    <router-link to="/about"> About </router-link>
+                  </md-menu-item>
+
+                  <md-menu-item class="header-menu-item">
+                    <md-icon>logout</md-icon>
+                    <a @click="logout">Logout</a>
+                  </md-menu-item>
+                </md-menu-content>
+              </md-menu>
             </li>
           </ul>
         </span>
@@ -181,5 +206,28 @@ export default {
   font-size: 14px;
   letter-spacing: 2px;
   text-transform: uppercase;
+}
+</style>
+
+<style>
+.header-menu-item .md-list-item-content {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.md-list .header-menu-item .md-list-item-content .md-icon {
+  margin-right: 15px;
+  color: #448aff;
+  font-size: 20px !important;
+}
+
+.header-menu-item a {
+  cursor: pointer;
+}
+
+.header-menu-item .md-list-item-content {
+  min-height: 40px;
 }
 </style>
