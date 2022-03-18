@@ -27,7 +27,18 @@
               </div>
 
               <div class="md-layout-item md-small-size-100">
-                <md-field :class="getValidationClass('chartType')">
+                <md-field>
+                  <label for="chart-type">Chart Type (Read Only)</label>
+                  <md-input
+                    name="chart-type"
+                    id="chart-type"
+                    :value="chartTypeDisplay(form.chartType)"
+                    readonly
+                    md-dense
+                    :disabled="loading"
+                  ></md-input>
+                </md-field>
+                <!-- <md-field :class="getValidationClass('chartType')">
                   <label for="chart-type">Chart Type</label>
                   <md-select
                     name="chart-type"
@@ -41,7 +52,7 @@
                     <md-option value="x-bar-r">X-bar-R</md-option>
                   </md-select>
                   <span class="md-error"> Chart Type is required </span>
-                </md-field>
+                </md-field> -->
               </div>
             </div>
 
@@ -53,11 +64,25 @@
                     type="number"
                     id="subgroup-size"
                     name="subgroup-size"
+                    :max="10"
+                    :min="1"
                     v-model="form.subgroupSize"
-                    :disabled="loading"
+                    :disabled="loading || isUpdate"
                   />
                   <span class="md-error" v-if="!$v.form.subgroupSize.required">
-                    Subgroup Size is required
+                    Subgroup size is required
+                  </span>
+                  <span
+                    class="md-error"
+                    v-else-if="!$v.form.subgroupSize.minValue"
+                  >
+                    Subgroup size must be 1 or greater
+                  </span>
+                  <span
+                    class="md-error"
+                    v-else-if="!$v.form.subgroupSize.maxValue"
+                  >
+                    Subgroup size must be 10 or lessor
                   </span>
                 </md-field>
               </div>
@@ -68,7 +93,7 @@
                     id="password"
                     name="password"
                     v-model="form.password"
-                    :disabled="loading"
+                    :disabled="loading || form.isPublic"
                   />
                   <span class="md-error" v-if="!$v.form.password.required">
                     Password is required
@@ -84,7 +109,7 @@
               class="md-primary"
               :disabled="loading"
             >
-              Is Public ?
+              Password-protected?
             </md-checkbox>
           </md-card-content>
 
@@ -107,7 +132,12 @@
 
 <script>
 import { validationMixin } from "vuelidate";
-import { required, requiredIf } from "vuelidate/lib/validators";
+import {
+  required,
+  requiredIf,
+  minValue,
+  maxValue
+} from "vuelidate/lib/validators";
 import { mapActions } from "vuex";
 
 export default {
@@ -135,7 +165,9 @@ export default {
         required
       },
       subgroupSize: {
-        required
+        required,
+        minValue: minValue(1),
+        maxValue: maxValue(10)
       },
       password: {
         required: requiredIf(function () {
@@ -151,7 +183,7 @@ export default {
       chartType: "x-mr",
       subgroupSize: 1,
       password: "",
-      isPublic: true
+      isPublic: false
     },
     loading: false
   }),
@@ -159,26 +191,39 @@ export default {
   computed: {
     isUpdate() {
       return !!(this.dashboardChart && Object.keys(this.dashboardChart).length);
+    },
+
+    chartTypeDisplay() {
+      return function (val) {
+        let display = "XmR";
+        switch (val) {
+          case "x-mr":
+            display = "XmR";
+            break;
+          case "x-bar-r":
+            display = "X-bar and R";
+            break;
+          case "x-bar-s":
+            display = "X-bar and s";
+            break;
+
+          default:
+            break;
+        }
+        return display;
+      };
     }
   },
 
   watch: {
-    "form.chartType": function (newVal) {
-      switch (newVal) {
-        case "x-mr":
-          this.form.subgroupSize = 1;
-          break;
-        case "x-bar-s":
-          this.form.subgroupSize = 12;
-          break;
-        case "x-bar-r":
-          this.form.subgroupSize = 8;
-          break;
-
-        default:
-          break;
+    "form.subgroupSize": function (val) {
+      if (val > 1) {
+        this.form.chartType = "x-bar-r";
+      } else {
+        this.form.chartType = "x-mr";
       }
     },
+
     visibility(val) {
       if (val) this.setFormDefaults();
     }
@@ -228,7 +273,7 @@ export default {
           chartType: "x-mr",
           subgroupSize: 1,
           password: "",
-          isPublic: true
+          isPublic: false
         };
       }
     },

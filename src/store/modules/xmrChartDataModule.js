@@ -296,11 +296,11 @@ const xmrChartDataModule = {
     },
 
     dataAverage: (state, val) => {
-      state.dataAverage = val;
+      state.dataAverage = Number.parseFloat(val).toFixed(toFixed);
     },
 
     mrAverage: (state, val) => {
-      state.mrAverage = val;
+      state.mrAverage = Number.parseFloat(val).toFixed(toFixed);
     },
 
     estimatedStdDev: (state, val) => {

@@ -57,7 +57,7 @@ export default {
           }
         ],
         tableOverflow: true,
-        tableHeight: "795px",
+        tableHeight: "585px",
         onpaste: this.handleChange,
         ondeleterow: this.handleChange,
         oneditionend: this.handleChange
@@ -88,8 +88,8 @@ export default {
       // hiding first mr
       if (this.records.length > 0) this.options.data[0].mr = "";
 
-      let blankRows = 32;
-      if (this.records.length > 31) blankRows = 5;
+      let blankRows = 23;
+      if (this.records.length > 22) blankRows = 5;
       else blankRows = blankRows - this.records.length;
 
       // adding blank rows
@@ -252,6 +252,7 @@ export default {
 .data-table {
   min-width: 500px;
   min-height: 795px;
+  min-height: 585px;
   border-radius: 5px;
   background: #eee;
   position: relative;

@@ -43,7 +43,7 @@
           <md-table-cell md-label="Link to Share">
             {{ chartPageLink(item) }}
           </md-table-cell>
-          <md-table-cell md-label="Public Link?">
+          <md-table-cell md-label="Password-protected?">
             <md-icon v-if="item.isPublic">check</md-icon>
             <md-icon v-else>lock</md-icon>
           </md-table-cell>

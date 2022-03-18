@@ -52,7 +52,12 @@ export default {
 
     chartData() {
       let data = [];
+      let firstZeroFound = false;
       this.mr.forEach((value, key) => {
+        if (!firstZeroFound && value === 0) {
+          firstZeroFound = true;
+          return;
+        } else firstZeroFound = true;
         data.push({
           key: key + "",
           MR: value,
