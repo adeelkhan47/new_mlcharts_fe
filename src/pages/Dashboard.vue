@@ -44,7 +44,7 @@
             {{ chartPageLink(item) }}
           </md-table-cell>
           <md-table-cell md-label="Password-protected?">
-            <md-icon v-if="item.isPublic">check</md-icon>
+            <md-icon v-if="item.isPublic">close</md-icon>
             <md-icon v-else>lock</md-icon>
           </md-table-cell>
           <md-table-cell md-label="Password">
@@ -55,7 +55,7 @@
           </md-table-cell>
           <md-table-cell md-label="Actions">
             <md-button
-              :disabled="item.chartType !== 'x-mr'"
+              :disabled="!availableCharts.includes(item.chartType)"
               class="md-icon-button md-dense action md-primary"
               @click="() => openChartPage(item)"
             >
@@ -120,6 +120,7 @@ export default {
 
   data() {
     return {
+      availableCharts: ["x-mr", "x-bar-r"],
       selectedChart: null,
       visible: false,
       ask: false

@@ -1,18 +1,5 @@
 <template>
   <div class="home">
-    <div class="actions-wrapper">
-      <ul class="actions">
-        <li class="action">
-          <md-button
-            class="md-primary md-raised no-transform"
-            @click="showAddDialog = true"
-          >
-            Add Data Value(s)
-          </md-button>
-        </li>
-      </ul>
-    </div>
-
     <div class="content-wrapper">
       <div class="content-body">
         <div class="tables">
@@ -22,26 +9,24 @@
             :lowerSpecLimit="lowerSpecLimit"
             @specLimitChanged="handleSpecLimit"
           />
-          <xmr-data-excel />
+          <template v-if="subgroupSize">
+            <x-bar-r-data-excel :subgroupSize="subgroupSize" />
+          </template>
         </div>
         <div class="charts">
           <chart-x
-            title="X Chart"
+            title="Averages Chart"
             :dataList="dataList"
-            :formattedDataList="formattedDataList"
+            :formattedDataList="formattedAverages"
           />
-          <chart-mr
+          <chart-x
+            title="Ranges Chart"
             :dataList="dataList"
-            :mr="mr"
-            :mrAverage="mrAverage"
-            :mrControlLimits_UCL="mrControlLimits_UCL"
+            :formattedDataList="formattedRanges"
           />
-          <chart-histogram />
         </div>
       </div>
     </div>
-
-    <add-data :visibility="showAddDialog" @hide="showAddDialog = false" />
 
     <md-dialog :md-active="askPassword">
       <md-dialog-title> Password is required </md-dialog-title>
@@ -67,24 +52,19 @@
 </template>
 
 <script>
-import ChartHistogram from "../components/charts/HistogramChart.vue";
-import XmrDataExcel from "../components/tables/XmrDataExcel.vue";
+import XBarRDataExcel from "../components/tables/XBarRDataExcel.vue";
 import StatisticsTable from "../components/tables/StatisticsTable.vue";
-import ChartMr from "../components/charts/ChartMr.vue";
-import AddData from "../components/inputs/AddData.vue";
 import ChartX from "../components/charts/ChartX.vue";
 import userHelper from "../utils/userHelper.util";
 import { mapActions, mapState } from "vuex";
+import util from "../utils";
 
 export default {
-  name: "XmrChart",
+  name: "XBarRChart",
 
   components: {
-    ChartHistogram,
     StatisticsTable,
-    XmrDataExcel,
-    ChartMr,
-    AddData,
+    XBarRDataExcel,
     ChartX
   },
 
@@ -97,27 +77,27 @@ export default {
       storeCB: null,
       askPassword: false,
       statisticsData: [],
-      formattedDataList: []
+      formattedAverages: [],
+      formattedRanges: []
     };
   },
 
   computed: {
     ...mapState("dashboardChartModule", ["loading", "password"]),
 
-    ...mapState("xmrChartDataModule", [
+    ...mapState("xBarRChartDataModule", [
       "dataList",
-      "dataAverage",
-      "xControlLimits_UCL",
-      "xControlLimits_LCL",
-      "mr",
-      "mrAverage",
-      "mrControlLimits_UCL",
-      "estimatedStdDev",
+      "subgroupSize",
+      "averageRange",
+      "grandAverage",
+      "stdDev",
       "cpu",
       "cpl",
       "cpk",
       "upperSpecLimit",
-      "lowerSpecLimit"
+      "lowerSpecLimit",
+      "xBarData",
+      "rangeData"
     ])
   },
 
@@ -135,19 +115,34 @@ export default {
     },
 
     dataList() {
-      this.formattedDataList = this.dataList.map((obj) => {
+      this.formattedAverages = this.dataList.map((obj) => {
         return {
           key: obj.id + "",
-          label: obj.label,
-          Value: obj.value,
-          CL: this.dataAverage,
-          UCL: this.xControlLimits_UCL,
-          LCL: this.xControlLimits_LCL
+          label: obj.reference1,
+          Value: util.formatNumber(obj.average),
+          CL: util.formatNumber(this.xBarData.cl),
+          UCL: util.formatNumber(this.xBarData.ucl),
+          LCL: util.formatNumber(this.xBarData.lcl)
+        };
+      });
+
+      this.formattedRanges = this.dataList.map((obj) => {
+        return {
+          key: obj.id + "",
+          label: obj.reference1,
+          Value: util.formatNumber(obj.range),
+          CL: util.formatNumber(this.rangeData.cl),
+          UCL: util.formatNumber(this.rangeData.ucl),
+          LCL: util.formatNumber(this.rangeData.lcl)
         };
       });
     },
 
-    estimatedStdDev() {
+    subgroupSize() {
+      this.setStatisticsData();
+    },
+
+    stdDev() {
       this.setStatisticsData();
     },
 
@@ -161,6 +156,7 @@ export default {
   },
 
   created() {
+    this.$store.commit("xBarRChartDataModule/reset");
     const userObj = userHelper.getUserObj();
     if (!userObj) {
       this.$router.push("/login");
@@ -168,7 +164,7 @@ export default {
       this.setPageData(() => {
         this.getChart({
           chartId: this.chartId,
-          moduleName: "xmrChartDataModule",
+          moduleName: "xBarRChartDataModule",
           cb: this.handleResponse,
           getMeThePassword: this.handlePass
         });
@@ -182,53 +178,51 @@ export default {
   },
 
   methods: {
+    ...mapActions("xBarRChartDataModule", ["handelLimitChange"]),
     ...mapActions("dashboardChartModule", ["getChart"]),
-
     ...mapActions("responseMessageModule", ["setShow", "setMessage"]),
-
-    ...mapActions("xmrChartDataModule", [
-      "init",
-      "setUpperSpecLimit",
-      "setLowerSpecLimit"
-    ]),
 
     handleSpecLimit({ key, value }) {
       if (key === "upper") {
-        this.setUpperSpecLimit(value);
+        this.handelLimitChange({
+          upperLimit: value
+        });
       } else {
-        this.setLowerSpecLimit(value);
+        this.handelLimitChange({
+          lowerLimit: value
+        });
       }
     },
 
     setStatisticsData() {
       this.statisticsData = [
         {
-          key: "Avg. Moving Range",
-          value: this.mrAverage
+          key: "Average Range",
+          value: util.formatNumber(this.averageRange)
         },
         {
-          key: "Data Average",
-          value: this.dataAverage
+          key: "Grand Average",
+          value: util.formatNumber(this.grandAverage)
         },
         {
           key: "Estimated Std Dev",
-          value: this.estimatedStdDev
+          value: util.formatNumber(this.stdDev)
         },
         {
-          key: "Data Count",
-          value: this.dataList.length
+          key: "Subgroup Size",
+          value: this.subgroupSize
         },
         {
           key: "Cpu",
-          value: this.cpu
+          value: util.formatNumber(this.cpu)
         },
         {
           key: "Cpl",
-          value: this.cpl
+          value: util.formatNumber(this.cpl)
         },
         {
           key: "Cpk",
-          value: this.cpk
+          value: util.formatNumber(this.cpk)
         }
       ];
     },

@@ -6,6 +6,7 @@ import About from "../pages/About.vue";
 import Login from "../pages/Login.vue";
 import Register from "../pages/Register.vue";
 import XmrChart from "../pages/XmrChart.vue";
+import XBarRChart from "../pages/XBarRChart.vue";
 
 Vue.use(VueRouter);
 
@@ -29,6 +30,11 @@ const routes = [
         path: "/x-mr/:chartId",
         name: "XmrChart",
         component: XmrChart
+      },
+      {
+        path: "/x-bar-r/:chartId",
+        name: "XBarRChart",
+        component: XBarRChart
       }
     ]
   },

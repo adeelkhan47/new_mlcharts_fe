@@ -1,6 +1,6 @@
 <template>
   <div class="x-chart">
-    <h3 class="chart-title">X Chart</h3>
+    <h3 class="chart-title">{{ title }}</h3>
     <template v-if="chartData && chartData.length">
       <v-chart :forceFit="true" :height="400" :data="chartData" :scale="scale">
         <v-tooltip />
@@ -19,10 +19,12 @@
 <script>
 const DataSet = require("@antv/data-set");
 import colors from "../../utils/colors.util";
-import { mapState } from "vuex";
 
 export default {
   name: "ChartX",
+
+  props: ["title", "dataList", "formattedDataList"],
+
   data() {
     return {
       colors,
@@ -45,27 +47,8 @@ export default {
   },
 
   computed: {
-    ...mapState("xmrChartDataModule", [
-      "dataList",
-      "dataAverage",
-      "xControlLimits_UCL",
-      "xControlLimits_LCL"
-    ]),
-
     chartData() {
-      const data = this.dataList.map((obj) => {
-        return {
-          key: obj.id + "",
-          label: obj.label,
-          Value: obj.value,
-          CL: this.dataAverage,
-          UCL: this.xControlLimits_UCL,
-          LCL: this.xControlLimits_LCL
-        };
-      });
-
-      const dv = new DataSet.View().source(data);
-
+      const dv = new DataSet.View().source(this.formattedDataList);
       dv.transform({
         type: "fold",
         fields: ["Value", "CL", "UCL", "LCL"],

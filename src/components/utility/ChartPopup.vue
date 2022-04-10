@@ -105,7 +105,7 @@
             <md-checkbox
               name="is-public"
               id="is-public"
-              v-model="form.isPublic"
+              v-model="isPasswordProtected"
               class="md-primary"
               :disabled="loading"
             >
@@ -191,6 +191,15 @@ export default {
   computed: {
     isUpdate() {
       return !!(this.dashboardChart && Object.keys(this.dashboardChart).length);
+    },
+
+    isPasswordProtected: {
+      set(val) {
+        this.form.isPublic = !val;
+      },
+      get() {
+        return !this.form.isPublic;
+      }
     },
 
     chartTypeDisplay() {

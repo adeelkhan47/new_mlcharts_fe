@@ -37,7 +37,7 @@
       </md-table-row>
       <md-table-row
         slot="md-table-row"
-        v-for="item of tableData"
+        v-for="item of statisticsData"
         :key="item.key"
       >
         <md-table-cell md-label="Label">
@@ -52,69 +52,35 @@
 </template>
 
 <script>
-import { mapActions, mapState } from "vuex";
 export default {
   name: "StatisticsTable",
 
-  computed: {
-    ...mapState("xmrChartDataModule", [
-      "dataList",
-      "dataAverage",
-      "mrAverage",
-      "estimatedStdDev",
-      "cpu",
-      "cpl",
-      "cpk",
-      "upperSpecLimit",
-      "lowerSpecLimit"
-    ]),
-
-    tableData() {
-      return [
-        {
-          key: "Avg. Moving Range",
-          value: this.mrAverage
-        },
-        {
-          key: "Data Average",
-          value: this.dataAverage
-        },
-        {
-          key: "Estimated Std Dev",
-          value: this.estimatedStdDev
-        },
-        {
-          key: "Data Count",
-          value: this.dataList.length
-        },
-        {
-          key: "Cpu",
-          value: this.cpu
-        },
-        {
-          key: "Cpl",
-          value: this.cpl
-        },
-        {
-          key: "Cpk",
-          value: this.cpk
-        }
-      ];
+  props: {
+    statisticsData: {
+      type: Array,
+      required: true
+    },
+    upperSpecLimit: {
+      required: true
+    },
+    lowerSpecLimit: {
+      required: true
     }
   },
 
   methods: {
-    ...mapActions("xmrChartDataModule", [
-      "setUpperSpecLimit",
-      "setLowerSpecLimit"
-    ]),
-
     upperLimitChanged(event) {
-      this.setUpperSpecLimit(Number.parseInt(event.target.value));
+      this.$emit("specLimitChanged", {
+        key: "upper",
+        value: Number.parseInt(event.target.value)
+      });
     },
 
     lowerLimitChanged(event) {
-      this.setLowerSpecLimit(Number.parseInt(event.target.value));
+      this.$emit("specLimitChanged", {
+        key: "lower",
+        value: Number.parseInt(event.target.value)
+      });
     }
   }
 };

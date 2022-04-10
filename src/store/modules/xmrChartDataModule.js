@@ -65,39 +65,47 @@ const xmrChartDataModule = {
     populate: (ctx) => {
       ctx.commit("loading", true);
       const dataValues = ctx.state.dataList.map((obj) => obj.value);
-      ctx.commit("dataAverage", util.average(dataValues));
+      const dataAverage = util.calculateAverage(dataValues);
+      ctx.commit("dataAverage", dataAverage);
 
       let mrValues = Array.from(ctx.state.mr.values());
       if (mrValues.length) {
         if (mrValues.length == 1) mrValues = [];
         else mrValues = mrValues.slice(1);
       }
-      ctx.commit("mrAverage", util.average(mrValues));
+      const mrAverage = util.calculateAverage(mrValues);
+      ctx.commit("mrAverage", mrAverage);
 
-      const std = ctx.state.mrAverage / X_CONTROL_LIMITS_CONST;
+      const std = mrAverage / X_CONTROL_LIMITS_CONST;
       ctx.commit("estimatedStdDev", std);
 
-      const ucl = ctx.state.dataAverage + 3 * std;
+      const ucl = dataAverage + 3 * std;
       ctx.commit("xControlLimits_UCL", ucl);
 
-      const lcl = ctx.state.dataAverage - 3 * std;
+      const lcl = dataAverage - 3 * std;
       ctx.commit("xControlLimits_LCL", lcl);
 
-      const mr_UCL = MR_UCL_CONST * ctx.state.mrAverage;
+      const mr_UCL = MR_UCL_CONST * mrAverage;
       ctx.commit("mrControlLimits_UCL", mr_UCL);
 
-      ctx.dispatch("populateCPX");
+      ctx.dispatch("populateCPX", {
+        std,
+        mrAverage,
+        dataAverage
+      });
     },
 
-    populateCPX: (ctx) => {
-      const std = ctx.state.mrAverage / X_CONTROL_LIMITS_CONST;
+    populateCPX: (ctx, payload) => {
+      if (!payload) payload = {};
+      let { std = null, mrAverage = null, dataAverage = null } = payload;
+      if (mrAverage === null) mrAverage = ctx.state.mrAverage;
+      if (std === null) std = mrAverage / X_CONTROL_LIMITS_CONST;
+      if (dataAverage === null) dataAverage = ctx.state.dataAverage;
 
-      const cpu =
-        (ctx.state.upperSpecLimit - ctx.state.dataAverage) / (3 * std);
+      const cpu = (ctx.state.upperSpecLimit - dataAverage) / (3 * std);
       ctx.commit("cpu", cpu);
 
-      const cpl =
-        (ctx.state.dataAverage - ctx.state.lowerSpecLimit) / (3 * std);
+      const cpl = (dataAverage - ctx.state.lowerSpecLimit) / (3 * std);
       ctx.commit("cpl", cpl);
 
       const cpk = Math.min(cpu, cpl);

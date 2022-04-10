@@ -28,7 +28,15 @@ const dashboardChartModule = {
         });
     },
 
-    getChart(ctx, { chartId, cb = () => {}, getMeThePassword = () => {} }) {
+    getChart(
+      ctx,
+      {
+        chartId,
+        moduleName = "xmrChartDataModule",
+        cb = () => {},
+        getMeThePassword = () => {}
+      }
+    ) {
       ctx.commit("LOADING", true);
       ctx.commit("CURRENT_CHART", null);
       ctx.commit("LOADING", false);
@@ -46,12 +54,14 @@ const dashboardChartModule = {
               ctx.dispatch("actuallyGetChart", {
                 chartId,
                 password: pass,
+                moduleName,
                 cb
               });
             });
           } else {
             ctx.dispatch("actuallyGetChart", {
               chartId,
+              moduleName,
               cb
             });
           }
@@ -65,17 +75,22 @@ const dashboardChartModule = {
         });
     },
 
-    actuallyGetChart(ctx, { chartId, password = "", cb = () => {} }) {
+    actuallyGetChart(
+      ctx,
+      { chartId, password = "", moduleName, cb = () => {} }
+    ) {
       dashboardChartApi
         .getDashboardChartById(chartId, password)
         .then((res) => {
-          ctx.commit("CURRENT_CHART", res.data.data[0]);
+          const currentChart = res.data.data[0];
+          ctx.commit("CURRENT_CHART", currentChart);
           ctx.commit("LOADING", false);
           ctx.dispatch(
-            "xmrChartDataModule/init",
+            moduleName + "/init",
             {
               chartId,
-              password
+              password,
+              currentChart
             },
             { root: true }
           );

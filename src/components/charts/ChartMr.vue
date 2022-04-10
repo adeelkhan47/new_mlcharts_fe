@@ -19,10 +19,12 @@
 <script>
 const DataSet = require("@antv/data-set");
 import colors from "../../utils/colors.util";
-import { mapState } from "vuex";
 
 export default {
   name: "ChartMr",
+
+  props: ["dataList", "mr", "mrAverage", "mrControlLimits_UCL"],
+
   data() {
     return {
       colors,
@@ -43,13 +45,6 @@ export default {
   },
 
   computed: {
-    ...mapState("xmrChartDataModule", [
-      "dataList",
-      "mr",
-      "mrAverage",
-      "mrControlLimits_UCL"
-    ]),
-
     chartData() {
       let data = [];
       let firstZeroFound = false;

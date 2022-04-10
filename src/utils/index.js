@@ -1,3 +1,5 @@
+import constants from "./constants.util";
+
 function isNumber(num) {
   return !!(
     (num || num === 0) &&
@@ -8,16 +10,6 @@ function isNumber(num) {
 
 function isString(val) {
   return !!(val && typeof val == "string" && val.trim().length);
-}
-
-function average(dataList) {
-  let sum = 0;
-  if (dataList && dataList instanceof Array) {
-    dataList.forEach((val) => {
-      sum += val;
-    });
-    return sum / dataList.length;
-  } else return sum;
 }
 
 function getMR(val1, val2) {
@@ -52,13 +44,96 @@ function getID() {
   return u1 + n1 + l1 + u2 + n2 + l2;
 }
 
+function getRangeForXBarR(valuesObj) {
+  let range = 0;
+  if (
+    valuesObj &&
+    typeof valuesObj === "object" &&
+    Object.keys(valuesObj).length
+  ) {
+    const values = Object.values(valuesObj);
+    range = Math.max(...values) - Math.min(...values);
+  }
+  return range;
+}
+
+function getAverageForXBarR(valuesObj) {
+  let average = 0;
+  if (
+    valuesObj &&
+    typeof valuesObj === "object" &&
+    Object.keys(valuesObj).length
+  ) {
+    const values = Object.values(valuesObj);
+    average = calculateAverage(values);
+  }
+  return average;
+}
+
+function getStdDevForXBarR(averageRange, subgroupSize) {
+  return averageRange / constants.CONST_BY_SUBGROUP_SIZE[subgroupSize].d2;
+}
+
+function getXBarDataForXBarR(grandAverage, averageRange, subgroupSize) {
+  const ucl =
+    grandAverage +
+    constants.CONST_BY_SUBGROUP_SIZE[subgroupSize].a2 * averageRange;
+  const cl = grandAverage;
+  const lcl =
+    grandAverage -
+    constants.CONST_BY_SUBGROUP_SIZE[subgroupSize].a2 * averageRange;
+
+  return {
+    ucl,
+    cl,
+    lcl
+  };
+}
+
+function getRangeDataForXBarR(averageRange, subgroupSize) {
+  const ucl = constants.CONST_BY_SUBGROUP_SIZE[subgroupSize].d4 * averageRange;
+  const cl = averageRange;
+  const lcl = constants.CONST_BY_SUBGROUP_SIZE[subgroupSize].d3 * averageRange;
+
+  return {
+    ucl,
+    cl,
+    lcl
+  };
+}
+
+function calculateAverage(list) {
+  if (!(list instanceof Array && list.length)) return 0;
+
+  list = list.filter((val) => !isNaN(val)).map((val) => Number.parseFloat(val));
+  const totalSum = list.reduce((sum, val) => {
+    sum += val;
+    return sum;
+  }, 0);
+  return totalSum / list.length;
+}
+
+function formatNumber(num) {
+  if (!isNaN(num)) {
+    num = Number.parseFloat(num).toFixed(constants.FIXED_POINTS);
+    num = Number.parseFloat(num).toString();
+  }
+  return num;
+}
+
 const util = {
   isNumber,
   isString,
-  average,
+  calculateAverage,
   getMR,
   getID,
-  getMrMap
+  getMrMap,
+  getRangeForXBarR,
+  getAverageForXBarR,
+  getStdDevForXBarR,
+  getXBarDataForXBarR,
+  getRangeDataForXBarR,
+  formatNumber
 };
 
 export default util;

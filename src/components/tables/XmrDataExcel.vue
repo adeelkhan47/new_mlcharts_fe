@@ -12,7 +12,7 @@ import "jexcel/dist/jexcel.css";
 import jexcel from "jexcel";
 
 export default {
-  name: "DataExcel",
+  name: "XmrDataExcel",
 
   components: {
     AddData,
