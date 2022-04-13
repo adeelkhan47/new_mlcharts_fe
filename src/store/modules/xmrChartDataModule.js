@@ -1,5 +1,6 @@
 import util from "../../utils";
 import { xmrChartDataApi } from "../../api";
+import constants from "../../utils/constants.util";
 
 const X_CONTROL_LIMITS_CONST = 1.128;
 const MR_UCL_CONST = 3.268;
@@ -10,8 +11,8 @@ const xmrChartDataModule = {
 
   state: () => ({
     loading: false,
-    upperSpecLimit: 20,
-    lowerSpecLimit: 10,
+    upperSpecLimit: "20",
+    lowerSpecLimit: "10",
     dataList: [],
     mr: new Map(),
     dataAverage: 0,
@@ -19,30 +20,90 @@ const xmrChartDataModule = {
     estimatedStdDev: 0,
     xControlLimits_UCL: 0,
     xControlLimits_LCL: 0,
-    mrControlLimits_UCL: 0,
-    cpu: 0,
-    cpl: 0,
-    cpk: 0
+    mrControlLimits_UCL: 0
   }),
 
-  actions: {
-    init: (ctx, { chartId, password }) => {
-      ctx.commit("loading", true);
-      let appData = localStorage.getItem("appData");
-      if (appData) {
-        appData = JSON.parse(appData);
+  getters: {
+    cpu(state) {
+      let temp = {
+        label: "",
+        value: ""
+      };
 
-        if (
-          appData &&
-          typeof appData == "object" &&
-          Object.keys(appData).length
-        ) {
-          if (appData.hasOwnProperty("upperSpecLimit"))
-            ctx.commit("upperSpecLimit", appData["upperSpecLimit"]);
-
-          if (appData.hasOwnProperty("lowerSpecLimit"))
-            ctx.commit("lowerSpecLimit", appData["lowerSpecLimit"]);
+      const upper = util.convertVal(state.upperSpecLimit);
+      if (
+        typeof upper === "number" &&
+        typeof state.dataAverage === "number" &&
+        typeof state.estimatedStdDev === "number"
+      ) {
+        const val = (upper - state.dataAverage) / (3 * state.estimatedStdDev);
+        if (val !== Infinity && val !== -Infinity) {
+          temp.value = val;
+          temp.label = val.toFixed(constants.FIXED_POINTS);
         }
+      }
+
+      return temp;
+    },
+
+    cpl(state) {
+      let temp = {
+        label: "",
+        value: ""
+      };
+
+      const lower = util.convertVal(state.lowerSpecLimit);
+      if (
+        typeof lower === "number" &&
+        typeof state.dataAverage === "number" &&
+        typeof state.estimatedStdDev === "number"
+      ) {
+        const val = (state.dataAverage - lower) / (3 * state.estimatedStdDev);
+        if (val !== Infinity && val !== -Infinity) {
+          temp.value = val;
+          temp.label = val.toFixed(constants.FIXED_POINTS);
+        }
+      }
+
+      return temp;
+    },
+
+    cpk(state, getters) {
+      let temp = {
+        label: "",
+        value: ""
+      };
+
+      let cpuVal = getters.cpu.value;
+      let cplVal = getters.cpl.value;
+      let val = "";
+
+      if (typeof cpuVal === "number" && typeof cplVal === "number")
+        val = Math.min(cpuVal, cplVal);
+      else if (typeof cpuVal === "number") val = cpuVal;
+      else if (typeof cplVal === "number") val = cplVal;
+
+      temp.value = val;
+      if (typeof val === "number")
+        temp.label = val.toFixed(constants.FIXED_POINTS);
+
+      return temp;
+    }
+  },
+
+  actions: {
+    init: (ctx, { chartId, password, currentChart = {} }) => {
+      ctx.commit("loading", true);
+
+      if (
+        currentChart &&
+        typeof currentChart === "object" &&
+        Object.keys(currentChart).length
+      ) {
+        if (currentChart.upperSpecLimit)
+          ctx.commit("upperSpecLimit", currentChart.upperSpecLimit);
+        if (currentChart.lowerSpecLimit)
+          ctx.commit("lowerSpecLimit", currentChart.lowerSpecLimit);
       }
 
       xmrChartDataApi
@@ -101,23 +162,6 @@ const xmrChartDataModule = {
       if (mrAverage === null) mrAverage = ctx.state.mrAverage;
       if (std === null) std = mrAverage / X_CONTROL_LIMITS_CONST;
       if (dataAverage === null) dataAverage = ctx.state.dataAverage;
-
-      const cpu = (ctx.state.upperSpecLimit - dataAverage) / (3 * std);
-      ctx.commit("cpu", cpu);
-
-      const cpl = (dataAverage - ctx.state.lowerSpecLimit) / (3 * std);
-      ctx.commit("cpl", cpl);
-
-      const cpk = Math.min(cpu, cpl);
-      ctx.commit("cpk", cpk);
-
-      // saving data
-      const appData = {
-        dataList: ctx.state.dataList,
-        upperSpecLimit: ctx.state.upperSpecLimit,
-        lowerSpecLimit: ctx.state.lowerSpecLimit
-      };
-      localStorage.setItem("appData", JSON.stringify(appData));
 
       ctx.commit("loading", false);
     },
@@ -255,17 +299,11 @@ const xmrChartDataModule = {
     },
 
     setUpperSpecLimit: (ctx, val) => {
-      if (util.isNumber(val)) {
-        ctx.commit("upperSpecLimit", val);
-        ctx.dispatch("populateCPX");
-      }
+      ctx.commit("upperSpecLimit", val);
     },
 
     setLowerSpecLimit: (ctx, val) => {
-      if (util.isNumber(val)) {
-        ctx.commit("lowerSpecLimit", val);
-        ctx.dispatch("populateCPX");
-      }
+      ctx.commit("lowerSpecLimit", val);
     }
   },
 
@@ -304,7 +342,7 @@ const xmrChartDataModule = {
     },
 
     dataAverage: (state, val) => {
-      state.dataAverage = Number.parseFloat(val).toFixed(toFixed);
+      state.dataAverage = val;
     },
 
     mrAverage: (state, val) => {
@@ -312,7 +350,7 @@ const xmrChartDataModule = {
     },
 
     estimatedStdDev: (state, val) => {
-      state.estimatedStdDev = Number.parseFloat(val).toFixed(toFixed);
+      state.estimatedStdDev = val;
     },
 
     xControlLimits_UCL: (state, val) => {
@@ -327,27 +365,17 @@ const xmrChartDataModule = {
       state.mrControlLimits_UCL = Number.parseFloat(val).toFixed(toFixed);
     },
 
-    cpu: (state, val) => {
-      state.cpu = Number.parseFloat(val).toFixed(toFixed);
-    },
-
-    cpl: (state, val) => {
-      state.cpl = Number.parseFloat(val).toFixed(toFixed);
-    },
-
-    cpk: (state, val) => {
-      state.cpk = Number.parseFloat(val).toFixed(toFixed);
-    },
-
     dataList: (state, val) => {
       state.dataList = val;
     },
 
     upperSpecLimit: (state, val) => {
+      if (typeof val === "number") val = JSON.stringify(val);
       state.upperSpecLimit = val;
     },
 
     lowerSpecLimit: (state, val) => {
+      if (typeof val === "number") val = JSON.stringify(val);
       state.lowerSpecLimit = val;
     },
 

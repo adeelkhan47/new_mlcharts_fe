@@ -37,6 +37,15 @@ function updateDashboardChart(chartId, body) {
   return axios.put(URL, body);
 }
 
+function updateDashboardSpecLimits(chartId, body) {
+  const URL =
+    constants.API_BASE_URL +
+    constants.DASHBOARD_CHART_PATH +
+    "/spec-limits/" +
+    chartId;
+  return axios.put(URL, body);
+}
+
 function deleteDashboardChart(chartId) {
   const URL =
     constants.API_BASE_URL + constants.DASHBOARD_CHART_PATH + "/" + chartId;
@@ -49,6 +58,7 @@ const dashboardChartApi = Object.freeze({
   getDashboardChartById,
   createDashboardChart,
   updateDashboardChart,
+  updateDashboardSpecLimits,
   deleteDashboardChart
 });
 

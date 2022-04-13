@@ -1,25 +1,19 @@
 import util from "../../utils";
 import { xBarRChartDataApi } from "../../api";
-
-const UPPER_SPEC_LIMIT_KEY = "xBarR_upper_limit";
-const LOWER_SPEC_LIMIT_KEY = "xBarR_lower_limit";
-const toFixed = 3;
+import constants from "../../utils/constants.util";
 
 const xBarRChartDataModule = {
   namespaced: true,
 
   state: () => ({
     loading: false,
-    upperSpecLimit: 8,
-    lowerSpecLimit: 1,
+    upperSpecLimit: "8",
+    lowerSpecLimit: "1",
     dataList: [],
     averageRange: 0,
     grandAverage: 0,
     subgroupSize: null,
     stdDev: 0,
-    cpu: 0,
-    cpl: 0,
-    cpk: 0,
     xBarData: {
       ucl: 0,
       cl: 0,
@@ -32,6 +26,74 @@ const xBarRChartDataModule = {
     }
   }),
 
+  getters: {
+    cpu(state) {
+      let temp = {
+        label: "",
+        value: ""
+      };
+
+      const upper = util.convertVal(state.upperSpecLimit);
+      if (
+        typeof upper === "number" &&
+        typeof state.grandAverage === "number" &&
+        typeof state.stdDev === "number"
+      ) {
+        const val = (upper - state.grandAverage) / (3 * state.stdDev);
+        if (val !== Infinity && val !== -Infinity) {
+          temp.value = val;
+          temp.label = val.toFixed(constants.FIXED_POINTS);
+        }
+      }
+
+      return temp;
+    },
+
+    cpl(state) {
+      let temp = {
+        label: "",
+        value: ""
+      };
+
+      const lower = util.convertVal(state.lowerSpecLimit);
+      if (
+        typeof lower === "number" &&
+        typeof state.grandAverage === "number" &&
+        typeof state.stdDev === "number"
+      ) {
+        const val = (state.grandAverage - lower) / (3 * state.stdDev);
+        if (val !== Infinity && val !== -Infinity) {
+          temp.value = val;
+          temp.label = val.toFixed(constants.FIXED_POINTS);
+        }
+      }
+
+      return temp;
+    },
+
+    cpk(state, getters) {
+      let temp = {
+        label: "",
+        value: ""
+      };
+
+      let cpuVal = getters.cpu.value;
+      let cplVal = getters.cpl.value;
+      let val = "";
+
+      if (typeof cpuVal === "number" && typeof cplVal === "number")
+        val = Math.min(cpuVal, cplVal);
+      else if (typeof cpuVal === "number") val = cpuVal;
+      else if (typeof cplVal === "number") val = cplVal;
+
+      temp.value = val;
+      if (typeof val === "number")
+        temp.label = val.toFixed(constants.FIXED_POINTS);
+
+      return temp;
+    }
+  },
+
   actions: {
     reset: (ctx) => {
       ctx.commit("reset");
@@ -39,15 +101,19 @@ const xBarRChartDataModule = {
 
     init: (ctx, { chartId, password, currentChart = {} }) => {
       ctx.commit("loading", true);
-      ctx.dispatch("setLimits");
 
       if (
         currentChart &&
         typeof currentChart === "object" &&
-        Object.keys(currentChart).length &&
-        currentChart.subgroupSize
-      )
-        ctx.commit("subgroupSize", currentChart.subgroupSize);
+        Object.keys(currentChart).length
+      ) {
+        if (currentChart.subgroupSize)
+          ctx.commit("subgroupSize", currentChart.subgroupSize);
+        if (currentChart.upperSpecLimit)
+          ctx.commit("upperSpecLimit", currentChart.upperSpecLimit);
+        if (currentChart.lowerSpecLimit)
+          ctx.commit("lowerSpecLimit", currentChart.lowerSpecLimit);
+      }
 
       xBarRChartDataApi
         .getChartData(chartId, password)
@@ -60,25 +126,6 @@ const xBarRChartDataModule = {
           console.error("Unable to get chart data :: ", err);
           ctx.commit("loading", false);
         });
-    },
-
-    setLimits: (ctx) => {
-      let appData = localStorage.getItem("appData");
-      if (appData) {
-        appData = JSON.parse(appData);
-
-        if (
-          appData &&
-          typeof appData == "object" &&
-          Object.keys(appData).length
-        ) {
-          if (appData.hasOwnProperty(UPPER_SPEC_LIMIT_KEY))
-            ctx.commit("upperSpecLimit", appData[UPPER_SPEC_LIMIT_KEY]);
-
-          if (appData.hasOwnProperty(LOWER_SPEC_LIMIT_KEY))
-            ctx.commit("lowerSpecLimit", appData[LOWER_SPEC_LIMIT_KEY]);
-        }
-      }
     },
 
     populateData: (ctx, list) => {
@@ -107,9 +154,6 @@ const xBarRChartDataModule = {
       const averageRange = util.calculateAverage(ranges);
       const grandAverage = util.calculateAverage(averages);
       const stdDev = util.getStdDevForXBarR(averageRange, subgroupSize);
-      const cpu = (ctx.state.upperSpecLimit - grandAverage) / (3 * stdDev);
-      const cpl = (grandAverage - ctx.state.lowerSpecLimit) / (3 * stdDev);
-      const cpk = Math.min(cpu, cpl);
       const xBarData = util.getXBarDataForXBarR(
         grandAverage,
         averageRange,
@@ -120,40 +164,17 @@ const xBarRChartDataModule = {
       ctx.commit("averageRange", averageRange);
       ctx.commit("grandAverage", grandAverage);
       ctx.commit("stdDev", stdDev);
-      ctx.commit("cpu", cpu);
-      ctx.commit("cpl", cpl);
-      ctx.commit("cpk", cpk);
       ctx.commit("xBarData", xBarData);
       ctx.commit("rangeData", rangeData);
       ctx.commit("loading", false);
     },
 
-    handelLimitChange: (ctx, { upperLimit = null, lowerLimit = null }) => {
-      const grandAverage = ctx.state.grandAverage;
-      const stdDev = ctx.state.stdDev;
-      let cpu = ctx.state.cpu;
-      let cpl = ctx.state.cpl;
+    setUpperSpecLimit: (ctx, val) => {
+      ctx.commit("upperSpecLimit", val);
+    },
 
-      if (util.isNumber(upperLimit)) {
-        ctx.commit("upperSpecLimit", upperLimit);
-        cpu = (upperLimit - grandAverage) / (3 * stdDev);
-      }
-
-      if (util.isNumber(lowerLimit)) {
-        ctx.commit("lowerSpecLimit", lowerLimit);
-        cpl = (grandAverage - lowerLimit) / (3 * stdDev);
-      }
-
-      const cpk = Math.min(cpu, cpl);
-
-      ctx.commit("cpu", cpu);
-      ctx.commit("cpl", cpl);
-      ctx.commit("cpk", cpk);
-
-      let appData = {};
-      appData[UPPER_SPEC_LIMIT_KEY] = ctx.state.upperSpecLimit;
-      appData[LOWER_SPEC_LIMIT_KEY] = ctx.state.lowerSpecLimit;
-      localStorage.setItem("appData", JSON.stringify(appData));
+    setLowerSpecLimit: (ctx, val) => {
+      ctx.commit("lowerSpecLimit", val);
     },
 
     addDataItems: (ctx, { chartId, password, records, cb = () => {} }) => {
@@ -243,18 +264,6 @@ const xBarRChartDataModule = {
       state.stdDev = val;
     },
 
-    cpu: (state, val) => {
-      state.cpu = val;
-    },
-
-    cpl: (state, val) => {
-      state.cpl = val;
-    },
-
-    cpk: (state, val) => {
-      state.cpk = val;
-    },
-
     xBarData: (state, val) => {
       state.xBarData = val;
     },
@@ -269,9 +278,6 @@ const xBarRChartDataModule = {
       state.grandAverage = 0;
       state.subgroupSize = null;
       state.stdDev = 0;
-      state.cpu = 0;
-      state.cpl = 0;
-      state.cpk = 0;
       state.xBarData = {
         ucl: 0,
         cl: 0,

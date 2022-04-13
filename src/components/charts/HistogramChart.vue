@@ -42,8 +42,10 @@ export default {
           tickInterval: 1
         }
       ],
-      height: 400,
-      label: { formatter: formatter }
+      height: 300,
+      label: {
+        formatter: formatter
+      }
     };
   },
 
@@ -75,9 +77,10 @@ export default {
 
 <style scoped>
 .histogram {
-  margin: 20px 5px;
+  margin: 25px 5px;
   position: relative;
   width: 100%;
+  margin-bottom: 0px;
 }
 
 .chart-title {

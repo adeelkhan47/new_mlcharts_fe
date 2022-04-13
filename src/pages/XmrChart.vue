@@ -16,12 +16,16 @@
     <div class="content-wrapper">
       <div class="content-body">
         <div class="tables">
-          <statistics-table
-            :statisticsData="statisticsData"
-            :upperSpecLimit="upperSpecLimit"
-            :lowerSpecLimit="lowerSpecLimit"
-            @specLimitChanged="handleSpecLimit"
-          />
+          <div class="column-row">
+            <statistics-table
+              :statisticsData="statisticsData"
+              :upperSpecLimit="upperSpecLimit"
+              :lowerSpecLimit="lowerSpecLimit"
+              @specLimitChanged="handleSpecLimit"
+              @saveLimits="saveLimits"
+            />
+            <chart-histogram class="col-chart" />
+          </div>
           <xmr-data-excel />
         </div>
         <div class="charts">
@@ -36,7 +40,6 @@
             :mrAverage="mrAverage"
             :mrControlLimits_UCL="mrControlLimits_UCL"
           />
-          <chart-histogram />
         </div>
       </div>
     </div>
@@ -74,7 +77,9 @@ import ChartMr from "../components/charts/ChartMr.vue";
 import AddData from "../components/inputs/AddData.vue";
 import ChartX from "../components/charts/ChartX.vue";
 import userHelper from "../utils/userHelper.util";
-import { mapActions, mapState } from "vuex";
+import { mapActions, mapGetters, mapState } from "vuex";
+import { dashboardChartApi } from "../api";
+import util from "../utils";
 
 export default {
   name: "XmrChart",
@@ -113,12 +118,11 @@ export default {
       "mrAverage",
       "mrControlLimits_UCL",
       "estimatedStdDev",
-      "cpu",
-      "cpl",
-      "cpk",
       "upperSpecLimit",
       "lowerSpecLimit"
-    ])
+    ]),
+
+    ...mapGetters("xmrChartDataModule", ["cpu", "cpl", "cpk"])
   },
 
   watch: {
@@ -140,7 +144,7 @@ export default {
           key: obj.id + "",
           label: obj.label,
           Value: obj.value,
-          CL: this.dataAverage,
+          CL: util.formatNumber(this.dataAverage),
           UCL: this.xControlLimits_UCL,
           LCL: this.xControlLimits_LCL
         };
@@ -200,6 +204,15 @@ export default {
       }
     },
 
+    saveLimits() {
+      if (this.chartId) {
+        dashboardChartApi.updateDashboardSpecLimits(this.chartId, {
+          upperSpecLimit: this.upperSpecLimit,
+          lowerSpecLimit: this.lowerSpecLimit
+        });
+      }
+    },
+
     setStatisticsData() {
       this.statisticsData = [
         {
@@ -208,11 +221,11 @@ export default {
         },
         {
           key: "Data Average",
-          value: this.dataAverage
+          value: util.formatNumber(this.dataAverage)
         },
         {
           key: "Estimated Std Dev",
-          value: this.estimatedStdDev
+          value: util.formatNumber(this.estimatedStdDev)
         },
         {
           key: "Data Count",
@@ -220,15 +233,15 @@ export default {
         },
         {
           key: "Cpu",
-          value: this.cpu
+          value: this.cpu.label
         },
         {
           key: "Cpl",
-          value: this.cpl
+          value: this.cpl.label
         },
         {
           key: "Cpk",
-          value: this.cpk
+          value: this.cpk.label
         }
       ];
     },
@@ -333,6 +346,16 @@ export default {
 
 .tables > * {
   margin: 20px 5px;
+}
+
+.column-row {
+  display: flex;
+  flex-direction: column;
+  width: 350px;
+}
+
+.col-chart {
+  transform: translateX(-25px);
 }
 
 .charts {

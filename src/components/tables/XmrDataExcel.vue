@@ -40,7 +40,11 @@ export default {
         rowDrag: false,
         columns: [
           { type: "text", title: "ID", width: "0px", readOnly: true },
-          { type: "text", title: "Reference 1", width: "150px" },
+          {
+            type: "text",
+            title: "Reference 1 (Appears on chart)",
+            width: "220px"
+          },
           { type: "text", title: "Reference 2", width: "150px" },
           {
             type: "numeric",
@@ -57,10 +61,56 @@ export default {
           }
         ],
         tableOverflow: true,
-        tableHeight: "585px",
+        tableHeight: "730px",
         onpaste: this.handleChange,
         ondeleterow: this.handleChange,
-        oneditionend: this.handleChange
+        oneditionend: this.handleChange,
+        contextMenu: function (obj, x, y, e) {
+          var items = [];
+
+          // Copy
+          items.push({
+            title: obj.options.text.copy,
+            shortcut: "Ctrl + C",
+            onclick: function () {
+              obj.copy(true);
+            }
+          });
+
+          // Paste
+          if (navigator && navigator.clipboard) {
+            items.push({
+              title: obj.options.text.paste,
+              shortcut: "Ctrl + V",
+              onclick: function () {
+                if (obj.selectedCell) {
+                  navigator.clipboard.readText().then(function (text) {
+                    if (text) {
+                      jexcel.current.paste(
+                        obj.selectedCell[0],
+                        obj.selectedCell[1],
+                        text
+                      );
+                    }
+                  });
+                }
+              }
+            });
+          }
+
+          // Save
+          if (obj.options.allowExport) {
+            items.push({
+              title: obj.options.text.saveAs,
+              shortcut: "Ctrl + S",
+              onclick: function () {
+                obj.download();
+              }
+            });
+          }
+
+          return items;
+        }
       }
     };
   },
@@ -88,7 +138,7 @@ export default {
       // hiding first mr
       if (this.records.length > 0) this.options.data[0].mr = "";
 
-      let blankRows = 23;
+      let blankRows = 29;
       if (this.records.length > 22) blankRows = 5;
       else blankRows = blankRows - this.records.length;
 
@@ -252,7 +302,7 @@ export default {
 .data-table {
   min-width: 500px;
   min-height: 795px;
-  min-height: 585px;
+  min-height: 725px;
   border-radius: 5px;
   background: #eee;
   position: relative;

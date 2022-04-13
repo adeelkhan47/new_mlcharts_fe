@@ -82,7 +82,7 @@
                     class="md-error"
                     v-else-if="!$v.form.subgroupSize.maxValue"
                   >
-                    Subgroup size must be 10 or lessor
+                    Subgroup size must be 10 or less
                   </span>
                 </md-field>
               </div>

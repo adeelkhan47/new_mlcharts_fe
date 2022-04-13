@@ -13,8 +13,8 @@
           <md-field class="input-field">
             <md-input
               :value="upperSpecLimit"
-              @change="upperLimitChanged"
-              type="number"
+              @input="upperLimitChanged"
+              @change="saveLimits"
               class="spec-input"
             ></md-input>
           </md-field>
@@ -28,8 +28,8 @@
           <md-field class="input-field">
             <md-input
               :value="lowerSpecLimit"
-              @change="lowerLimitChanged"
-              type="number"
+              @input="lowerLimitChanged"
+              @change="saveLimits"
               class="spec-input"
             ></md-input>
           </md-field>
@@ -69,18 +69,22 @@ export default {
   },
 
   methods: {
-    upperLimitChanged(event) {
+    upperLimitChanged(value) {
       this.$emit("specLimitChanged", {
         key: "upper",
-        value: Number.parseInt(event.target.value)
+        value: value
       });
     },
 
-    lowerLimitChanged(event) {
+    lowerLimitChanged(value) {
       this.$emit("specLimitChanged", {
         key: "lower",
-        value: Number.parseInt(event.target.value)
+        value: value
       });
+    },
+
+    saveLimits() {
+      this.$emit("saveLimits");
     }
   }
 };
@@ -92,7 +96,20 @@ export default {
 }
 
 .spec-input {
-  background: red;
   width: 100px;
+}
+</style>
+
+<style>
+.st-wrapper .md-table-head-container {
+  padding: 6px 0px;
+}
+
+.st-wrapper .md-table-cell,
+.st-wrapper .md-table-head-container,
+.st-wrapper .md-field {
+  height: auto;
+  min-height: auto;
+  margin: 0px;
 }
 </style>

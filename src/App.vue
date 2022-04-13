@@ -13,7 +13,8 @@ export default {
 
   data() {
     return {
-      paths: ["Dashboard", "About", "XmrChart", "XBarRChart"]
+      // "About",
+      paths: ["Dashboard", "XmrChart", "XBarRChart"]
     };
   },
 

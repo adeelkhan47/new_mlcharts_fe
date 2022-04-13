@@ -8,6 +8,7 @@
             :upperSpecLimit="upperSpecLimit"
             :lowerSpecLimit="lowerSpecLimit"
             @specLimitChanged="handleSpecLimit"
+            @saveLimits="saveLimits"
           />
           <template v-if="subgroupSize">
             <x-bar-r-data-excel :subgroupSize="subgroupSize" />
@@ -56,8 +57,9 @@ import XBarRDataExcel from "../components/tables/XBarRDataExcel.vue";
 import StatisticsTable from "../components/tables/StatisticsTable.vue";
 import ChartX from "../components/charts/ChartX.vue";
 import userHelper from "../utils/userHelper.util";
-import { mapActions, mapState } from "vuex";
+import { mapActions, mapGetters, mapState } from "vuex";
 import util from "../utils";
+import { dashboardChartApi } from "../api";
 
 export default {
   name: "XBarRChart",
@@ -91,14 +93,13 @@ export default {
       "averageRange",
       "grandAverage",
       "stdDev",
-      "cpu",
-      "cpl",
-      "cpk",
       "upperSpecLimit",
       "lowerSpecLimit",
       "xBarData",
       "rangeData"
-    ])
+    ]),
+
+    ...mapGetters("xBarRChartDataModule", ["cpu", "cpl", "cpk"])
   },
 
   watch: {
@@ -178,18 +179,26 @@ export default {
   },
 
   methods: {
-    ...mapActions("xBarRChartDataModule", ["handelLimitChange"]),
+    ...mapActions("xBarRChartDataModule", [
+      "setUpperSpecLimit",
+      "setLowerSpecLimit"
+    ]),
     ...mapActions("dashboardChartModule", ["getChart"]),
     ...mapActions("responseMessageModule", ["setShow", "setMessage"]),
 
     handleSpecLimit({ key, value }) {
       if (key === "upper") {
-        this.handelLimitChange({
-          upperLimit: value
-        });
+        this.setUpperSpecLimit(value);
       } else {
-        this.handelLimitChange({
-          lowerLimit: value
+        this.setLowerSpecLimit(value);
+      }
+    },
+
+    saveLimits() {
+      if (this.chartId) {
+        dashboardChartApi.updateDashboardSpecLimits(this.chartId, {
+          upperSpecLimit: this.upperSpecLimit,
+          lowerSpecLimit: this.lowerSpecLimit
         });
       }
     },
@@ -214,15 +223,15 @@ export default {
         },
         {
           key: "Cpu",
-          value: util.formatNumber(this.cpu)
+          value: this.cpu.label
         },
         {
           key: "Cpl",
-          value: util.formatNumber(this.cpl)
+          value: this.cpl.label
         },
         {
           key: "Cpk",
-          value: util.formatNumber(this.cpk)
+          value: this.cpk.label
         }
       ];
     },

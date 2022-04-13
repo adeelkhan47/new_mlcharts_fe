@@ -31,10 +31,10 @@
                     <router-link to="/dashboard"> Dashboard</router-link>
                   </md-menu-item>
 
-                  <md-menu-item class="header-menu-item">
+                  <!-- <md-menu-item class="header-menu-item">
                     <md-icon>info</md-icon>
                     <router-link to="/about"> About </router-link>
-                  </md-menu-item>
+                  </md-menu-item> -->
 
                   <md-menu-item class="header-menu-item">
                     <md-icon>logout</md-icon>

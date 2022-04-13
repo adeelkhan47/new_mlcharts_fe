@@ -7,7 +7,7 @@
       <md-table v-model="charts" md-card class="table">
         <md-table-toolbar>
           <div class="md-toolbar-section-start">
-            <h1 class="md-title">Available Charts</h1>
+            <h1 class="md-title">My Charts</h1>
           </div>
 
           <md-button

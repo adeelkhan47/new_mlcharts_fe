@@ -114,11 +114,21 @@ function calculateAverage(list) {
 }
 
 function formatNumber(num) {
-  if (!isNaN(num)) {
+  if ((num || num === 0) && !isNaN(num)) {
     num = Number.parseFloat(num).toFixed(constants.FIXED_POINTS);
     num = Number.parseFloat(num).toString();
   }
   return num;
+}
+
+function convertVal(num) {
+  let val = "";
+  if ((num || num === 0) && num !== Infinity && num !== NaN) {
+    if (typeof num === "string" && !isNaN(num)) {
+      val = Number.parseFloat(num);
+    } else if (typeof num === "number") val = num;
+  }
+  return val;
 }
 
 const util = {
@@ -133,7 +143,8 @@ const util = {
   getStdDevForXBarR,
   getXBarDataForXBarR,
   getRangeDataForXBarR,
-  formatNumber
+  formatNumber,
+  convertVal
 };
 
 export default util;

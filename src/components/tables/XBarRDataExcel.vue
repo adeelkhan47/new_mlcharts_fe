@@ -47,7 +47,11 @@ export default {
         rowDrag: false,
         columns: [
           { type: "text", title: "ID", width: "0px", readOnly: true },
-          { type: "text", title: "Reference 1", width: "150px" },
+          {
+            type: "text",
+            title: "Reference 1 (Appears on chart)",
+            width: "220px"
+          },
           { type: "text", title: "Reference 2", width: "150px" }
         ],
         tableOverflow: true,
@@ -261,7 +265,11 @@ export default {
     getExcelColumns() {
       let columns = [
         { type: "text", title: "Row ID", width: "0px", readOnly: true },
-        { type: "text", title: "Reference 1", width: "150px" },
+        {
+          type: "text",
+          title: "Reference 1 (Appears on chart)",
+          width: "220px"
+        },
         { type: "text", title: "Reference 2", width: "150px" }
       ];
 
@@ -349,7 +357,7 @@ export default {
 
 <style scoped>
 .data-table {
-  min-width: 500px;
+  min-width: 550px;
   min-height: 795px;
   min-height: 585px;
   max-width: 755px;
