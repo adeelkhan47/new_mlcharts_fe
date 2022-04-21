@@ -116,7 +116,7 @@ function calculateAverage(list) {
 function formatNumber(num) {
   if ((num || num === 0) && !isNaN(num)) {
     num = Number.parseFloat(num).toFixed(constants.FIXED_POINTS);
-    num = Number.parseFloat(num).toString();
+    num = Number.parseFloat(num);
   }
   return num;
 }
