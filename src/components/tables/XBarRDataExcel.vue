@@ -283,21 +283,98 @@ export default {
         });
       }
 
-      columns.push({
-        type: "text",
-        title: "Average",
-        width: "100px",
-        readOnly: true
-      });
-
-      columns.push({
-        type: "text",
-        title: "Range",
-        width: "100px",
-        readOnly: true
-      });
-
-      return columns;
+      return columns.concat([
+        {
+          type: "text",
+          title: "Average",
+          width: "100px",
+          readOnly: true
+        },
+        {
+          type: "text",
+          title: "Range",
+          width: "100px",
+          readOnly: true
+        },
+        {
+          type: "text",
+          title: "Cumul. Grand Avg",
+          width: "125px",
+          readOnly: true
+        },
+        {
+          type: "text",
+          title: "Cumul. Avg range",
+          width: "125px",
+          readOnly: true
+        },
+        {
+          type: "text",
+          title: "Cumul. Est SD",
+          width: "110px",
+          readOnly: true
+        },
+        {
+          type: "text",
+          title: "Avg UCL",
+          width: "100px",
+          readOnly: true
+        },
+        {
+          type: "text",
+          title: "Avg CL",
+          width: "100px",
+          readOnly: true
+        },
+        {
+          type: "text",
+          title: "Avg LCL",
+          width: "100px",
+          readOnly: true
+        },
+        {
+          type: "text",
+          title: "Rng UCL",
+          width: "100px",
+          readOnly: true
+        },
+        {
+          type: "text",
+          title: "Rng CL",
+          width: "100px",
+          readOnly: true
+        },
+        {
+          type: "text",
+          title: "Rng LCL",
+          width: "100px",
+          readOnly: true
+        },
+        {
+          type: "text",
+          title: "CPL",
+          width: "100px",
+          readOnly: true
+        },
+        {
+          type: "text",
+          title: "CPU",
+          width: "100px",
+          readOnly: true
+        },
+        {
+          type: "text",
+          title: "CPK",
+          width: "100px",
+          readOnly: true
+        },
+        {
+          type: "text",
+          title: "Avg CPK",
+          width: "100px",
+          readOnly: true
+        }
+      ]);
     },
 
     getExcelRecord(dataObj = null) {
@@ -311,6 +388,7 @@ export default {
       let values = {};
       let average = "";
       let range = "";
+      let append = {};
 
       if (dataExists) {
         record = {
@@ -330,6 +408,28 @@ export default {
         ) {
           values = dataObj.values;
         }
+
+        append = {
+          average: util.formatNumber(average),
+          range: util.formatNumber(range),
+          cumulativeAverageRange: util.formatNumber(
+            dataObj.cumulativeAverageRange
+          ),
+          cumulativeGrandAverage: util.formatNumber(
+            dataObj.cumulativeGrandAverage
+          ),
+          cumulativeStdDev: util.formatNumber(dataObj.cumulativeStdDev),
+          averageUCL: util.formatNumber(dataObj.averageUCL),
+          averageCL: util.formatNumber(dataObj.averageCL),
+          averageLCL: util.formatNumber(dataObj.averageLCL),
+          rangeUCL: util.formatNumber(dataObj.rangeUCL),
+          rangeCL: util.formatNumber(dataObj.rangeCL),
+          rangeLCL: util.formatNumber(dataObj.rangeLCL),
+          cumulativeCPL: util.formatNumber(dataObj.cumulativeCPL),
+          cumulativeCPU: util.formatNumber(dataObj.cumulativeCPU),
+          cumulativeCPK: util.formatNumber(dataObj.cumulativeCPK),
+          averageCPK: util.formatNumber(dataObj.averageCPK)
+        };
       } else {
         record = {
           id: "",
@@ -338,16 +438,18 @@ export default {
         };
       }
 
+      // adding data col values
       for (let i = 1; i <= this.subgroupSize; i++) {
         const key = "x" + i;
         const value = values.hasOwnProperty(key) ? values[key] : "";
         record[key] = value;
       }
 
-      record.average =
-        typeof average === "string" ? average : util.formatNumber(average);
-      record.range =
-        typeof range === "string" ? range : util.formatNumber(range);
+      // adding other col values
+      for (const col in append) {
+        const val = append[col];
+        record[col] = val;
+      }
 
       return record;
     }

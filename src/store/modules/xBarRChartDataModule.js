@@ -129,20 +129,108 @@ const xBarRChartDataModule = {
     },
 
     populateData: (ctx, list) => {
+      const subgroupSize = ctx.state.subgroupSize;
+      const lowerSpecLimit = util.getNumValOrStr(ctx.state.lowerSpecLimit);
+      const upperSpecLimit = util.getNumValOrStr(ctx.state.upperSpecLimit);
       let values = {};
       let range = 0;
       let average = 0;
+      let rangeSum = 0;
+      let averageSum = 0;
+      let cumulativeAverageRange = 0;
+      let cumulativeGrandAverage = 0;
+      let cumulativeStdDev = 0;
+      let averageUCL = 0;
+      let averageCL = null;
+      let averageLCL = 0;
+      let rangeUCL = 0;
+      let rangeCL = null;
+      let rangeLCL = 0;
+      let cumulativeCPL = 0;
+      let cumulativeCPU = 0;
+      let cumulativeCPK = 0;
 
-      list = list.map((obj) => {
+      list = list.map((obj, i) => {
         range = 0;
         average = 0;
         values = obj.values || {};
+        cumulativeStdDev = 0;
+        averageUCL = 0;
+        averageLCL = 0;
+        rangeUCL = 0;
+        rangeLCL = 0;
+        cumulativeCPL = 0;
+        cumulativeCPU = 0;
+        cumulativeCPK = 0;
+
         if (Object.keys(values).length) {
           range = util.getRangeForXBarR(values);
           average = util.getAverageForXBarR(values);
         }
+
+        rangeSum += range;
+        averageSum += average;
+        cumulativeAverageRange = util.getCumulativeAverage(rangeSum, i + 1);
+        cumulativeGrandAverage = util.getCumulativeAverage(averageSum, i + 1);
+        cumulativeStdDev = util.getStdDevForXBarR(
+          cumulativeAverageRange,
+          subgroupSize
+        );
+        averageUCL = util.getAverageUCL(
+          cumulativeGrandAverage,
+          cumulativeAverageRange,
+          subgroupSize
+        );
+        averageLCL = util.getAverageLCL(
+          cumulativeGrandAverage,
+          cumulativeAverageRange,
+          subgroupSize
+        );
+        rangeUCL = util.getRangeUCL(cumulativeAverageRange, subgroupSize);
+        rangeLCL = util.getRangeLCL(cumulativeAverageRange, subgroupSize);
+        cumulativeCPL = util.getCumulativeCPL(
+          cumulativeGrandAverage,
+          cumulativeStdDev,
+          lowerSpecLimit
+        );
+        cumulativeCPU = util.getCumulativeCPU(
+          cumulativeGrandAverage,
+          cumulativeStdDev,
+          upperSpecLimit
+        );
+        cumulativeCPK = util.getCumulativeCPK(cumulativeCPL, cumulativeCPU);
+
+        if (averageCL === null) {
+          averageCL = average;
+        }
+        if (rangeCL === null) {
+          rangeCL = range;
+        }
+
         obj.average = average;
         obj.range = range;
+        obj.cumulativeAverageRange = cumulativeAverageRange;
+        obj.cumulativeGrandAverage = cumulativeGrandAverage;
+        obj.cumulativeStdDev = cumulativeStdDev;
+        obj.averageUCL = averageUCL;
+        obj.averageCL = averageCL;
+        obj.averageLCL = averageLCL;
+        obj.rangeUCL = rangeUCL;
+        obj.rangeCL = rangeCL;
+        obj.rangeLCL = rangeLCL;
+        obj.cumulativeCPL = cumulativeCPL;
+        obj.cumulativeCPU = cumulativeCPU;
+        obj.cumulativeCPK = cumulativeCPK;
+
+        return obj;
+      });
+
+      const averageCPK = util.calculateAverage(
+        list.map((obj) => obj.cumulativeCPK)
+      );
+
+      list = list.map((obj) => {
+        obj.averageCPK = averageCPK;
         return obj;
       });
 
@@ -150,7 +238,6 @@ const xBarRChartDataModule = {
 
       const ranges = list.map((obj) => obj.range);
       const averages = list.map((obj) => obj.average);
-      const subgroupSize = ctx.state.subgroupSize;
       const averageRange = util.calculateAverage(ranges);
       const grandAverage = util.calculateAverage(averages);
       const stdDev = util.getStdDevForXBarR(averageRange, subgroupSize);

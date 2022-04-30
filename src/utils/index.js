@@ -131,6 +131,75 @@ function convertVal(num) {
   return val;
 }
 
+function getCumulativeAverage(averageSum, count) {
+  return averageSum / count;
+}
+
+function getAverageUCL(
+  cumulativeGrandAverage,
+  cumulativeAverageRange,
+  subgroupSize
+) {
+  return (
+    cumulativeGrandAverage +
+    constants.CONST_BY_SUBGROUP_SIZE[subgroupSize].a2 * cumulativeAverageRange
+  );
+}
+
+function getAverageLCL(
+  cumulativeGrandAverage,
+  cumulativeAverageRange,
+  subgroupSize
+) {
+  return (
+    cumulativeGrandAverage -
+    constants.CONST_BY_SUBGROUP_SIZE[subgroupSize].a2 * cumulativeAverageRange
+  );
+}
+
+function getRangeUCL(cumulativeAverageRange, subgroupSize) {
+  return (
+    constants.CONST_BY_SUBGROUP_SIZE[subgroupSize].d4 * cumulativeAverageRange
+  );
+}
+
+function getRangeLCL(cumulativeAverageRange, subgroupSize) {
+  return (
+    constants.CONST_BY_SUBGROUP_SIZE[subgroupSize].d3 * cumulativeAverageRange
+  );
+}
+
+function getCumulativeCPL(
+  cumulativeGrandAverage,
+  cumulativeStdDev,
+  lowerSpecLimit
+) {
+  if (typeof lowerSpecLimit === "string") return "";
+  return (cumulativeGrandAverage - lowerSpecLimit) / (3 * cumulativeStdDev);
+}
+
+function getCumulativeCPU(
+  cumulativeGrandAverage,
+  cumulativeStdDev,
+  upperSpecLimit
+) {
+  if (typeof upperSpecLimit === "string") return "";
+  return (upperSpecLimit - cumulativeGrandAverage) / (3 * cumulativeStdDev);
+}
+
+function getCumulativeCPK(cumulativeCPL, cumulativeCPU) {
+  if (typeof cumulativeCPL === "string" && typeof cumulativeCPU === "string")
+    return "";
+  else if (typeof cumulativeCPL === "string") return cumulativeCPU;
+  else if (typeof cumulativeCPU === "string") return cumulativeCPL;
+  else return Math.min(cumulativeCPL, cumulativeCPU);
+}
+
+function getNumValOrStr(val) {
+  if ((!val && val !== 0) || isNaN(val)) return "";
+  return Number.parseInt(val);
+}
+
 const util = {
   isNumber,
   isString,
@@ -144,7 +213,16 @@ const util = {
   getXBarDataForXBarR,
   getRangeDataForXBarR,
   formatNumber,
-  convertVal
+  convertVal,
+  getCumulativeAverage,
+  getAverageUCL,
+  getAverageLCL,
+  getRangeUCL,
+  getRangeLCL,
+  getCumulativeCPL,
+  getCumulativeCPU,
+  getCumulativeCPK,
+  getNumValOrStr
 };
 
 export default util;
