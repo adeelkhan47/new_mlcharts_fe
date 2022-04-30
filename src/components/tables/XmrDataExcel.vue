@@ -10,6 +10,7 @@ import { mapActions, mapState } from "vuex";
 import AddData from "../inputs/AddData.vue";
 import "jexcel/dist/jexcel.css";
 import jexcel from "jexcel";
+import util from "../../utils";
 
 export default {
   name: "XmrDataExcel",
@@ -55,12 +56,85 @@ export default {
           },
           {
             type: "text",
+            title: "Cumul. Avg",
+            width: "100px",
+            readOnly: true
+          },
+          {
+            type: "text",
+            title: "Cumul. Avg mR",
+            width: "110px",
+            readOnly: true
+          },
+          {
+            type: "text",
+            title: "Cumul. Est SD",
+            width: "100px",
+            readOnly: true
+          },
+          {
+            type: "text",
             title: "Moving Range",
             width: "100px",
+            readOnly: true
+          },
+          {
+            type: "text",
+            title: "x UCL",
+            width: "100px",
+            readOnly: true
+          },
+          {
+            type: "text",
+            title: "x CL",
+            width: "100px",
+            readOnly: true
+          },
+          {
+            type: "text",
+            title: "x LCL",
+            width: "100px",
+            readOnly: true
+          },
+          {
+            type: "text",
+            title: "mR UCL",
+            width: "100px",
+            readOnly: true
+          },
+          {
+            type: "text",
+            title: "mR CL",
+            width: "100px",
+            readOnly: true
+          },
+          {
+            type: "text",
+            title: "CPL",
+            width: "100px",
+            readOnly: true
+          },
+          {
+            type: "text",
+            title: "CPU",
+            width: "100px",
+            readOnly: true
+          },
+          {
+            type: "text",
+            title: "CPK",
+            width: "100px",
+            readOnly: true
+          },
+          {
+            type: "text",
+            title: "Avg Cpk (overall)",
+            width: "120px",
             readOnly: true
           }
         ],
         tableOverflow: true,
+        tableWidth: "755px",
         tableHeight: "730px",
         onpaste: this.handleChange,
         ondeleterow: this.handleChange,
@@ -129,14 +203,23 @@ export default {
           label: obj.label,
           reference: obj.reference,
           value: obj.value,
-          mr: this.mr.get(obj.id)
+          movingRange: util.formatNumber(obj.movingRange),
+          cumulativeAverage: util.formatNumber(obj.cumulativeAverage),
+          cumulativeAverageMR: util.formatNumber(obj.cumulativeAverageMR),
+          cumulativeStdDev: util.formatNumber(obj.cumulativeStdDev),
+          xUCL: util.formatNumber(obj.xUCL),
+          xCL: util.formatNumber(obj.xCL),
+          xLCL: util.formatNumber(obj.xLCL),
+          mrUCL: util.formatNumber(obj.mrUCL),
+          mrCL: util.formatNumber(obj.mrCL),
+          cumulativeCPL: util.formatNumber(obj.cumulativeCPL),
+          cumulativeCPU: util.formatNumber(obj.cumulativeCPU),
+          cumulativeCPK: util.formatNumber(obj.cumulativeCPK),
+          averageCumulativeCPK: util.formatNumber(obj.averageCumulativeCPK)
         };
       });
 
       this.options.data = JSON.parse(JSON.stringify(this.records));
-
-      // hiding first mr
-      if (this.records.length > 0) this.options.data[0].mr = "";
 
       let blankRows = 29;
       if (this.records.length > 22) blankRows = 5;
@@ -149,7 +232,19 @@ export default {
           label: "",
           reference: "",
           value: "",
-          mr: ""
+          movingRange: "",
+          cumulativeAverage: "",
+          cumulativeAverageMR: "",
+          cumulativeStdDev: "",
+          xUCL: "",
+          xCL: "",
+          xLCL: "",
+          mrUCL: "",
+          mrCL: "",
+          cumulativeCPL: "",
+          cumulativeCPU: "",
+          cumulativeCPK: "",
+          averageCumulativeCPK: ""
         });
       }
 
@@ -307,6 +402,7 @@ export default {
   background: #eee;
   position: relative;
   overflow: hidden;
+  max-width: 755px;
 }
 
 .loading::after {

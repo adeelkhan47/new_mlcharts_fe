@@ -105,7 +105,9 @@ function getRangeDataForXBarR(averageRange, subgroupSize) {
 function calculateAverage(list) {
   if (!(list instanceof Array && list.length)) return 0;
 
-  list = list.filter((val) => !isNaN(val)).map((val) => Number.parseFloat(val));
+  list = list
+    .filter((val) => val !== "" && !isNaN(val))
+    .map((val) => Number.parseFloat(val));
   const totalSum = list.reduce((sum, val) => {
     sum += val;
     return sum;
@@ -200,6 +202,40 @@ function getNumValOrStr(val) {
   return Number.parseInt(val);
 }
 
+function getMovingRangeForXMR(prevVal, currVal, index) {
+  if (index === 0) return "";
+  prevVal = getNumValOrStr(prevVal);
+  currVal = getNumValOrStr(currVal);
+  if (typeof prevVal !== "number" || typeof currVal !== "number") return "";
+  return Math.abs(currVal - prevVal);
+}
+
+function getCumulativeStdDevForXMR(cumulativeAvgMr) {
+  cumulativeAvgMr = getNumValOrStr(cumulativeAvgMr);
+  if (typeof cumulativeAvgMr !== "number") return "";
+  return cumulativeAvgMr / constants.X_VALUE_CONSTANT;
+}
+
+function getX_UCL_ForXMR(cumulativeAverage, cumulativeAvgMr) {
+  return cumulativeAverage + 3 * (cumulativeAvgMr / constants.X_VALUE_CONSTANT);
+}
+
+function getX_LCL_ForXMR(cumulativeAverage, cumulativeAvgMr) {
+  return cumulativeAverage - 3 * (cumulativeAvgMr / constants.X_VALUE_CONSTANT);
+}
+
+function getMrUCLForXMR(cumulativeAvgMr) {
+  return constants.MR_VALUE_CONSTANT * cumulativeAvgMr;
+}
+
+function getCPL_ForXMR(cumulativeAverage, cumulativeStdDev, lowerSpecLimit) {
+  return (cumulativeAverage - lowerSpecLimit) / (3 * cumulativeStdDev);
+}
+
+function getCPU_ForXMR(cumulativeAverage, cumulativeStdDev, upperSpecLimit) {
+  return (upperSpecLimit - cumulativeAverage) / (3 * cumulativeStdDev);
+}
+
 const util = {
   isNumber,
   isString,
@@ -222,7 +258,14 @@ const util = {
   getCumulativeCPL,
   getCumulativeCPU,
   getCumulativeCPK,
-  getNumValOrStr
+  getNumValOrStr,
+  getMovingRangeForXMR,
+  getCumulativeStdDevForXMR,
+  getX_UCL_ForXMR,
+  getX_LCL_ForXMR,
+  getMrUCLForXMR,
+  getCPL_ForXMR,
+  getCPU_ForXMR
 };
 
 export default util;

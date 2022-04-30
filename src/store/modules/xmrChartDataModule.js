@@ -110,11 +110,13 @@ const xmrChartDataModule = {
         .getAllData(chartId, password)
         .then((res) => {
           if (res && res.data && res.data.data) {
-            ctx.commit("dataList", res.data.data);
+            // ctx.commit("dataList", res.data.data);
 
-            ctx.commit("setMovingRange");
+            // ctx.commit("setMovingRange");
 
-            ctx.dispatch("populate");
+            // ctx.dispatch("populate");
+
+            ctx.dispatch("populateData", res.data.data);
           }
         })
         .catch((err) => {
@@ -163,6 +165,96 @@ const xmrChartDataModule = {
       if (std === null) std = mrAverage / X_CONTROL_LIMITS_CONST;
       if (dataAverage === null) dataAverage = ctx.state.dataAverage;
 
+      ctx.commit("loading", false);
+    },
+
+    populateData: (ctx, list) => {
+      ctx.commit("loading", true);
+
+      const lowerSpecLimit = util.getNumValOrStr(ctx.state.lowerSpecLimit);
+      const upperSpecLimit = util.getNumValOrStr(ctx.state.upperSpecLimit);
+      let prev = null;
+      let curr = null;
+      let movingRange = "";
+      let valuesSum = 0;
+      let mrSum = 0;
+      let cumulativeAverage = 0;
+      let cumulativeAverageMR = 0;
+      let cumulativeStdDev = 0;
+      let xUCL = 0;
+      let xCL = 0;
+      let xLCL = 0;
+      let mrUCL = 0;
+      let mrCL = 0;
+      let cumulativeCPL = 0;
+      let cumulativeCPU = 0;
+      let cumulativeCPK = 0;
+
+      list = list.map((obj, i) => {
+        prev = curr;
+        curr = obj.value;
+        movingRange = util.getMovingRangeForXMR(prev, curr, i);
+        valuesSum += obj.value;
+        cumulativeAverage = util.getCumulativeAverage(valuesSum, i + 1);
+        xCL = cumulativeAverage;
+        if (typeof movingRange === "string") {
+          mrSum = 0;
+          cumulativeAverageMR = "";
+          cumulativeStdDev = "";
+          xUCL = "";
+          xLCL = "";
+          mrUCL = "";
+          mrCL = "";
+          cumulativeCPL = "";
+          cumulativeCPU = "";
+          cumulativeCPK = "";
+        } else {
+          mrSum += movingRange;
+          cumulativeAverageMR = util.getCumulativeAverage(mrSum, i + 1);
+          cumulativeStdDev =
+            util.getCumulativeStdDevForXMR(cumulativeAverageMR);
+          xUCL = util.getX_UCL_ForXMR(cumulativeAverage, cumulativeAverageMR);
+          xLCL = util.getX_LCL_ForXMR(cumulativeAverage, cumulativeAverageMR);
+          mrUCL = util.getMrUCLForXMR(cumulativeAverageMR);
+          mrCL = cumulativeAverageMR;
+          cumulativeCPL = util.getCPL_ForXMR(
+            cumulativeAverage,
+            cumulativeStdDev,
+            lowerSpecLimit
+          );
+          cumulativeCPU = util.getCPU_ForXMR(
+            cumulativeAverage,
+            cumulativeStdDev,
+            upperSpecLimit
+          );
+          cumulativeCPK = util.getCumulativeCPK(cumulativeCPL, cumulativeCPU);
+        }
+
+        obj.movingRange = movingRange;
+        obj.cumulativeAverage = cumulativeAverage;
+        obj.cumulativeAverageMR = cumulativeAverageMR;
+        obj.cumulativeStdDev = cumulativeStdDev;
+        obj.xUCL = xUCL;
+        obj.xCL = xCL;
+        obj.xLCL = xLCL;
+        obj.mrUCL = mrUCL;
+        obj.mrCL = mrCL;
+        obj.cumulativeCPL = cumulativeCPL;
+        obj.cumulativeCPU = cumulativeCPU;
+        obj.cumulativeCPK = cumulativeCPK;
+
+        return obj;
+      });
+
+      const averageCumulativeCPK = util.calculateAverage(
+        list.map((obj) => obj.cumulativeCPK)
+      );
+      list = list.map((obj) => {
+        obj.averageCumulativeCPK = averageCumulativeCPK;
+        return obj;
+      });
+
+      ctx.commit("dataList", list);
       ctx.commit("loading", false);
     },
 

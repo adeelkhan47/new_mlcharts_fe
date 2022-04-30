@@ -5,6 +5,9 @@ const DASHBOARD_CHART_PATH = "/dashboard-charts";
 const USER_PATH = "/users";
 const FIXED_POINTS = 3;
 
+const X_VALUE_CONSTANT = 1.128;
+const MR_VALUE_CONSTANT = 3.268;
+
 const CONST_BY_SUBGROUP_SIZE = {
   2: { a2: 1.88, d2: 1.128, d3: 0, d4: 3.267 },
   3: { a2: 1.023, d2: 1.693, d3: 0, d4: 2.574 },
@@ -24,7 +27,9 @@ const constants = Object.freeze({
   DASHBOARD_CHART_PATH,
   USER_PATH,
   CONST_BY_SUBGROUP_SIZE,
-  FIXED_POINTS
+  FIXED_POINTS,
+  X_VALUE_CONSTANT,
+  MR_VALUE_CONSTANT
 });
 
 export default constants;
