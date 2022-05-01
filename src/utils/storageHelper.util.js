@@ -30,11 +30,21 @@ function getUserId() {
   else return null;
 }
 
+function storeData(key, value) {
+  localStorage.setItem(key, value);
+}
+
+function getStoredData(key) {
+  localStorage.getItem(key);
+}
+
 export default {
   USER_DATA_KEY,
 
   getUserObj,
   setUserObj,
   removeUserObj,
-  getUserId
+  getUserId,
+  storeData,
+  getStoredData
 };

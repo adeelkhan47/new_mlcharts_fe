@@ -66,6 +66,7 @@
 </template>
 
 <script>
+import storageHelper from "../utils/storageHelper.util";
 import { userApi } from "../api";
 
 export default {
@@ -87,7 +88,7 @@ export default {
     };
   },
   created() {
-    const userObj = userHelper.getUserObj();
+    const userObj = storageHelper.getUserObj();
     if (userObj) this.$router.push("/dashboard");
   },
   methods: {

@@ -6,7 +6,7 @@
 
 <script>
 import { setDefaultHeader } from "./api";
-import userHelper from "./utils/userHelper.util";
+import storageHelper from "./utils/storageHelper.util";
 
 export default {
   name: "App",
@@ -19,10 +19,10 @@ export default {
   },
 
   created() {
-    const userObj = userHelper.getUserObj();
+    const userObj = storageHelper.getUserObj();
 
     if (userObj) {
-      setDefaultHeader("user-id", userHelper.getUserId());
+      setDefaultHeader("user-id", storageHelper.getUserId());
     }
 
     if (!userObj && this.$route.name != "Login") this.$router.push("/login");

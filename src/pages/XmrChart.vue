@@ -76,7 +76,7 @@ import StatisticsTable from "../components/tables/StatisticsTable.vue";
 import ChartMr from "../components/charts/ChartMr.vue";
 import AddData from "../components/inputs/AddData.vue";
 import ChartX from "../components/charts/ChartX.vue";
-import userHelper from "../utils/userHelper.util";
+import storageHelper from "../utils/storageHelper.util";
 import { mapActions, mapGetters, mapState } from "vuex";
 import { dashboardChartApi } from "../api";
 import util from "../utils";
@@ -165,7 +165,7 @@ export default {
   },
 
   created() {
-    const userObj = userHelper.getUserObj();
+    const userObj = storageHelper.getUserObj();
     if (!userObj) {
       this.$router.push("/login");
     } else {

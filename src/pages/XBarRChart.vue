@@ -56,7 +56,7 @@
 import XBarRDataExcel from "../components/tables/XBarRDataExcel.vue";
 import StatisticsTable from "../components/tables/StatisticsTable.vue";
 import ChartX from "../components/charts/ChartX.vue";
-import userHelper from "../utils/userHelper.util";
+import storageHelper from "../utils/storageHelper.util";
 import { mapActions, mapGetters, mapState } from "vuex";
 import util from "../utils";
 import { dashboardChartApi } from "../api";
@@ -158,7 +158,7 @@ export default {
 
   created() {
     this.$store.commit("xBarRChartDataModule/reset");
-    const userObj = userHelper.getUserObj();
+    const userObj = storageHelper.getUserObj();
     if (!userObj) {
       this.$router.push("/login");
     } else {

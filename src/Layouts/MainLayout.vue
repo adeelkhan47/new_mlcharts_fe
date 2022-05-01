@@ -65,7 +65,7 @@
 
 <script>
 import { mapActions, mapState } from "vuex";
-import userHelper from "../utils/userHelper.util";
+import storageHelper from "../utils/storageHelper.util";
 
 export default {
   name: "MainLayout",
@@ -78,7 +78,7 @@ export default {
   },
 
   created() {
-    this.user = userHelper.getUserObj();
+    this.user = storageHelper.getUserObj();
   },
 
   mounted() {
@@ -137,7 +137,7 @@ export default {
     ...mapActions("responseMessageModule", ["setShow", "setMessage"]),
 
     logout() {
-      userHelper.removeUserObj();
+      storageHelper.removeUserObj();
       this.$router.push("/login");
     }
   }

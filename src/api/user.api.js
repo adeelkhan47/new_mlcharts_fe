@@ -1,5 +1,5 @@
 import axios from "axios";
-import userHelper from "../utils/userHelper.util";
+import storageHelper from "../utils/storageHelper.util";
 import constants from "../utils/constants.util";
 
 function login(email, password, callback = null) {
@@ -11,7 +11,7 @@ function login(email, password, callback = null) {
     })
     .then((res) => {
       if (res && res.data && res.data.data) {
-        userHelper.setUserObj(res.data.data);
+        storageHelper.setUserObj(res.data.data);
         if (callback)
           callback({
             response: res.data
