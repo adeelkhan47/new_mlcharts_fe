@@ -511,11 +511,11 @@ export default {
         append = {
           average: util.formatNumber(average),
           range: util.formatNumber(range),
-          cumulativeAverageRange: util.formatNumber(
-            dataObj.cumulativeAverageRange
-          ),
           cumulativeGrandAverage: util.formatNumber(
             dataObj.cumulativeGrandAverage
+          ),
+          cumulativeAverageRange: util.formatNumber(
+            dataObj.cumulativeAverageRange
           ),
           cumulativeStdDev: util.formatNumber(dataObj.cumulativeStdDev),
           averageUCL: util.formatNumber(dataObj.averageUCL),
@@ -540,8 +540,8 @@ export default {
         append = {
           average: "",
           range: "",
-          cumulativeAverageRange: "",
           cumulativeGrandAverage: "",
+          cumulativeAverageRange: "",
           cumulativeStdDev: "",
           averageUCL: "",
           averageCL: "",

@@ -180,7 +180,7 @@ function getCumulativeCPK(cumulativeCPL, cumulativeCPU) {
 
 function getNumValOrStr(val) {
   if ((!val && val !== 0) || isNaN(val)) return "";
-  return Number.parseInt(val);
+  return Number.parseFloat(val);
 }
 
 function getMovingRangeForXMR(prevVal, currVal, index) {

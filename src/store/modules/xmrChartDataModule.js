@@ -241,7 +241,7 @@ const xmrChartDataModule = {
           cumulativeCPK = "";
         } else {
           mrSum += movingRange;
-          cumulativeAverageMR = util.getCumulativeAverage(mrSum, i + 1);
+          cumulativeAverageMR = util.getCumulativeAverage(mrSum, i);
           cumulativeStdDev =
             util.getCumulativeStdDevForXMR(cumulativeAverageMR);
           xUCL = util.getX_UCL_ForXMR(cumulativeAverage, cumulativeAverageMR);
