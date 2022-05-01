@@ -59,7 +59,53 @@ export default {
         tableWidth: "755px",
         onpaste: this.handleChange,
         ondeleterow: this.handleChange,
-        oneditionend: this.handleChange
+        oneditionend: this.handleChange,
+        contextMenu: function (obj, x, y, e) {
+          var items = [];
+
+          // Copy
+          items.push({
+            title: obj.options.text.copy,
+            shortcut: "Ctrl + C",
+            onclick: function () {
+              obj.copy(true);
+            }
+          });
+
+          // Paste
+          if (navigator && navigator.clipboard) {
+            items.push({
+              title: obj.options.text.paste,
+              shortcut: "Ctrl + V",
+              onclick: function () {
+                if (obj.selectedCell) {
+                  navigator.clipboard.readText().then(function (text) {
+                    if (text) {
+                      jexcel.current.paste(
+                        obj.selectedCell[0],
+                        obj.selectedCell[1],
+                        text
+                      );
+                    }
+                  });
+                }
+              }
+            });
+          }
+
+          // Save
+          if (obj.options.allowExport) {
+            items.push({
+              title: obj.options.text.saveAs,
+              shortcut: "Ctrl + S",
+              onclick: function () {
+                obj.download();
+              }
+            });
+          }
+
+          return items;
+        }
       }
     };
   },
@@ -435,6 +481,24 @@ export default {
           id: "",
           reference1: "",
           reference2: ""
+        };
+
+        append = {
+          average: "",
+          range: "",
+          cumulativeAverageRange: "",
+          cumulativeGrandAverage: "",
+          cumulativeStdDev: "",
+          averageUCL: "",
+          averageCL: "",
+          averageLCL: "",
+          rangeUCL: "",
+          rangeCL: "",
+          rangeLCL: "",
+          cumulativeCPL: "",
+          cumulativeCPU: "",
+          cumulativeCPK: "",
+          averageCPK: ""
         };
       }
 
