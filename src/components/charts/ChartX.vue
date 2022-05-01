@@ -23,7 +23,21 @@ import colors from "../../utils/colors.util";
 export default {
   name: "ChartX",
 
-  props: ["title", "dataList", "formattedDataList"],
+  props: {
+    title: {
+      type: String
+    },
+    dataList: {
+      type: Array
+    },
+    formattedDataList: {
+      type: Array
+    },
+    showLCL: {
+      type: Boolean,
+      default: true
+    }
+  },
 
   data() {
     return {
@@ -49,9 +63,13 @@ export default {
   computed: {
     chartData() {
       const dv = new DataSet.View().source(this.formattedDataList);
+      let fields = ["Value", "CL", "UCL"];
+      if (this.showLCL) {
+        fields.push("LCL");
+      }
       dv.transform({
         type: "fold",
-        fields: ["Value", "CL", "UCL", "LCL"],
+        fields: fields,
         key: "id",
         value: "value"
       });

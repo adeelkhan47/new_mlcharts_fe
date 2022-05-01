@@ -33,62 +33,108 @@ const xmrChartDataModule = {
         value: ""
       };
 
-      const upper = util.convertVal(state.upperSpecLimit);
+      const lockedRow = getLockedRow(state.lockedRowIndex, state.dataList);
       if (
-        typeof upper === "number" &&
-        typeof state.dataAverage === "number" &&
-        typeof state.estimatedStdDev === "number"
+        lockedRow &&
+        typeof lockedRow === "object" &&
+        typeof lockedRow.cumulativeCPK === "number"
       ) {
-        const val = (upper - state.dataAverage) / (3 * state.estimatedStdDev);
-        if (val !== Infinity && val !== -Infinity) {
-          temp.value = val;
-          temp.label = val.toFixed(constants.FIXED_POINTS);
-        }
+        temp.value = lockedRow.cumulativeCPU;
+        temp.label = lockedRow.cumulativeCPU.toFixed(constants.FIXED_POINTS);
       }
 
       return temp;
     },
 
-    cpl(state) {
+    cpl: (state) => {
       let temp = {
         label: "",
         value: ""
       };
 
-      const lower = util.convertVal(state.lowerSpecLimit);
+      const lockedRow = getLockedRow(state.lockedRowIndex, state.dataList);
       if (
-        typeof lower === "number" &&
-        typeof state.dataAverage === "number" &&
-        typeof state.estimatedStdDev === "number"
+        lockedRow &&
+        typeof lockedRow === "object" &&
+        typeof lockedRow.cumulativeCPK === "number"
       ) {
-        const val = (state.dataAverage - lower) / (3 * state.estimatedStdDev);
-        if (val !== Infinity && val !== -Infinity) {
-          temp.value = val;
-          temp.label = val.toFixed(constants.FIXED_POINTS);
-        }
+        temp.value = lockedRow.cumulativeCPL;
+        temp.label = lockedRow.cumulativeCPL.toFixed(constants.FIXED_POINTS);
       }
 
       return temp;
     },
 
-    cpk(state, getters) {
+    cpk: (state) => {
       let temp = {
         label: "",
         value: ""
       };
 
-      let cpuVal = getters.cpu.value;
-      let cplVal = getters.cpl.value;
-      let val = "";
+      const lockedRow = getLockedRow(state.lockedRowIndex, state.dataList);
+      if (
+        lockedRow &&
+        typeof lockedRow === "object" &&
+        typeof lockedRow.cumulativeCPK === "number"
+      ) {
+        temp.value = lockedRow.cumulativeCPK;
+        temp.label = lockedRow.cumulativeCPK.toFixed(constants.FIXED_POINTS);
+      }
 
-      if (typeof cpuVal === "number" && typeof cplVal === "number")
-        val = Math.min(cpuVal, cplVal);
-      else if (typeof cpuVal === "number") val = cpuVal;
-      else if (typeof cplVal === "number") val = cplVal;
+      return temp;
+    },
 
-      temp.value = val;
-      if (typeof val === "number")
-        temp.label = val.toFixed(constants.FIXED_POINTS);
+    xChartData: (state) => {
+      let temp = {
+        ucl: 0,
+        cl: 0,
+        lcl: 0
+      };
+
+      const lockedRow = getLockedRow(state.lockedRowIndex, state.dataList);
+      if (
+        lockedRow &&
+        typeof lockedRow === "object" &&
+        typeof lockedRow.cumulativeCPK === "number"
+      ) {
+        temp.ucl = lockedRow.xUCL;
+        temp.cl = lockedRow.xCL;
+        temp.lcl = lockedRow.xLCL;
+      }
+
+      return temp;
+    },
+
+    mrChartData: (state) => {
+      let temp = {
+        ucl: 0,
+        cl: 0
+      };
+
+      const lockedRow = getLockedRow(state.lockedRowIndex, state.dataList);
+      if (
+        lockedRow &&
+        typeof lockedRow === "object" &&
+        typeof lockedRow.cumulativeCPK === "number"
+      ) {
+        temp.ucl = lockedRow.mrUCL;
+        temp.cl = lockedRow.mrCL;
+      }
+
+      return temp;
+    },
+
+    cumulativeStdDev: (state) => {
+      let temp = 0;
+
+      const lockedRow = getLockedRow(state.lockedRowIndex, state.dataList);
+      if (
+        lockedRow &&
+        typeof lockedRow === "object" &&
+        typeof lockedRow.cumulativeCPK === "number"
+      ) {
+        temp = lockedRow.cumulativeStdDev;
+      }
 
       return temp;
     }
@@ -403,10 +449,12 @@ const xmrChartDataModule = {
 
     setUpperSpecLimit: (ctx, val) => {
       ctx.commit("upperSpecLimit", val);
+      ctx.dispatch("populateData", ctx.state.dataList);
     },
 
     setLowerSpecLimit: (ctx, val) => {
       ctx.commit("lowerSpecLimit", val);
+      ctx.dispatch("populateData", ctx.state.dataList);
     },
 
     setLockedRowIndex: (ctx, { value, chartId }) => {
@@ -496,5 +544,15 @@ const xmrChartDataModule = {
     }
   }
 };
+
+function getLockedRow(lockedRowIndex, dataList) {
+  let lockedRow = "NONE";
+  if (typeof lockedRowIndex === "number" && lockedRowIndex < dataList.length) {
+    lockedRow = dataList[lockedRowIndex];
+  } else if (dataList.length && lockedRow === "NONE")
+    lockedRow = dataList[dataList.length - 1];
+
+  return lockedRow;
+}
 
 export default xmrChartDataModule;

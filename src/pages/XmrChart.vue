@@ -34,11 +34,17 @@
             :dataList="dataList"
             :formattedDataList="formattedDataList"
           />
-          <chart-mr
+          <!-- <chart-mr
             :dataList="dataList"
             :mr="mr"
             :mrAverage="mrAverage"
             :mrControlLimits_UCL="mrControlLimits_UCL"
+          /> -->
+          <chart-x
+            title="MR Chart"
+            :dataList="dataList"
+            :formattedDataList="formattedMrDataList"
+            :showLCL="false"
           />
         </div>
       </div>
@@ -102,7 +108,8 @@ export default {
       storeCB: null,
       askPassword: false,
       statisticsData: [],
-      formattedDataList: []
+      formattedDataList: [],
+      formattedMrDataList: []
     };
   },
 
@@ -119,10 +126,17 @@ export default {
       "mrControlLimits_UCL",
       "estimatedStdDev",
       "upperSpecLimit",
-      "lowerSpecLimit"
+      "lowerSpecLimit",
+      "lockedRowIndex"
     ]),
 
-    ...mapGetters("xmrChartDataModule", ["cpu", "cpl", "cpk"])
+    ...mapGetters("xmrChartDataModule", [
+      "cpu",
+      "cpl",
+      "cpk",
+      "xChartData",
+      "mrChartData"
+    ])
   },
 
   watch: {
@@ -139,16 +153,7 @@ export default {
     },
 
     dataList() {
-      this.formattedDataList = this.dataList.map((obj) => {
-        return {
-          key: obj.id + "",
-          label: obj.label,
-          Value: obj.value,
-          CL: util.formatNumber(this.dataAverage),
-          UCL: this.xControlLimits_UCL,
-          LCL: this.xControlLimits_LCL
-        };
-      });
+      this.setChartData();
     },
 
     estimatedStdDev() {
@@ -160,6 +165,23 @@ export default {
     },
 
     lowerSpecLimit() {
+      this.setStatisticsData();
+    },
+
+    lockedRowIndex() {
+      this.setStatisticsData();
+      this.setChartData();
+    },
+
+    cpu() {
+      this.setStatisticsData();
+    },
+
+    cpl() {
+      this.setStatisticsData();
+    },
+
+    cpk() {
       this.setStatisticsData();
     }
   },
@@ -290,6 +312,31 @@ export default {
       this.chartId = pathname[pathname.length - 1] || "";
 
       if (cb) cb();
+    },
+
+    setChartData() {
+      this.formattedDataList = this.dataList.map((obj) => {
+        return {
+          key: obj.id + "",
+          label: obj.label,
+          Value: obj.value,
+          CL: util.formatNumber(this.xChartData.cl),
+          UCL: util.formatNumber(this.xChartData.ucl),
+          LCL: util.formatNumber(this.xChartData.lcl)
+        };
+      });
+
+      this.formattedMrDataList = this.dataList
+        .filter((obj) => typeof obj.movingRange === "number")
+        .map((obj) => {
+          return {
+            key: obj.id + "",
+            label: obj.label,
+            Value: obj.movingRange,
+            CL: util.formatNumber(this.mrChartData.cl),
+            UCL: util.formatNumber(this.mrChartData.ucl)
+          };
+        });
     }
   }
 };

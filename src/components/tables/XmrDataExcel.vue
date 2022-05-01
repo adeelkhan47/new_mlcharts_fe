@@ -61,6 +61,12 @@ export default {
           },
           {
             type: "text",
+            title: "Moving Range",
+            width: "100px",
+            readOnly: true
+          },
+          {
+            type: "text",
             title: "Cumul. Avg",
             width: "100px",
             readOnly: true
@@ -77,12 +83,7 @@ export default {
             width: "100px",
             readOnly: true
           },
-          {
-            type: "text",
-            title: "Moving Range",
-            width: "100px",
-            readOnly: true
-          },
+
           {
             type: "text",
             title: "x UCL",

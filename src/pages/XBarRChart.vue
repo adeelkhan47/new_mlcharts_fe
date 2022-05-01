@@ -290,8 +290,8 @@ export default {
           label: obj.reference1,
           Value: util.formatNumber(obj.range),
           CL: util.formatNumber(this.rangeData.cl),
-          UCL: util.formatNumber(this.rangeData.ucl)
-          // LCL: util.formatNumber(this.rangeData.lcl)
+          UCL: util.formatNumber(this.rangeData.ucl),
+          LCL: util.formatNumber(this.rangeData.lcl)
         };
       });
     }

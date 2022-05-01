@@ -20,8 +20,9 @@
 </template>
 
 <script>
+import util from "../../utils";
 const DataSet = require("@antv/data-set");
-import { mapState } from "vuex";
+import { mapGetters, mapState } from "vuex";
 
 const formatter = (val) => {
   if (val % 2) {
@@ -50,11 +51,13 @@ export default {
   },
 
   computed: {
-    ...mapState("xmrChartDataModule", ["dataList", "estimatedStdDev"]),
+    ...mapState("xmrChartDataModule", ["dataList"]),
+
+    ...mapGetters("xmrChartDataModule", ["cumulativeStdDev"]),
 
     chartData() {
       const values = this.dataList.map((obj) => obj.value);
-      const binWidth = Math.ceil(this.estimatedStdDev);
+      const binWidth = Math.ceil(this.cumulativeStdDev);
       let minScale = Math.min(...values) || 0;
 
       if (minScale < binWidth) minScale = 0;
@@ -63,13 +66,19 @@ export default {
       const sourceData = values.map((value) => ({ value }));
 
       const dv = new DataSet.View().source(sourceData);
+
       dv.transform({
         type: "bin.histogram",
         field: "value",
         binWidth,
         as: ["value", "count"]
       });
-      return dv.rows;
+      return dv.rows.map((obj) => {
+        if (obj.value && obj.value.length) {
+          obj.value = obj.value.map((v) => util.formatNumber(v));
+        }
+        return obj;
+      });
     }
   }
 };

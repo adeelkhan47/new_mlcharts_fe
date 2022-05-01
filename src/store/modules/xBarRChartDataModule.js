@@ -102,8 +102,8 @@ const xBarRChartDataModule = {
     rangeData: (state) => {
       let temp = {
         ucl: 0,
-        cl: 0
-        // lcl: 0
+        cl: 0,
+        lcl: 0
       };
 
       const lockedRow = getLockedRow(state.lockedRowIndex, state.dataList);
@@ -114,6 +114,7 @@ const xBarRChartDataModule = {
       ) {
         temp.ucl = lockedRow.rangeUCL;
         temp.cl = lockedRow.rangeCL;
+        temp.lcl = lockedRow.rangeLCL;
       }
 
       return temp;
