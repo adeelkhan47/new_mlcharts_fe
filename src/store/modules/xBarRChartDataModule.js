@@ -1,6 +1,9 @@
 import util from "../../utils";
 import { xBarRChartDataApi } from "../../api";
 import constants from "../../utils/constants.util";
+import storageHelper from "../../utils/storageHelper.util";
+
+const LOCK_LIMIT_KEY = "X_BAR_R_LOCKED_ROW_INDEX__";
 
 const xBarRChartDataModule = {
   namespaced: true,
@@ -23,7 +26,8 @@ const xBarRChartDataModule = {
       ucl: 0,
       cl: 0,
       lcl: 0
-    }
+    },
+    lockedRowIndex: "NONE"
   }),
 
   getters: {
@@ -113,6 +117,14 @@ const xBarRChartDataModule = {
           ctx.commit("upperSpecLimit", currentChart.upperSpecLimit);
         if (currentChart.lowerSpecLimit)
           ctx.commit("lowerSpecLimit", currentChart.lowerSpecLimit);
+
+        let lockedRow = storageHelper.getStoredData(
+          LOCK_LIMIT_KEY + currentChart.chartId
+        );
+        if (lockedRow !== null && !isNaN(lockedRow)) {
+          lockedRow = Number.parseInt(lockedRow);
+          ctx.commit("lockedRowIndex", lockedRow);
+        }
       }
 
       xBarRChartDataApi
@@ -315,6 +327,11 @@ const xBarRChartDataModule = {
             ctx.commit("loading", false);
           });
       }
+    },
+
+    setLockedRowIndex: (ctx, { value, chartId }) => {
+      ctx.commit("lockedRowIndex", value);
+      storageHelper.storeData(LOCK_LIMIT_KEY + chartId, value);
     }
   },
 
@@ -359,6 +376,10 @@ const xBarRChartDataModule = {
       state.rangeData = val;
     },
 
+    lockedRowIndex: (state, val) => {
+      state.lockedRowIndex = val;
+    },
+
     reset: (state) => {
       state.dataList = [];
       state.averageRange = 0;
@@ -375,6 +396,7 @@ const xBarRChartDataModule = {
         cl: 0,
         lcl: 0
       };
+      state.lockedRowIndex = "NONE";
     }
   }
 };

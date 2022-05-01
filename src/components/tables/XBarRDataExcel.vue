@@ -16,7 +16,21 @@ const irrelevantKeys = [
   "reference2",
   "average",
   "range",
-  "values"
+  "values",
+  "lockLimit",
+  "cumulativeAverageRange",
+  "cumulativeGrandAverage",
+  "cumulativeStdDev",
+  "averageUCL",
+  "averageCL",
+  "averageLCL",
+  "rangeUCL",
+  "rangeCL",
+  "rangeLCL",
+  "cumulativeCPL",
+  "cumulativeCPU",
+  "cumulativeCPK",
+  "averageCPK"
 ];
 
 export default {
@@ -60,6 +74,7 @@ export default {
         onpaste: this.handleChange,
         ondeleterow: this.handleChange,
         oneditionend: this.handleChange,
+        onchange: this.handleLockLimit,
         contextMenu: function (obj, x, y, e) {
           var items = [];
 
@@ -111,7 +126,11 @@ export default {
   },
 
   computed: {
-    ...mapState("xBarRChartDataModule", ["dataList", "loading"]),
+    ...mapState("xBarRChartDataModule", [
+      "dataList",
+      "loading",
+      "lockedRowIndex"
+    ]),
 
     ...mapState("dashboardChartModule", ["password"])
   },
@@ -135,6 +154,13 @@ export default {
         this.options.data.push(this.getExcelRecord());
       }
 
+      if (
+        typeof this.lockedRowIndex === "number" &&
+        this.lockedRowIndex <= this.options.data.length
+      ) {
+        this.options.data[this.lockedRowIndex].lockLimit = true;
+      }
+
       this.init();
     }
   },
@@ -151,7 +177,8 @@ export default {
     ...mapActions("xBarRChartDataModule", [
       "addDataItems",
       "updateDataItems",
-      "removeDataItems"
+      "removeDataItems",
+      "setLockedRowIndex"
     ]),
 
     ...mapActions("responseMessageModule", ["setShow", "setMessage"]),
@@ -184,6 +211,7 @@ export default {
       const deletedRecords = this.getDeletedRecords(currentData);
       const updatedRecords = this.getUpdatedRecords(currentData);
       const newRecords = this.getNewRecords(currentData);
+
       if (deletedRecords && deletedRecords.length) {
         const deletedRecordIds = deletedRecords
           .map((obj) => obj.id)
@@ -194,6 +222,7 @@ export default {
           rowIds: deletedRecordIds
         });
       }
+
       if (updatedRecords && updatedRecords.length) {
         this.updateDataItems({
           chartId: this.chartId,
@@ -201,12 +230,30 @@ export default {
           records: updatedRecords
         });
       }
+
       if (newRecords && newRecords.length) {
         this.addDataItems({
           records: newRecords,
           chartId: this.chartId,
           password: this.password,
           cb: this.handleResponse
+        });
+      }
+    },
+
+    handleLockLimit(
+      container,
+      dataRow,
+      colIndex,
+      rowIndex,
+      currentVal,
+      prevVal
+    ) {
+      // id = 0, lockLimit = 1
+      if (colIndex === "1" && currentVal !== prevVal) {
+        this.setLockedRowIndex({
+          value: currentVal ? Number.parseInt(rowIndex) : "NONE",
+          chartId: this.chartId
         });
       }
     },
@@ -253,7 +300,7 @@ export default {
       const oldIds = this.records.map((obj) => obj.id);
       const newRecords = currentData.filter((currObj) => {
         const addition = Object.values(currObj).filter(
-          (val) => val || typeof value === "number"
+          (val) => (val || typeof val === "number") && typeof val !== "boolean"
         );
         return addition.length && !oldIds.includes(currObj.id);
       });
@@ -311,6 +358,11 @@ export default {
     getExcelColumns() {
       let columns = [
         { type: "text", title: "Row ID", width: "0px", readOnly: true },
+        {
+          type: "radio",
+          title: "Lock Limits",
+          width: "100px"
+        },
         {
           type: "text",
           title: "Reference 1 (Appears on chart)",
@@ -439,6 +491,7 @@ export default {
       if (dataExists) {
         record = {
           id: dataObj.id,
+          lockLimit: false,
           reference1: dataObj.reference1,
           reference2: dataObj.reference2
         };
@@ -479,6 +532,7 @@ export default {
       } else {
         record = {
           id: "",
+          lockLimit: false,
           reference1: "",
           reference2: ""
         };

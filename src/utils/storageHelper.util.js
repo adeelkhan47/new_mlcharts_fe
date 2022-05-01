@@ -31,11 +31,12 @@ function getUserId() {
 }
 
 function storeData(key, value) {
+  if (typeof value !== "string") value = JSON.stringify(value);
   localStorage.setItem(key, value);
 }
 
 function getStoredData(key) {
-  localStorage.getItem(key);
+  return localStorage.getItem(key);
 }
 
 export default {

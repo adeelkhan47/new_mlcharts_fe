@@ -203,10 +203,11 @@ export default {
     },
 
     deleteChart() {
+      const self = this;
       this.ask = false;
       const callback = function (response) {
-        this.setMessage(response.message);
-        this.setShow(true);
+        self.setMessage(response.message);
+        self.setShow(true);
       };
 
       if (this.selectedChart) {
