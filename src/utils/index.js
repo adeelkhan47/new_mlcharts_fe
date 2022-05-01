@@ -177,8 +177,7 @@ function getCumulativeCPL(
   lowerSpecLimit
 ) {
   if (typeof lowerSpecLimit === "string") return "";
-  // its infinity
-  else if (cumulativeStdDev === 0) return "";
+  else if (cumulativeStdDev === 0) return ""; // infinity
   return (cumulativeGrandAverage - lowerSpecLimit) / (3 * cumulativeStdDev);
 }
 
@@ -188,8 +187,7 @@ function getCumulativeCPU(
   upperSpecLimit
 ) {
   if (typeof upperSpecLimit === "string") return "";
-  // its infinity
-  else if (cumulativeStdDev === 0) return "";
+  else if (cumulativeStdDev === 0) return ""; // infinity
   return (upperSpecLimit - cumulativeGrandAverage) / (3 * cumulativeStdDev);
 }
 
@@ -233,10 +231,12 @@ function getMrUCLForXMR(cumulativeAvgMr) {
 }
 
 function getCPL_ForXMR(cumulativeAverage, cumulativeStdDev, lowerSpecLimit) {
+  if (cumulativeStdDev === 0) return ""; // infinity
   return (cumulativeAverage - lowerSpecLimit) / (3 * cumulativeStdDev);
 }
 
 function getCPU_ForXMR(cumulativeAverage, cumulativeStdDev, upperSpecLimit) {
+  if (cumulativeStdDev === 0) return ""; // infinity
   return (upperSpecLimit - cumulativeAverage) / (3 * cumulativeStdDev);
 }
 

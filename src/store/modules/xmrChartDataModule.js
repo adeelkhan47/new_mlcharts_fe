@@ -1,10 +1,12 @@
 import util from "../../utils";
 import { xmrChartDataApi } from "../../api";
 import constants from "../../utils/constants.util";
+import storageHelper from "../../utils/storageHelper.util";
 
 const X_CONTROL_LIMITS_CONST = 1.128;
 const MR_UCL_CONST = 3.268;
 const toFixed = 3;
+const LOCK_LIMIT_KEY = "X_MR_LOCKED_ROW_INDEX__";
 
 const xmrChartDataModule = {
   namespaced: true,
@@ -20,7 +22,8 @@ const xmrChartDataModule = {
     estimatedStdDev: 0,
     xControlLimits_UCL: 0,
     xControlLimits_LCL: 0,
-    mrControlLimits_UCL: 0
+    mrControlLimits_UCL: 0,
+    lockedRowIndex: "NONE"
   }),
 
   getters: {
@@ -104,6 +107,14 @@ const xmrChartDataModule = {
           ctx.commit("upperSpecLimit", currentChart.upperSpecLimit);
         if (currentChart.lowerSpecLimit)
           ctx.commit("lowerSpecLimit", currentChart.lowerSpecLimit);
+
+        let lockedRow = storageHelper.getStoredData(
+          LOCK_LIMIT_KEY + currentChart.chartId
+        );
+        if (lockedRow !== null && !isNaN(lockedRow)) {
+          lockedRow = Number.parseInt(lockedRow);
+          ctx.commit("lockedRowIndex", lockedRow);
+        }
       }
 
       xmrChartDataApi
@@ -396,6 +407,11 @@ const xmrChartDataModule = {
 
     setLowerSpecLimit: (ctx, val) => {
       ctx.commit("lowerSpecLimit", val);
+    },
+
+    setLockedRowIndex: (ctx, { value, chartId }) => {
+      ctx.commit("lockedRowIndex", value);
+      storageHelper.storeData(LOCK_LIMIT_KEY + chartId, value);
     }
   },
 
@@ -473,6 +489,10 @@ const xmrChartDataModule = {
 
     loading: (state, val) => {
       state.loading = val;
+    },
+
+    lockedRowIndex: (state, val) => {
+      state.lockedRowIndex = val;
     }
   }
 };

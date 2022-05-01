@@ -42,6 +42,11 @@ export default {
         columns: [
           { type: "text", title: "ID", width: "0px", readOnly: true },
           {
+            type: "radio",
+            title: "Lock Limit",
+            width: "100px"
+          },
+          {
             type: "text",
             title: "Reference 1 (Appears on chart)",
             width: "220px"
@@ -139,6 +144,7 @@ export default {
         onpaste: this.handleChange,
         ondeleterow: this.handleChange,
         oneditionend: this.handleChange,
+        onchange: this.handleLockLimit,
         contextMenu: function (obj, x, y, e) {
           var items = [];
 
@@ -190,7 +196,12 @@ export default {
   },
 
   computed: {
-    ...mapState("xmrChartDataModule", ["dataList", "mr", "loading"]),
+    ...mapState("xmrChartDataModule", [
+      "dataList",
+      "mr",
+      "loading",
+      "lockedRowIndex"
+    ]),
 
     ...mapState("dashboardChartModule", ["password"])
   },
@@ -200,6 +211,7 @@ export default {
       this.records = this.dataList.map((obj) => {
         return {
           id: obj.id,
+          lockLimit: false,
           label: obj.label,
           reference: obj.reference,
           value: obj.value,
@@ -229,6 +241,7 @@ export default {
       for (let i = 0; i < blankRows; i++) {
         this.options.data.push({
           id: "",
+          lockLimit: false,
           label: "",
           reference: "",
           value: "",
@@ -248,6 +261,13 @@ export default {
         });
       }
 
+      if (
+        typeof this.lockedRowIndex === "number" &&
+        this.lockedRowIndex <= this.options.data.length
+      ) {
+        this.options.data[this.lockedRowIndex].lockLimit = true;
+      }
+
       this.init();
     }
   },
@@ -265,7 +285,8 @@ export default {
       "addDataItems",
       "updateDataItems",
       "removeDataItem",
-      "removeDataItems"
+      "removeDataItems",
+      "setLockedRowIndex"
     ]),
 
     ...mapActions("responseMessageModule", ["setShow", "setMessage"]),
@@ -305,6 +326,7 @@ export default {
           dataIds: deletedRecordIds
         });
       }
+
       if (updatedRecords && updatedRecords.length) {
         this.updateDataItems({
           chartId: this.chartId,
@@ -312,6 +334,7 @@ export default {
           dataObjectList: updatedRecords
         });
       }
+
       if (newRecords && newRecords.length) {
         this.addDataItems({
           itemList: newRecords,
@@ -388,6 +411,23 @@ export default {
     closed() {
       this.showEdit = false;
       this.selectedItem = null;
+    },
+
+    handleLockLimit(
+      container,
+      dataRow,
+      colIndex,
+      rowIndex,
+      currentVal,
+      prevVal
+    ) {
+      // id = 0, lockLimit = 1
+      if (colIndex === "1" && currentVal !== prevVal) {
+        this.setLockedRowIndex({
+          value: currentVal ? Number.parseInt(rowIndex) : "NONE",
+          chartId: this.chartId
+        });
+      }
     }
   }
 };

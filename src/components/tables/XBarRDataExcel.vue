@@ -360,7 +360,7 @@ export default {
         { type: "text", title: "Row ID", width: "0px", readOnly: true },
         {
           type: "radio",
-          title: "Lock Limits",
+          title: "Lock Limit",
           width: "100px"
         },
         {
