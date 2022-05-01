@@ -90,9 +90,6 @@ export default {
     ...mapState("xBarRChartDataModule", [
       "dataList",
       "subgroupSize",
-      "averageRange",
-      "grandAverage",
-      "stdDev",
       "upperSpecLimit",
       "lowerSpecLimit",
       "lockedRowIndex"
@@ -103,7 +100,10 @@ export default {
       "cpl",
       "cpk",
       "xBarData",
-      "rangeData"
+      "rangeData",
+      "cumulativeAverageRange",
+      "cumulativeGrandAverage",
+      "cumulativeStdDev"
     ])
   },
 
@@ -128,7 +128,7 @@ export default {
       this.setStatisticsData();
     },
 
-    stdDev() {
+    cumulativeStdDev() {
       this.setStatisticsData();
     },
 
@@ -143,6 +143,18 @@ export default {
     lockedRowIndex() {
       this.setStatisticsData();
       this.setChartData();
+    },
+
+    cpu() {
+      this.setStatisticsData();
+    },
+
+    cpl() {
+      this.setStatisticsData();
+    },
+
+    cpk() {
+      this.setStatisticsData();
     }
   },
 
@@ -196,16 +208,16 @@ export default {
     setStatisticsData() {
       this.statisticsData = [
         {
-          key: "Average Range",
-          value: util.formatNumber(this.averageRange)
+          key: "Cumul. Average Range",
+          value: util.formatNumber(this.cumulativeAverageRange)
         },
         {
-          key: "Grand Average",
-          value: util.formatNumber(this.grandAverage)
+          key: "Cumul. Grand Average",
+          value: util.formatNumber(this.cumulativeGrandAverage)
         },
         {
-          key: "Estimated Std Dev",
-          value: util.formatNumber(this.stdDev)
+          key: "Cumul. Std Dev",
+          value: util.formatNumber(this.cumulativeStdDev)
         },
         {
           key: "Subgroup Size",

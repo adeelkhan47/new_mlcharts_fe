@@ -12,27 +12,6 @@ function isString(val) {
   return !!(val && typeof val == "string" && val.trim().length);
 }
 
-function getMR(val1, val2) {
-  let mr = 0;
-  if (isNumber(val1) && isNumber(val2)) {
-    if (val1 > val2) mr = val1 - val2;
-    else mr = val2 - val1;
-  }
-  return mr;
-}
-
-function getMrMap(dataList) {
-  let temp = new Map();
-  let prev = null;
-  dataList.forEach((obj) => {
-    if (prev != null) temp.set(obj.id, getMR(prev, obj.value));
-    else temp.set(obj.id, 0);
-
-    prev = obj.value;
-  });
-  return temp;
-}
-
 function getID() {
   const u1 = String.fromCharCode(Math.ceil(Math.random() * 25) + 65);
   const u2 = String.fromCharCode(Math.ceil(Math.random() * 25) + 65);
@@ -244,9 +223,7 @@ const util = {
   isNumber,
   isString,
   calculateAverage,
-  getMR,
   getID,
-  getMrMap,
   getRangeForXBarR,
   getAverageForXBarR,
   getStdDevForXBarR,

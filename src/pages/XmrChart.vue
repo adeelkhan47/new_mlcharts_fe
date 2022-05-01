@@ -34,12 +34,6 @@
             :dataList="dataList"
             :formattedDataList="formattedDataList"
           />
-          <!-- <chart-mr
-            :dataList="dataList"
-            :mr="mr"
-            :mrAverage="mrAverage"
-            :mrControlLimits_UCL="mrControlLimits_UCL"
-          /> -->
           <chart-x
             title="MR Chart"
             :dataList="dataList"
@@ -79,7 +73,6 @@
 import ChartHistogram from "../components/charts/HistogramChart.vue";
 import XmrDataExcel from "../components/tables/XmrDataExcel.vue";
 import StatisticsTable from "../components/tables/StatisticsTable.vue";
-import ChartMr from "../components/charts/ChartMr.vue";
 import AddData from "../components/inputs/AddData.vue";
 import ChartX from "../components/charts/ChartX.vue";
 import storageHelper from "../utils/storageHelper.util";
@@ -94,7 +87,6 @@ export default {
     ChartHistogram,
     StatisticsTable,
     XmrDataExcel,
-    ChartMr,
     AddData,
     ChartX
   },
@@ -118,13 +110,6 @@ export default {
 
     ...mapState("xmrChartDataModule", [
       "dataList",
-      "dataAverage",
-      "xControlLimits_UCL",
-      "xControlLimits_LCL",
-      "mr",
-      "mrAverage",
-      "mrControlLimits_UCL",
-      "estimatedStdDev",
       "upperSpecLimit",
       "lowerSpecLimit",
       "lockedRowIndex"
@@ -135,7 +120,10 @@ export default {
       "cpl",
       "cpk",
       "xChartData",
-      "mrChartData"
+      "mrChartData",
+      "cumulativeAverage",
+      "cumulativeAverageMR",
+      "cumulativeStdDev"
     ])
   },
 
@@ -156,7 +144,7 @@ export default {
       this.setChartData();
     },
 
-    estimatedStdDev() {
+    cumulativeStdDev() {
       this.setStatisticsData();
     },
 
@@ -238,16 +226,16 @@ export default {
     setStatisticsData() {
       this.statisticsData = [
         {
-          key: "Avg. Moving Range",
-          value: this.mrAverage
+          key: "Cumul. Avg. Moving Range",
+          value: util.formatNumber(this.cumulativeAverageMR)
         },
         {
-          key: "Data Average",
-          value: util.formatNumber(this.dataAverage)
+          key: "Cumul. Grand Average",
+          value: util.formatNumber(this.cumulativeAverage)
         },
         {
-          key: "Estimated Std Dev",
-          value: util.formatNumber(this.estimatedStdDev)
+          key: "Cumul. Std Dev",
+          value: util.formatNumber(this.cumulativeStdDev)
         },
         {
           key: "Data Count",

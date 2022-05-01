@@ -16,13 +16,6 @@ const xmrChartDataModule = {
     upperSpecLimit: "20",
     lowerSpecLimit: "10",
     dataList: [],
-    mr: new Map(),
-    dataAverage: 0,
-    mrAverage: 0,
-    estimatedStdDev: 0,
-    xControlLimits_UCL: 0,
-    xControlLimits_LCL: 0,
-    mrControlLimits_UCL: 0,
     lockedRowIndex: "NONE"
   }),
 
@@ -124,6 +117,36 @@ const xmrChartDataModule = {
       return temp;
     },
 
+    cumulativeAverage: (state) => {
+      let temp = 0;
+
+      const lockedRow = getLockedRow(state.lockedRowIndex, state.dataList);
+      if (
+        lockedRow &&
+        typeof lockedRow === "object" &&
+        typeof lockedRow.cumulativeCPK === "number"
+      ) {
+        temp = lockedRow.cumulativeAverage;
+      }
+
+      return temp;
+    },
+
+    cumulativeAverageMR: (state) => {
+      let temp = 0;
+
+      const lockedRow = getLockedRow(state.lockedRowIndex, state.dataList);
+      if (
+        lockedRow &&
+        typeof lockedRow === "object" &&
+        typeof lockedRow.cumulativeCPK === "number"
+      ) {
+        temp = lockedRow.cumulativeAverageMR;
+      }
+
+      return temp;
+    },
+
     cumulativeStdDev: (state) => {
       let temp = 0;
 
@@ -167,12 +190,6 @@ const xmrChartDataModule = {
         .getAllData(chartId, password)
         .then((res) => {
           if (res && res.data && res.data.data) {
-            // ctx.commit("dataList", res.data.data);
-
-            // ctx.commit("setMovingRange");
-
-            // ctx.dispatch("populate");
-
             ctx.dispatch("populateData", res.data.data);
           }
         })
@@ -180,49 +197,6 @@ const xmrChartDataModule = {
           console.error("Unable to get all data :: ", err);
           ctx.commit("loading", false);
         });
-    },
-
-    populate: (ctx) => {
-      ctx.commit("loading", true);
-      const dataValues = ctx.state.dataList.map((obj) => obj.value);
-      const dataAverage = util.calculateAverage(dataValues);
-      ctx.commit("dataAverage", dataAverage);
-
-      let mrValues = Array.from(ctx.state.mr.values());
-      if (mrValues.length) {
-        if (mrValues.length == 1) mrValues = [];
-        else mrValues = mrValues.slice(1);
-      }
-      const mrAverage = util.calculateAverage(mrValues);
-      ctx.commit("mrAverage", mrAverage);
-
-      const std = mrAverage / X_CONTROL_LIMITS_CONST;
-      ctx.commit("estimatedStdDev", std);
-
-      const ucl = dataAverage + 3 * std;
-      ctx.commit("xControlLimits_UCL", ucl);
-
-      const lcl = dataAverage - 3 * std;
-      ctx.commit("xControlLimits_LCL", lcl);
-
-      const mr_UCL = MR_UCL_CONST * mrAverage;
-      ctx.commit("mrControlLimits_UCL", mr_UCL);
-
-      ctx.dispatch("populateCPX", {
-        std,
-        mrAverage,
-        dataAverage
-      });
-    },
-
-    populateCPX: (ctx, payload) => {
-      if (!payload) payload = {};
-      let { std = null, mrAverage = null, dataAverage = null } = payload;
-      if (mrAverage === null) mrAverage = ctx.state.mrAverage;
-      if (std === null) std = mrAverage / X_CONTROL_LIMITS_CONST;
-      if (dataAverage === null) dataAverage = ctx.state.dataAverage;
-
-      ctx.commit("loading", false);
     },
 
     populateData: (ctx, list) => {
@@ -469,9 +443,6 @@ const xmrChartDataModule = {
       let list = JSON.parse(JSON.stringify(state.dataList));
       list.push(obj);
       state.dataList = list;
-
-      // adding MR
-      state.mr = util.getMrMap(list);
     },
 
     updateData: (state, { key, value }) => {
@@ -480,45 +451,11 @@ const xmrChartDataModule = {
         if (obj.key === key) obj.value = value;
         return obj;
       });
-
-      // updating MR
-      state.mr = util.getMrMap(state.dataList);
     },
 
     removeData: (state, key) => {
       // removing Data
       state.dataList = state.dataList.filter((obj) => obj.key != key);
-
-      // removing MR
-      state.mr = util.getMrMap(state.dataList);
-    },
-
-    setMovingRange: (state) => {
-      state.mr = util.getMrMap(state.dataList);
-    },
-
-    dataAverage: (state, val) => {
-      state.dataAverage = val;
-    },
-
-    mrAverage: (state, val) => {
-      state.mrAverage = Number.parseFloat(val).toFixed(toFixed);
-    },
-
-    estimatedStdDev: (state, val) => {
-      state.estimatedStdDev = val;
-    },
-
-    xControlLimits_UCL: (state, val) => {
-      state.xControlLimits_UCL = Number.parseFloat(val).toFixed(toFixed);
-    },
-
-    xControlLimits_LCL: (state, val) => {
-      state.xControlLimits_LCL = Number.parseFloat(val).toFixed(toFixed);
-    },
-
-    mrControlLimits_UCL: (state, val) => {
-      state.mrControlLimits_UCL = Number.parseFloat(val).toFixed(toFixed);
     },
 
     dataList: (state, val) => {

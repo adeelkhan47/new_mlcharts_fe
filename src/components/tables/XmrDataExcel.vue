@@ -199,7 +199,6 @@ export default {
   computed: {
     ...mapState("xmrChartDataModule", [
       "dataList",
-      "mr",
       "loading",
       "lockedRowIndex"
     ]),

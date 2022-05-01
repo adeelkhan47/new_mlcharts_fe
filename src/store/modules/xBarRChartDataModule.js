@@ -13,10 +13,7 @@ const xBarRChartDataModule = {
     upperSpecLimit: "8",
     lowerSpecLimit: "1",
     dataList: [],
-    averageRange: 0,
-    grandAverage: 0,
     subgroupSize: null,
-    stdDev: 0,
     lockedRowIndex: "NONE"
   }),
 
@@ -115,6 +112,51 @@ const xBarRChartDataModule = {
         temp.ucl = lockedRow.rangeUCL;
         temp.cl = lockedRow.rangeCL;
         temp.lcl = lockedRow.rangeLCL;
+      }
+
+      return temp;
+    },
+
+    cumulativeAverageRange: (state) => {
+      let temp = 0;
+
+      const lockedRow = getLockedRow(state.lockedRowIndex, state.dataList);
+      if (
+        lockedRow &&
+        typeof lockedRow === "object" &&
+        typeof lockedRow.cumulativeCPK === "number"
+      ) {
+        temp = lockedRow.cumulativeAverageRange;
+      }
+
+      return temp;
+    },
+
+    cumulativeGrandAverage: (state) => {
+      let temp = 0;
+
+      const lockedRow = getLockedRow(state.lockedRowIndex, state.dataList);
+      if (
+        lockedRow &&
+        typeof lockedRow === "object" &&
+        typeof lockedRow.cumulativeCPK === "number"
+      ) {
+        temp = lockedRow.cumulativeGrandAverage;
+      }
+
+      return temp;
+    },
+
+    cumulativeStdDev: (state) => {
+      let temp = 0;
+
+      const lockedRow = getLockedRow(state.lockedRowIndex, state.dataList);
+      if (
+        lockedRow &&
+        typeof lockedRow === "object" &&
+        typeof lockedRow.cumulativeCPK === "number"
+      ) {
+        temp = lockedRow.cumulativeStdDev;
       }
 
       return temp;
@@ -271,16 +313,6 @@ const xBarRChartDataModule = {
       });
 
       ctx.commit("dataList", list);
-
-      const ranges = list.map((obj) => obj.range);
-      const averages = list.map((obj) => obj.average);
-      const averageRange = util.calculateAverage(ranges);
-      const grandAverage = util.calculateAverage(averages);
-      const stdDev = util.getStdDevForXBarR(averageRange, subgroupSize);
-
-      ctx.commit("averageRange", averageRange);
-      ctx.commit("grandAverage", grandAverage);
-      ctx.commit("stdDev", stdDev);
       ctx.commit("loading", false);
     },
 
@@ -370,20 +402,8 @@ const xBarRChartDataModule = {
       state.lowerSpecLimit = val;
     },
 
-    averageRange: (state, val) => {
-      state.averageRange = val;
-    },
-
-    grandAverage: (state, val) => {
-      state.grandAverage = val;
-    },
-
     subgroupSize: (state, val) => {
       state.subgroupSize = val;
-    },
-
-    stdDev: (state, val) => {
-      state.stdDev = val;
     },
 
     lockedRowIndex: (state, val) => {
@@ -392,10 +412,7 @@ const xBarRChartDataModule = {
 
     reset: (state) => {
       state.dataList = [];
-      state.averageRange = 0;
-      state.grandAverage = 0;
       state.subgroupSize = null;
-      state.stdDev = 0;
       state.lockedRowIndex = "NONE";
     }
   }
