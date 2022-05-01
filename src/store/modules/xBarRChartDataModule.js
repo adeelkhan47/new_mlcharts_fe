@@ -17,82 +17,104 @@ const xBarRChartDataModule = {
     grandAverage: 0,
     subgroupSize: null,
     stdDev: 0,
-    xBarData: {
-      ucl: 0,
-      cl: 0,
-      lcl: 0
-    },
-    rangeData: {
-      ucl: 0,
-      cl: 0,
-      lcl: 0
-    },
     lockedRowIndex: "NONE"
   }),
 
   getters: {
-    cpu(state) {
+    cpu: (state) => {
       let temp = {
         label: "",
         value: ""
       };
 
-      const upper = util.convertVal(state.upperSpecLimit);
+      const lockedRow = getLockedRow(state.lockedRowIndex, state.dataList);
       if (
-        typeof upper === "number" &&
-        typeof state.grandAverage === "number" &&
-        typeof state.stdDev === "number"
+        lockedRow &&
+        typeof lockedRow === "object" &&
+        typeof lockedRow.cumulativeCPK === "number"
       ) {
-        const val = (upper - state.grandAverage) / (3 * state.stdDev);
-        if (val !== Infinity && val !== -Infinity) {
-          temp.value = val;
-          temp.label = val.toFixed(constants.FIXED_POINTS);
-        }
+        temp.value = lockedRow.cumulativeCPU;
+        temp.label = lockedRow.cumulativeCPU.toFixed(constants.FIXED_POINTS);
       }
 
       return temp;
     },
 
-    cpl(state) {
+    cpl: (state) => {
       let temp = {
         label: "",
         value: ""
       };
 
-      const lower = util.convertVal(state.lowerSpecLimit);
+      const lockedRow = getLockedRow(state.lockedRowIndex, state.dataList);
       if (
-        typeof lower === "number" &&
-        typeof state.grandAverage === "number" &&
-        typeof state.stdDev === "number"
+        lockedRow &&
+        typeof lockedRow === "object" &&
+        typeof lockedRow.cumulativeCPK === "number"
       ) {
-        const val = (state.grandAverage - lower) / (3 * state.stdDev);
-        if (val !== Infinity && val !== -Infinity) {
-          temp.value = val;
-          temp.label = val.toFixed(constants.FIXED_POINTS);
-        }
+        temp.value = lockedRow.cumulativeCPL;
+        temp.label = lockedRow.cumulativeCPL.toFixed(constants.FIXED_POINTS);
       }
 
       return temp;
     },
 
-    cpk(state, getters) {
+    cpk: (state) => {
       let temp = {
         label: "",
         value: ""
       };
 
-      let cpuVal = getters.cpu.value;
-      let cplVal = getters.cpl.value;
-      let val = "";
+      const lockedRow = getLockedRow(state.lockedRowIndex, state.dataList);
+      if (
+        lockedRow &&
+        typeof lockedRow === "object" &&
+        typeof lockedRow.cumulativeCPK === "number"
+      ) {
+        temp.value = lockedRow.cumulativeCPK;
+        temp.label = lockedRow.cumulativeCPK.toFixed(constants.FIXED_POINTS);
+      }
 
-      if (typeof cpuVal === "number" && typeof cplVal === "number")
-        val = Math.min(cpuVal, cplVal);
-      else if (typeof cpuVal === "number") val = cpuVal;
-      else if (typeof cplVal === "number") val = cplVal;
+      return temp;
+    },
 
-      temp.value = val;
-      if (typeof val === "number")
-        temp.label = val.toFixed(constants.FIXED_POINTS);
+    xBarData: (state) => {
+      let temp = {
+        ucl: 0,
+        cl: 0,
+        lcl: 0
+      };
+
+      const lockedRow = getLockedRow(state.lockedRowIndex, state.dataList);
+      if (
+        lockedRow &&
+        typeof lockedRow === "object" &&
+        typeof lockedRow.cumulativeCPK === "number"
+      ) {
+        temp.ucl = lockedRow.averageUCL;
+        temp.cl = lockedRow.averageCL;
+        temp.lcl = lockedRow.averageLCL;
+      }
+
+      return temp;
+    },
+
+    rangeData: (state) => {
+      let temp = {
+        ucl: 0,
+        cl: 0
+        // lcl: 0
+      };
+
+      const lockedRow = getLockedRow(state.lockedRowIndex, state.dataList);
+      if (
+        lockedRow &&
+        typeof lockedRow === "object" &&
+        typeof lockedRow.cumulativeCPK === "number"
+      ) {
+        temp.ucl = lockedRow.rangeUCL;
+        temp.cl = lockedRow.rangeCL;
+      }
 
       return temp;
     }
@@ -141,6 +163,7 @@ const xBarRChartDataModule = {
     },
 
     populateData: (ctx, list) => {
+      ctx.commit("loading", true);
       const subgroupSize = ctx.state.subgroupSize;
       const lowerSpecLimit = util.getNumValOrStr(ctx.state.lowerSpecLimit);
       const upperSpecLimit = util.getNumValOrStr(ctx.state.upperSpecLimit);
@@ -253,27 +276,21 @@ const xBarRChartDataModule = {
       const averageRange = util.calculateAverage(ranges);
       const grandAverage = util.calculateAverage(averages);
       const stdDev = util.getStdDevForXBarR(averageRange, subgroupSize);
-      const xBarData = util.getXBarDataForXBarR(
-        grandAverage,
-        averageRange,
-        subgroupSize
-      );
-      const rangeData = util.getRangeDataForXBarR(averageRange, subgroupSize);
 
       ctx.commit("averageRange", averageRange);
       ctx.commit("grandAverage", grandAverage);
       ctx.commit("stdDev", stdDev);
-      ctx.commit("xBarData", xBarData);
-      ctx.commit("rangeData", rangeData);
       ctx.commit("loading", false);
     },
 
     setUpperSpecLimit: (ctx, val) => {
       ctx.commit("upperSpecLimit", val);
+      ctx.dispatch("populateData", ctx.state.dataList);
     },
 
     setLowerSpecLimit: (ctx, val) => {
       ctx.commit("lowerSpecLimit", val);
+      ctx.dispatch("populateData", ctx.state.dataList);
     },
 
     addDataItems: (ctx, { chartId, password, records, cb = () => {} }) => {
@@ -368,14 +385,6 @@ const xBarRChartDataModule = {
       state.stdDev = val;
     },
 
-    xBarData: (state, val) => {
-      state.xBarData = val;
-    },
-
-    rangeData: (state, val) => {
-      state.rangeData = val;
-    },
-
     lockedRowIndex: (state, val) => {
       state.lockedRowIndex = val;
     },
@@ -386,19 +395,19 @@ const xBarRChartDataModule = {
       state.grandAverage = 0;
       state.subgroupSize = null;
       state.stdDev = 0;
-      state.xBarData = {
-        ucl: 0,
-        cl: 0,
-        lcl: 0
-      };
-      state.rangeData = {
-        ucl: 0,
-        cl: 0,
-        lcl: 0
-      };
       state.lockedRowIndex = "NONE";
     }
   }
 };
+
+function getLockedRow(lockedRowIndex, dataList) {
+  let lockedRow = "NONE";
+  if (typeof lockedRowIndex === "number" && lockedRowIndex < dataList.length) {
+    lockedRow = dataList[lockedRowIndex];
+  } else if (dataList.length && lockedRow === "NONE")
+    lockedRow = dataList[dataList.length - 1];
+
+  return lockedRow;
+}
 
 export default xBarRChartDataModule;

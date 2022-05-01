@@ -95,11 +95,16 @@ export default {
       "stdDev",
       "upperSpecLimit",
       "lowerSpecLimit",
-      "xBarData",
-      "rangeData"
+      "lockedRowIndex"
     ]),
 
-    ...mapGetters("xBarRChartDataModule", ["cpu", "cpl", "cpk"])
+    ...mapGetters("xBarRChartDataModule", [
+      "cpu",
+      "cpl",
+      "cpk",
+      "xBarData",
+      "rangeData"
+    ])
   },
 
   watch: {
@@ -116,27 +121,7 @@ export default {
     },
 
     dataList() {
-      this.formattedAverages = this.dataList.map((obj) => {
-        return {
-          key: obj.id + "",
-          label: obj.reference1,
-          Value: util.formatNumber(obj.average),
-          CL: util.formatNumber(this.xBarData.cl),
-          UCL: util.formatNumber(this.xBarData.ucl),
-          LCL: util.formatNumber(this.xBarData.lcl)
-        };
-      });
-
-      this.formattedRanges = this.dataList.map((obj) => {
-        return {
-          key: obj.id + "",
-          label: obj.reference1,
-          Value: util.formatNumber(obj.range),
-          CL: util.formatNumber(this.rangeData.cl),
-          UCL: util.formatNumber(this.rangeData.ucl),
-          LCL: util.formatNumber(this.rangeData.lcl)
-        };
-      });
+      this.setChartData();
     },
 
     subgroupSize() {
@@ -153,6 +138,11 @@ export default {
 
     lowerSpecLimit() {
       this.setStatisticsData();
+    },
+
+    lockedRowIndex() {
+      this.setStatisticsData();
+      this.setChartData();
     }
   },
 
@@ -280,6 +270,30 @@ export default {
       this.chartId = pathname[pathname.length - 1] || "";
 
       if (cb) cb();
+    },
+
+    setChartData() {
+      this.formattedAverages = this.dataList.map((obj) => {
+        return {
+          key: obj.id + "",
+          label: obj.reference1,
+          Value: util.formatNumber(obj.average),
+          CL: util.formatNumber(this.xBarData.cl),
+          UCL: util.formatNumber(this.xBarData.ucl),
+          LCL: util.formatNumber(this.xBarData.lcl)
+        };
+      });
+
+      this.formattedRanges = this.dataList.map((obj) => {
+        return {
+          key: obj.id + "",
+          label: obj.reference1,
+          Value: util.formatNumber(obj.range),
+          CL: util.formatNumber(this.rangeData.cl),
+          UCL: util.formatNumber(this.rangeData.ucl)
+          // LCL: util.formatNumber(this.rangeData.lcl)
+        };
+      });
     }
   }
 };
