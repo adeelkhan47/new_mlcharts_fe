@@ -1,7 +1,7 @@
 <template>
   <div class="histogram">
     <h3 class="chart-title">Histogram Chart</h3>
-    <template v-if="chartData && chartData.length">
+    <template v-if="dataList && dataList.length > 1">
       <v-chart
         :forceFit="true"
         :height="height"
@@ -33,6 +33,7 @@ const formatter = (val) => {
 
 export default {
   name: "ChartHistogram",
+
   data() {
     return {
       scale: [
@@ -40,6 +41,7 @@ export default {
           dataKey: "value",
           nice: false,
           min: 0,
+          max: 1,
           tickInterval: 1
         }
       ],
@@ -57,22 +59,30 @@ export default {
 
     chartData() {
       const values = this.dataList.map((obj) => obj.value);
-      const binWidth = Math.ceil(this.cumulativeStdDev);
+      const minWidth = Math.ceil(this.cumulativeStdDev);
       let minScale = Math.min(...values) || 0;
+      let maxScale = Math.max(...values) + 1 || 1;
+      // must be an odd number
+      let tickInterval = minWidth % 2 === 0 ? minWidth - 1 : minWidth;
 
-      if (minScale < binWidth) minScale = 0;
+      if (tickInterval < 1) tickInterval = 1;
+      if (minScale < minWidth) minScale = 0;
+      if (maxScale < minWidth) maxScale = minWidth + 1;
 
       this.scale[0].min = minScale;
-      const sourceData = values.map((value) => ({ value }));
+      this.scale[0].max = maxScale;
+      this.scale[0].tickInterval = tickInterval;
 
+      const sourceData = values.map((value) => ({ value }));
       const dv = new DataSet.View().source(sourceData);
 
       dv.transform({
         type: "bin.histogram",
         field: "value",
-        binWidth,
+        minWidth,
         as: ["value", "count"]
       });
+
       return dv.rows.map((obj) => {
         if (obj.value && obj.value.length) {
           obj.value = obj.value.map((v) => util.formatNumber(v));
