@@ -13,8 +13,8 @@ const xmrChartDataModule = {
 
   state: () => ({
     loading: false,
-    upperSpecLimit: "20",
-    lowerSpecLimit: "10",
+    upperSpecLimit: "",
+    lowerSpecLimit: "",
     dataList: [],
     lockedRowIndex: "NONE"
   }),
@@ -30,7 +30,7 @@ const xmrChartDataModule = {
       if (
         lockedRow &&
         typeof lockedRow === "object" &&
-        typeof lockedRow.cumulativeCPK === "number"
+        typeof lockedRow.cumulativeCPU === "number"
       ) {
         temp.value = lockedRow.cumulativeCPU;
         temp.label = lockedRow.cumulativeCPU.toFixed(constants.FIXED_POINTS);
@@ -49,7 +49,7 @@ const xmrChartDataModule = {
       if (
         lockedRow &&
         typeof lockedRow === "object" &&
-        typeof lockedRow.cumulativeCPK === "number"
+        typeof lockedRow.cumulativeCPL === "number"
       ) {
         temp.value = lockedRow.cumulativeCPL;
         temp.label = lockedRow.cumulativeCPL.toFixed(constants.FIXED_POINTS);
@@ -88,7 +88,7 @@ const xmrChartDataModule = {
       if (
         lockedRow &&
         typeof lockedRow === "object" &&
-        typeof lockedRow.cumulativeCPK === "number"
+        Object.keys(lockedRow).length
       ) {
         temp.ucl = lockedRow.xUCL;
         temp.cl = lockedRow.xCL;
@@ -108,7 +108,7 @@ const xmrChartDataModule = {
       if (
         lockedRow &&
         typeof lockedRow === "object" &&
-        typeof lockedRow.cumulativeCPK === "number"
+        Object.keys(lockedRow).length
       ) {
         temp.ucl = lockedRow.mrUCL;
         temp.cl = lockedRow.mrCL;
@@ -124,7 +124,7 @@ const xmrChartDataModule = {
       if (
         lockedRow &&
         typeof lockedRow === "object" &&
-        typeof lockedRow.cumulativeCPK === "number"
+        typeof lockedRow.cumulativeAverage === "number"
       ) {
         temp = lockedRow.cumulativeAverage;
       }
@@ -139,7 +139,7 @@ const xmrChartDataModule = {
       if (
         lockedRow &&
         typeof lockedRow === "object" &&
-        typeof lockedRow.cumulativeCPK === "number"
+        typeof lockedRow.cumulativeAverageMR === "number"
       ) {
         temp = lockedRow.cumulativeAverageMR;
       }
@@ -154,7 +154,7 @@ const xmrChartDataModule = {
       if (
         lockedRow &&
         typeof lockedRow === "object" &&
-        typeof lockedRow.cumulativeCPK === "number"
+        typeof lockedRow.cumulativeStdDev === "number"
       ) {
         temp = lockedRow.cumulativeStdDev;
       }
@@ -172,9 +172,9 @@ const xmrChartDataModule = {
         typeof currentChart === "object" &&
         Object.keys(currentChart).length
       ) {
-        if (currentChart.upperSpecLimit)
+        if (currentChart.hasOwnProperty("upperSpecLimit"))
           ctx.commit("upperSpecLimit", currentChart.upperSpecLimit);
-        if (currentChart.lowerSpecLimit)
+        if (currentChart.hasOwnProperty("lowerSpecLimit"))
           ctx.commit("lowerSpecLimit", currentChart.lowerSpecLimit);
 
         let lockedRow = storageHelper.getStoredData(
@@ -242,8 +242,7 @@ const xmrChartDataModule = {
         } else {
           mrSum += movingRange;
           cumulativeAverageMR = util.getCumulativeAverage(mrSum, i);
-          cumulativeStdDev =
-            util.getCumulativeStdDevForXMR(cumulativeAverageMR);
+          cumulativeStdDev = util.getStdDevForXMR(cumulativeAverageMR);
           xUCL = util.getX_UCL_ForXMR(cumulativeAverage, cumulativeAverageMR);
           xLCL = util.getX_LCL_ForXMR(cumulativeAverage, cumulativeAverageMR);
           mrUCL = util.getMrUCLForXMR(cumulativeAverageMR);
@@ -280,8 +279,11 @@ const xmrChartDataModule = {
       const averageCumulativeCPK = util.calculateAverage(
         list.map((obj) => obj.cumulativeCPK)
       );
+      const averageMR = list.length > 1 ? mrSum / (list.length - 1) : "";
+      const stdDev = util.getStdDevForXMR(averageMR);
       list = list.map((obj) => {
         obj.averageCumulativeCPK = averageCumulativeCPK;
+        obj.stdDev = stdDev;
         return obj;
       });
 

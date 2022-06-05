@@ -191,7 +191,7 @@ function getMovingRangeForXMR(prevVal, currVal, index) {
   return Math.abs(currVal - prevVal);
 }
 
-function getCumulativeStdDevForXMR(cumulativeAvgMr) {
+function getStdDevForXMR(cumulativeAvgMr) {
   cumulativeAvgMr = getNumValOrStr(cumulativeAvgMr);
   if (typeof cumulativeAvgMr !== "number") return "";
   return cumulativeAvgMr / constants.X_VALUE_CONSTANT;
@@ -210,12 +210,12 @@ function getMrUCLForXMR(cumulativeAvgMr) {
 }
 
 function getCPL_ForXMR(cumulativeAverage, cumulativeStdDev, lowerSpecLimit) {
-  if (cumulativeStdDev === 0) return ""; // infinity
+  if (cumulativeStdDev === 0 || typeof lowerSpecLimit === "string") return ""; // infinity
   return (cumulativeAverage - lowerSpecLimit) / (3 * cumulativeStdDev);
 }
 
 function getCPU_ForXMR(cumulativeAverage, cumulativeStdDev, upperSpecLimit) {
-  if (cumulativeStdDev === 0) return ""; // infinity
+  if (cumulativeStdDev === 0 || typeof upperSpecLimit === "string") return ""; // infinity
   return (upperSpecLimit - cumulativeAverage) / (3 * cumulativeStdDev);
 }
 
@@ -241,7 +241,7 @@ const util = {
   getCumulativeCPK,
   getNumValOrStr,
   getMovingRangeForXMR,
-  getCumulativeStdDevForXMR,
+  getStdDevForXMR,
   getX_UCL_ForXMR,
   getX_LCL_ForXMR,
   getMrUCLForXMR,

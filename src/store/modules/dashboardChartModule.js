@@ -111,13 +111,8 @@ const dashboardChartModule = {
     createChart(ctx, { body, cb = () => {} }) {
       let requestBody = { ...body };
 
-      if (requestBody.subgroupSize === 1) {
-        requestBody.upperSpecLimit = "20";
-        requestBody.lowerSpecLimit = "10";
-      } else {
-        requestBody.upperSpecLimit = "8";
-        requestBody.lowerSpecLimit = "1";
-      }
+      requestBody.upperSpecLimit = "";
+      requestBody.lowerSpecLimit = "";
 
       dashboardChartApi
         .createDashboardChart(requestBody)

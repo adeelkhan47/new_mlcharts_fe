@@ -22,7 +22,7 @@
 <script>
 import util from "../../utils";
 const DataSet = require("@antv/data-set");
-import { mapGetters, mapState } from "vuex";
+import { mapState } from "vuex";
 
 const formatter = (val) => {
   if (val % 2) {
@@ -55,11 +55,10 @@ export default {
   computed: {
     ...mapState("xmrChartDataModule", ["dataList"]),
 
-    ...mapGetters("xmrChartDataModule", ["cumulativeStdDev"]),
-
     chartData() {
       const values = this.dataList.map((obj) => obj.value);
-      const minWidth = Math.ceil(this.cumulativeStdDev);
+      const stdDev = this.dataList.length ? this.dataList[0].stdDev : "";
+      const minWidth = Math.ceil(stdDev);
       let minScale = Math.min(...values) || 0;
       let maxScale = Math.max(...values) + 1 || 1;
       // must be an odd number

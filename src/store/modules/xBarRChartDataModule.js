@@ -10,8 +10,8 @@ const xBarRChartDataModule = {
 
   state: () => ({
     loading: false,
-    upperSpecLimit: "8",
-    lowerSpecLimit: "1",
+    upperSpecLimit: "",
+    lowerSpecLimit: "",
     dataList: [],
     subgroupSize: null,
     lockedRowIndex: "NONE"
@@ -28,7 +28,7 @@ const xBarRChartDataModule = {
       if (
         lockedRow &&
         typeof lockedRow === "object" &&
-        typeof lockedRow.cumulativeCPK === "number"
+        typeof lockedRow.cumulativeCPU === "number"
       ) {
         temp.value = lockedRow.cumulativeCPU;
         temp.label = lockedRow.cumulativeCPU.toFixed(constants.FIXED_POINTS);
@@ -47,7 +47,7 @@ const xBarRChartDataModule = {
       if (
         lockedRow &&
         typeof lockedRow === "object" &&
-        typeof lockedRow.cumulativeCPK === "number"
+        typeof lockedRow.cumulativeCPL === "number"
       ) {
         temp.value = lockedRow.cumulativeCPL;
         temp.label = lockedRow.cumulativeCPL.toFixed(constants.FIXED_POINTS);
@@ -86,7 +86,7 @@ const xBarRChartDataModule = {
       if (
         lockedRow &&
         typeof lockedRow === "object" &&
-        typeof lockedRow.cumulativeCPK === "number"
+        Object.keys(lockedRow).length
       ) {
         temp.ucl = lockedRow.averageUCL;
         temp.cl = lockedRow.averageCL;
@@ -107,7 +107,7 @@ const xBarRChartDataModule = {
       if (
         lockedRow &&
         typeof lockedRow === "object" &&
-        typeof lockedRow.cumulativeCPK === "number"
+        Object.keys(lockedRow).length
       ) {
         temp.ucl = lockedRow.rangeUCL;
         temp.cl = lockedRow.rangeCL;
@@ -124,7 +124,7 @@ const xBarRChartDataModule = {
       if (
         lockedRow &&
         typeof lockedRow === "object" &&
-        typeof lockedRow.cumulativeCPK === "number"
+        typeof lockedRow.cumulativeAverageRange === "number"
       ) {
         temp = lockedRow.cumulativeAverageRange;
       }
@@ -139,7 +139,7 @@ const xBarRChartDataModule = {
       if (
         lockedRow &&
         typeof lockedRow === "object" &&
-        typeof lockedRow.cumulativeCPK === "number"
+        typeof lockedRow.cumulativeGrandAverage === "number"
       ) {
         temp = lockedRow.cumulativeGrandAverage;
       }
@@ -154,7 +154,7 @@ const xBarRChartDataModule = {
       if (
         lockedRow &&
         typeof lockedRow === "object" &&
-        typeof lockedRow.cumulativeCPK === "number"
+        typeof lockedRow.cumulativeStdDev === "number"
       ) {
         temp = lockedRow.cumulativeStdDev;
       }
@@ -178,9 +178,9 @@ const xBarRChartDataModule = {
       ) {
         if (currentChart.subgroupSize)
           ctx.commit("subgroupSize", currentChart.subgroupSize);
-        if (currentChart.upperSpecLimit)
+        if (currentChart.hasOwnProperty("upperSpecLimit"))
           ctx.commit("upperSpecLimit", currentChart.upperSpecLimit);
-        if (currentChart.lowerSpecLimit)
+        if (currentChart.hasOwnProperty("lowerSpecLimit"))
           ctx.commit("lowerSpecLimit", currentChart.lowerSpecLimit);
 
         let lockedRow = storageHelper.getStoredData(
@@ -291,10 +291,10 @@ const xBarRChartDataModule = {
         obj.cumulativeGrandAverage = cumulativeGrandAverage;
         obj.cumulativeStdDev = cumulativeStdDev;
         obj.averageUCL = averageUCL;
-        obj.averageCL = averageCL;
+        obj.averageCL = cumulativeGrandAverage; // requested change to use this instead of averageCL
         obj.averageLCL = averageLCL;
         obj.rangeUCL = rangeUCL;
-        obj.rangeCL = rangeCL;
+        obj.rangeCL = cumulativeAverageRange; // requested change to use this instead of rangeCL
         obj.rangeLCL = rangeLCL;
         obj.cumulativeCPL = cumulativeCPL;
         obj.cumulativeCPU = cumulativeCPU;
