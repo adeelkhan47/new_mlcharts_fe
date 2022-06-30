@@ -32,7 +32,7 @@ const formatter = (val) => {
 };
 
 export default {
-  name: "ChartHistogram",
+  name: "XBarRHistogramChart",
 
   data() {
     return {
@@ -53,10 +53,11 @@ export default {
   },
 
   computed: {
-    ...mapState("xmrChartDataModule", ["dataList", "dataset"]),
+    ...mapState("xBarRChartDataModule", ["dataList", "dataset"]),
 
     chartData() {
-      const values = this.dataList.map((obj) => obj.value);
+      let values = this.dataList.map((obj) => Object.values(obj.values));
+      values = [].concat(...values);
       const stdDev = this.dataset.stdDev;
       const minWidth = Math.ceil(stdDev);
       let minScale = Math.min(...values) || 0;

@@ -9,6 +9,7 @@ import { mapActions, mapState } from "vuex";
 import "jexcel/dist/jexcel.css";
 import jexcel from "jexcel";
 import util from "../../utils";
+import constants from "../../utils/constants.util";
 
 const irrelevantKeys = [
   "id",
@@ -69,14 +70,78 @@ export default {
           { type: "text", title: "Reference 2", width: "150px" }
         ],
         tableOverflow: true,
-        tableHeight: "585px",
         tableWidth: "755px",
+        tableHeight: "730px",
         onpaste: this.handleChange,
         ondeleterow: this.handleChange,
         oneditionend: this.handleChange,
         onchange: this.handleLockLimit,
         contextMenu: function (obj, x, y, e) {
           var items = [];
+
+          if (y == null) {
+          } else {
+            // Insert new row
+            if (obj.options.allowInsertRow == true) {
+              items.push({
+                title: obj.options.text.insertANewRowBefore,
+                onclick: function () {
+                  obj.insertRow(1, parseInt(y), 1);
+                }
+              });
+
+              items.push({
+                title: obj.options.text.insertANewRowAfter,
+                onclick: function () {
+                  obj.insertRow(1, parseInt(y));
+                }
+              });
+            }
+
+            // Delete rows
+            if (obj.options.allowDeleteRow == true) {
+              items.push({
+                title: obj.options.text.deleteSelectedRows,
+                onclick: function () {
+                  obj.deleteRow(
+                    obj.getSelectedRows().length ? undefined : parseInt(y)
+                  );
+                }
+              });
+            }
+
+            if (x) {
+              if (obj.options.allowComments == true) {
+                items.push({ type: "line" });
+
+                var title = obj.records[y][x].getAttribute("title") || "";
+
+                items.push({
+                  title: title
+                    ? obj.options.text.editComments
+                    : obj.options.text.addComments,
+                  onclick: function () {
+                    obj.setComments(
+                      [x, y],
+                      prompt(obj.options.text.comments, title)
+                    );
+                  }
+                });
+
+                if (title) {
+                  items.push({
+                    title: obj.options.text.clearComments,
+                    onclick: function () {
+                      obj.setComments([x, y], "");
+                    }
+                  });
+                }
+              }
+            }
+          }
+
+          // Line
+          items.push({ type: "line" });
 
           // Copy
           items.push({
@@ -145,7 +210,7 @@ export default {
 
       this.options.data = JSON.parse(JSON.stringify(this.records));
 
-      let blankRows = 23;
+      let blankRows = 29;
       if (this.records.length > 22) blankRows = 5;
       else blankRows = blankRows - this.records.length;
 
@@ -159,6 +224,10 @@ export default {
         this.lockedRowIndex <= this.options.data.length
       ) {
         this.options.data[this.lockedRowIndex].lockLimit = true;
+      } else {
+        this.options.data[
+          constants.DEFAULT_LOCK_LIMIT_FOR_SUBGROUPED_CHART
+        ].lockLimit = true;
       }
 
       this.init();
@@ -570,6 +639,12 @@ export default {
       }
 
       return record;
+    },
+
+    downloadData() {
+      if (this.spreadsheet && this.spreadsheet.download) {
+        this.spreadsheet.download();
+      }
     }
   }
 };
@@ -579,7 +654,7 @@ export default {
 .data-table {
   min-width: 550px;
   min-height: 795px;
-  min-height: 585px;
+  min-height: 725px;
   max-width: 755px;
   border-radius: 5px;
   background: #eee;

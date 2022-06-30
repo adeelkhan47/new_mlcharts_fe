@@ -14,7 +14,14 @@ const xBarRChartDataModule = {
     lowerSpecLimit: "",
     dataList: [],
     subgroupSize: null,
-    lockedRowIndex: "NONE"
+    lockedRowIndex: "NONE",
+    dataset: {
+      cpl: "",
+      cpu: "",
+      cpk: "",
+      stdDev: "",
+      average: ""
+    }
   }),
 
   getters: {
@@ -306,12 +313,34 @@ const xBarRChartDataModule = {
       const averageCPK = util.calculateAverage(
         list.map((obj) => obj.cumulativeCPK)
       );
+      const averageMR = list.length > 1 ? rangeSum / (list.length - 1) : "";
+      const stdDev = util.getStdDevForXBarR(averageMR, subgroupSize);
+      const datasetAverage = util.calculateAverage(list.map(obj => obj.average));
+      // methods are reused that's why they have cumulative in name
+      const cpl = util.getCumulativeCPL(
+        datasetAverage,
+        stdDev,
+        lowerSpecLimit
+      );
+      const cpu = util.getCumulativeCPU(
+        datasetAverage,
+        stdDev,
+        upperSpecLimit
+      );
+      const cpk = util.getCumulativeCPK(cpl, cpu);
 
       list = list.map((obj) => {
         obj.averageCPK = averageCPK;
         return obj;
       });
 
+      ctx.commit("dataset", {
+        average: datasetAverage,
+        stdDev,
+        cpl,
+        cpu,
+        cpk
+      });
       ctx.commit("dataList", list);
       ctx.commit("loading", false);
     },
@@ -326,7 +355,7 @@ const xBarRChartDataModule = {
       ctx.dispatch("populateData", ctx.state.dataList);
     },
 
-    addDataItems: (ctx, { chartId, password, records, cb = () => {} }) => {
+    addDataItems: (ctx, { chartId, password, records, cb = () => { } }) => {
       if (records instanceof Array && records.length) {
         ctx.commit("loading", true);
 
@@ -410,10 +439,25 @@ const xBarRChartDataModule = {
       state.lockedRowIndex = val;
     },
 
+    dataset: (state, datasetPayload) => {
+      let dataset = {
+        ...state.dataset,
+        ...datasetPayload
+      };
+      state.dataset = dataset;
+    },
+
     reset: (state) => {
       state.dataList = [];
       state.subgroupSize = null;
       state.lockedRowIndex = "NONE";
+      state.dataset = {
+        cpl: "",
+        cpu: "",
+        cpk: "",
+        stdDev: "",
+        average: ""
+      };
     }
   }
 };

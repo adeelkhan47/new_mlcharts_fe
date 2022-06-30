@@ -28,8 +28,8 @@
         </md-field>
 
         <md-field>
-          <label v-show="register.dob">Date of Birth</label>
-          <md-input v-model="register.dob" type="date"></md-input>
+          <label>Company</label>
+          <md-input v-model="register.company" type="text"></md-input>
         </md-field>
       </div>
 
@@ -79,7 +79,7 @@ export default {
         password: "",
         firstName: "",
         lastName: "",
-        dob: ""
+        company: ""
       },
       showSnackbar: false,
       errorMsg: "",
@@ -104,7 +104,7 @@ export default {
           this.register.password,
           this.register.firstName,
           this.register.lastName,
-          this.register.dob
+          this.register.company
         )
         .then((res) => {
           this.reset();
@@ -122,7 +122,7 @@ export default {
       this.register.password = "";
       this.register.firstName = "";
       this.register.lastName = "";
-      this.register.dob = "";
+      this.register.company = "";
 
       this.showSnackbar = false;
       this.errorMsg = "";

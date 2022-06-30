@@ -204,19 +204,20 @@ export default {
 
     chartTypeDisplay() {
       return function (val) {
-        let display = "XmR";
+        let display = "";
         switch (val) {
           case "x-mr":
-            display = "XmR";
+            display = "Individuals";
             break;
           case "x-bar-r":
-            display = "X-bar and R";
+            display = "Subgrouped";
             break;
           case "x-bar-s":
             display = "X-bar and s";
             break;
 
           default:
+            display = "Individuals";
             break;
         }
         return display;

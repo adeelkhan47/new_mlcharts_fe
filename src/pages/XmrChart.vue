@@ -1,6 +1,6 @@
 <template>
   <div class="home">
-    <div class="actions-wrapper">
+    <!-- <div class="actions-wrapper">
       <ul class="actions">
         <li class="action">
           <md-button
@@ -11,12 +11,21 @@
           </md-button>
         </li>
       </ul>
-    </div>
+    </div> -->
 
     <div class="content-wrapper">
       <div class="content-body">
         <div class="tables">
           <div class="column-row">
+            <div class="chart-action">
+              <md-button
+                class="md-primary md-raised no-transform chart-action-btn"
+                @click="downloadData"
+              >
+                <md-icon>download</md-icon>
+                Export to excel
+              </md-button>
+            </div>
             <statistics-table
               :statisticsData="statisticsData"
               :upperSpecLimit="upperSpecLimit"
@@ -26,7 +35,7 @@
             />
             <chart-histogram class="col-chart" />
           </div>
-          <xmr-data-excel />
+          <xmr-data-excel ref="xmrExcelSheet" />
         </div>
         <div class="charts">
           <chart-x
@@ -40,11 +49,15 @@
             :formattedDataList="formattedMrDataList"
             :showLCL="false"
           />
+          <process-capability-ratios
+            :dataList="dataList"
+            :formattedDataList="formattedDataCPK"
+          />
         </div>
       </div>
     </div>
 
-    <add-data :visibility="showAddDialog" @hide="showAddDialog = false" />
+    <!-- <add-data :visibility="showAddDialog" @hide="showAddDialog = false" /> -->
 
     <md-dialog :md-active="askPassword">
       <md-dialog-title> Password is required </md-dialog-title>
@@ -73,8 +86,9 @@
 import ChartHistogram from "../components/charts/HistogramChart.vue";
 import XmrDataExcel from "../components/tables/XmrDataExcel.vue";
 import StatisticsTable from "../components/tables/StatisticsTable.vue";
-import AddData from "../components/inputs/AddData.vue";
+// import AddData from "../components/inputs/AddData.vue";
 import ChartX from "../components/charts/ChartX.vue";
+import ProcessCapabilityRatios from "../components/charts/ProcessCapabilityRatios.vue";
 import storageHelper from "../utils/storageHelper.util";
 import { mapActions, mapGetters, mapState } from "vuex";
 import { dashboardChartApi } from "../api";
@@ -87,20 +101,22 @@ export default {
     ChartHistogram,
     StatisticsTable,
     XmrDataExcel,
-    AddData,
-    ChartX
+    // AddData,
+    ChartX,
+    ProcessCapabilityRatios
   },
 
   data() {
     return {
       loader: null,
-      showAddDialog: false,
+      // showAddDialog: false,
       chartId: "",
       pagePassword: "",
       storeCB: null,
       askPassword: false,
       statisticsData: [],
       formattedDataList: [],
+      formattedDataCPK: [],
       formattedMrDataList: []
     };
   },
@@ -110,6 +126,7 @@ export default {
 
     ...mapState("xmrChartDataModule", [
       "dataList",
+      "dataset",
       "upperSpecLimit",
       "lowerSpecLimit",
       "lockedRowIndex"
@@ -226,32 +243,20 @@ export default {
     setStatisticsData() {
       this.statisticsData = [
         {
-          key: "Cumul. Avg. Moving Range",
-          value: util.formatNumber(this.cumulativeAverageMR)
-        },
-        {
-          key: "Cumul. Grand Average",
-          value: util.formatNumber(this.cumulativeAverage)
-        },
-        {
-          key: "Cumul. Std Dev",
-          value: util.formatNumber(this.cumulativeStdDev)
-        },
-        {
           key: "Data Count",
           value: this.dataList.length
         },
         {
-          key: "Cpu",
-          value: this.cpu.label
+          key: "Cpu (overall)",
+          value: util.formatNumber(this.dataset.cpu)
         },
         {
-          key: "Cpl",
-          value: this.cpl.label
+          key: "Cpl (overall)",
+          value: util.formatNumber(this.dataset.cpl)
         },
         {
-          key: "Cpk",
-          value: this.cpk.label
+          key: "Cpk (overall)",
+          value: util.formatNumber(this.dataset.cpk)
         }
       ];
     },
@@ -314,6 +319,16 @@ export default {
         };
       });
 
+      this.formattedDataCPK = this.dataList
+        .map((obj) => {
+          return {
+            key: obj.id + "",
+            label: obj.reference1,
+            cpk: util.formatNumber(obj.cumulativeCPK)
+          };
+        })
+        .filter((obj) => typeof obj.cpk !== "string");
+
       this.formattedMrDataList = this.dataList
         .filter((obj) => typeof obj.movingRange === "number")
         .map((obj) => {
@@ -325,6 +340,15 @@ export default {
             UCL: util.formatNumber(this.mrChartData.ucl)
           };
         });
+    },
+
+    downloadData() {
+      if (
+        this.$refs &&
+        this.$refs.xmrExcelSheet &&
+        this.$refs.xmrExcelSheet.downloadData
+      )
+        this.$refs.xmrExcelSheet.downloadData();
     }
   }
 };
@@ -387,6 +411,18 @@ export default {
   display: flex;
   flex-direction: column;
   width: 350px;
+}
+
+.chart-action {
+  width: 100%;
+  padding: 8px;
+  padding-top: 0;
+  margin-bottom: 20px;
+}
+
+.chart-action-btn {
+  margin-top: 2px;
+  width: calc(100% - 16px);
 }
 
 .col-chart {

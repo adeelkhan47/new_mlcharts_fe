@@ -50,6 +50,8 @@ function getAverageForXBarR(valuesObj) {
 }
 
 function getStdDevForXBarR(averageRange, subgroupSize) {
+  averageRange = getNumValOrStr(averageRange);
+  if (typeof averageRange !== "number") return "";
   return averageRange / constants.CONST_BY_SUBGROUP_SIZE[subgroupSize].d2;
 }
 

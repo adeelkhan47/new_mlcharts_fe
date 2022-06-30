@@ -18,10 +18,7 @@
           </md-button>
         </md-table-toolbar>
 
-        <md-table-empty-state
-          md-label="No data found"
-          md-description="No chart found. Try to create a new chart"
-        >
+        <md-table-empty-state>
           <md-button class="md-primary md-raised" @click="createChart">
             Create new chart
           </md-button>
@@ -35,11 +32,11 @@
             {{ item.subgroupSize }}
           </md-table-cell>
           <md-table-cell md-label="Chart Type">
-            {{ item.chartType }}
+            {{ item.chartType | chartTypeFilter }}
           </md-table-cell>
-          <md-table-cell md-label="Last Edit">
+          <!-- <md-table-cell md-label="Last Edit">
             {{ time(item.modifiedOn) }}
-          </md-table-cell>
+          </md-table-cell> -->
           <md-table-cell md-label="Link to Share">
             {{ chartPageLink(item) }}
           </md-table-cell>
@@ -146,6 +143,28 @@ export default {
     }
   },
 
+  filters: {
+    chartTypeFilter(val) {
+      let display = "";
+      switch (val) {
+        case "x-mr":
+          display = "Individuals";
+          break;
+        case "x-bar-r":
+          display = "Subgrouped";
+          break;
+        case "x-bar-s":
+          display = "X-bar and s";
+          break;
+
+        default:
+          display = "Individuals";
+          break;
+      }
+      return display;
+    }
+  },
+
   created() {
     this.init();
   },
@@ -159,9 +178,20 @@ export default {
     ...mapActions("responseMessageModule", ["setShow", "setMessage"]),
 
     getCharTypePath(chartType) {
-      if (chartType && chartType.length)
-        return "/" + chartType.trim().replaceAll(" ", "_").toLowerCase();
-      else return "/";
+      let path = "/";
+      switch (chartType) {
+        case "x-mr":
+          path += "i";
+          break;
+        case "x-bar-r":
+          path += "s";
+          break;
+
+        default:
+          path += "i";
+          break;
+      }
+      return path;
     },
 
     getChartId(chartName) {

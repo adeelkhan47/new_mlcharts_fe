@@ -35,14 +35,14 @@ function login(email, password, callback = null) {
     });
 }
 
-function register(email, password, firstName, lastName, dob) {
+function register(email, password, firstName, lastName, company) {
   const URL = constants.API_BASE_URL + constants.USER_PATH + "/register";
   return axios.post(URL, {
     email,
     password,
     firstName,
     lastName,
-    dob
+    company
   });
 }
 

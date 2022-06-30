@@ -3,15 +3,30 @@
     <div class="content-wrapper">
       <div class="content-body">
         <div class="tables">
-          <statistics-table
-            :statisticsData="statisticsData"
-            :upperSpecLimit="upperSpecLimit"
-            :lowerSpecLimit="lowerSpecLimit"
-            @specLimitChanged="handleSpecLimit"
-            @saveLimits="saveLimits"
-          />
+          <div class="column-row">
+            <div class="chart-action">
+              <md-button
+                class="md-primary md-raised no-transform chart-action-btn"
+                @click="downloadData"
+              >
+                <md-icon>download</md-icon>
+                Export to excel
+              </md-button>
+            </div>
+            <statistics-table
+              :statisticsData="statisticsData"
+              :upperSpecLimit="upperSpecLimit"
+              :lowerSpecLimit="lowerSpecLimit"
+              @specLimitChanged="handleSpecLimit"
+              @saveLimits="saveLimits"
+            />
+            <x-bar-r-histogram-chart class="col-chart" />
+          </div>
           <template v-if="subgroupSize">
-            <x-bar-r-data-excel :subgroupSize="subgroupSize" />
+            <x-bar-r-data-excel
+              :subgroupSize="subgroupSize"
+              ref="xBarRExcelSheet"
+            />
           </template>
         </div>
         <div class="charts">
@@ -24,6 +39,10 @@
             title="Ranges Chart"
             :dataList="dataList"
             :formattedDataList="formattedRanges"
+          />
+          <process-capability-ratios
+            :dataList="dataList"
+            :formattedDataList="formattedDataCPK"
           />
         </div>
       </div>
@@ -56,10 +75,12 @@
 import XBarRDataExcel from "../components/tables/XBarRDataExcel.vue";
 import StatisticsTable from "../components/tables/StatisticsTable.vue";
 import ChartX from "../components/charts/ChartX.vue";
+import ProcessCapabilityRatios from "../components/charts/ProcessCapabilityRatios.vue";
 import storageHelper from "../utils/storageHelper.util";
 import { mapActions, mapGetters, mapState } from "vuex";
 import util from "../utils";
 import { dashboardChartApi } from "../api";
+import XBarRHistogramChart from "../components/charts/XBarRHistogramChart.vue";
 
 export default {
   name: "XBarRChart",
@@ -67,7 +88,9 @@ export default {
   components: {
     StatisticsTable,
     XBarRDataExcel,
-    ChartX
+    ChartX,
+    ProcessCapabilityRatios,
+    XBarRHistogramChart
   },
 
   data() {
@@ -80,6 +103,7 @@ export default {
       askPassword: false,
       statisticsData: [],
       formattedAverages: [],
+      formattedDataCPK: [],
       formattedRanges: []
     };
   },
@@ -89,6 +113,7 @@ export default {
 
     ...mapState("xBarRChartDataModule", [
       "dataList",
+      "dataset",
       "subgroupSize",
       "upperSpecLimit",
       "lowerSpecLimit",
@@ -155,6 +180,10 @@ export default {
 
     cpk() {
       this.setStatisticsData();
+    },
+
+    dataset() {
+      this.setStatisticsData();
     }
   },
 
@@ -208,32 +237,20 @@ export default {
     setStatisticsData() {
       this.statisticsData = [
         {
-          key: "Cumul. Average Range",
-          value: util.formatNumber(this.cumulativeAverageRange)
-        },
-        {
-          key: "Cumul. Grand Average",
-          value: util.formatNumber(this.cumulativeGrandAverage)
-        },
-        {
-          key: "Cumul. Std Dev",
-          value: util.formatNumber(this.cumulativeStdDev)
-        },
-        {
           key: "Subgroup Size",
           value: this.subgroupSize
         },
         {
-          key: "Cpu",
-          value: this.cpu.label
+          key: "Cpu (overall)",
+          value: util.formatNumber(this.dataset.cpu)
         },
         {
-          key: "Cpl",
-          value: this.cpl.label
+          key: "Cpl (overall)",
+          value: util.formatNumber(this.dataset.cpl)
         },
         {
-          key: "Cpk",
-          value: this.cpk.label
+          key: "Cpk (overall)",
+          value: util.formatNumber(this.dataset.cpk)
         }
       ];
     },
@@ -296,6 +313,14 @@ export default {
         };
       });
 
+      this.formattedDataCPK = this.dataList.map((obj) => {
+        return {
+          key: obj.id + "",
+          label: obj.reference1,
+          cpk: util.formatNumber(obj.cumulativeCPK)
+        };
+      });
+
       this.formattedRanges = this.dataList.map((obj) => {
         return {
           key: obj.id + "",
@@ -306,6 +331,15 @@ export default {
           LCL: util.formatNumber(this.rangeData.lcl)
         };
       });
+    },
+
+    downloadData() {
+      if (
+        this.$refs &&
+        this.$refs.xBarRExcelSheet &&
+        this.$refs.xBarRExcelSheet.downloadData
+      )
+        this.$refs.xBarRExcelSheet.downloadData();
     }
   }
 };
@@ -362,6 +396,28 @@ export default {
 
 .tables > * {
   margin: 20px 5px;
+}
+
+.column-row {
+  display: flex;
+  flex-direction: column;
+  width: 350px;
+}
+
+.chart-action {
+  width: 100%;
+  padding: 8px;
+  padding-top: 0;
+  margin-bottom: 20px;
+}
+
+.chart-action-btn {
+  margin-top: 2px;
+  width: calc(100% - 16px);
+}
+
+.col-chart {
+  transform: translateX(-25px);
 }
 
 .charts {

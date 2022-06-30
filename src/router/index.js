@@ -27,12 +27,12 @@ const routes = [
         component: About
       },
       {
-        path: "/x-mr/:chartId",
+        path: "/i/:chartId",
         name: "XmrChart",
         component: XmrChart
       },
       {
-        path: "/x-bar-r/:chartId",
+        path: "/s/:chartId",
         name: "XBarRChart",
         component: XBarRChart
       }

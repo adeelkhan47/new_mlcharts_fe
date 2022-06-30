@@ -16,7 +16,14 @@ const xmrChartDataModule = {
     upperSpecLimit: "",
     lowerSpecLimit: "",
     dataList: [],
-    lockedRowIndex: "NONE"
+    lockedRowIndex: "NONE",
+    dataset: {
+      cpl: "",
+      cpu: "",
+      cpk: "",
+      stdDev: "",
+      average: ""
+    }
   }),
 
   getters: {
@@ -281,17 +288,36 @@ const xmrChartDataModule = {
       );
       const averageMR = list.length > 1 ? mrSum / (list.length - 1) : "";
       const stdDev = util.getStdDevForXMR(averageMR);
+      const datasetAverage = util.calculateAverage(list.map(obj => obj.value));
+      const cpl = util.getCPL_ForXMR(
+        datasetAverage,
+        stdDev,
+        lowerSpecLimit
+      );
+      const cpu = util.getCPU_ForXMR(
+        datasetAverage,
+        stdDev,
+        upperSpecLimit
+      );
+      const cpk = util.getCumulativeCPK(cpl, cpu);
+
       list = list.map((obj) => {
         obj.averageCumulativeCPK = averageCumulativeCPK;
-        obj.stdDev = stdDev;
         return obj;
       });
 
+      ctx.commit("dataset", {
+        average: datasetAverage,
+        stdDev,
+        cpl,
+        cpu,
+        cpk
+      });
       ctx.commit("dataList", list);
       ctx.commit("loading", false);
     },
 
-    addDataItem: (ctx, { numberList, chartId, password, cb = () => {} }) => {
+    addDataItem: (ctx, { numberList, chartId, password, cb = () => { } }) => {
       if (
         chartId &&
         numberList &&
@@ -327,7 +353,7 @@ const xmrChartDataModule = {
       }
     },
 
-    addDataItems: (ctx, { itemList, chartId, password, cb = () => {} }) => {
+    addDataItems: (ctx, { itemList, chartId, password, cb = () => { } }) => {
       if (itemList && itemList instanceof Array && itemList.length) {
         ctx.commit("loading", true);
         const dataList = itemList.map((itemObj) => {
@@ -480,7 +506,15 @@ const xmrChartDataModule = {
 
     lockedRowIndex: (state, val) => {
       state.lockedRowIndex = val;
-    }
+    },
+
+    dataset: (state, datasetPayload) => {
+      let dataset = {
+        ...state.dataset,
+        ...datasetPayload
+      };
+      state.dataset = dataset;
+    },
   }
 };
 

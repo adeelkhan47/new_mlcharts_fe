@@ -1,4 +1,4 @@
-const API_BASE_URL = "http://143.198.63.57:8090";
+const API_BASE_URL = "http://localhost:8090";
 const XMR_CHART_DATA_PATH = "/xmr-data";
 const X_BAR_R_CHART_PATH = "/x-bar-r";
 const DASHBOARD_CHART_PATH = "/dashboard-charts";
@@ -7,6 +7,8 @@ const FIXED_POINTS = 3;
 
 const X_VALUE_CONSTANT = 1.128;
 const MR_VALUE_CONSTANT = 3.268;
+const DEFAULT_LOCK_LIMIT_FOR_SUBGROUPED_CHART = 9;
+const DEFAULT_LOCK_LIMIT_FOR_INDIVIDUALS_CHART = 19;
 
 const CONST_BY_SUBGROUP_SIZE = {
   2: { a2: 1.88, d2: 1.128, d3: 0, d4: 3.267 },
@@ -29,7 +31,9 @@ const constants = Object.freeze({
   CONST_BY_SUBGROUP_SIZE,
   FIXED_POINTS,
   X_VALUE_CONSTANT,
-  MR_VALUE_CONSTANT
+  MR_VALUE_CONSTANT,
+  DEFAULT_LOCK_LIMIT_FOR_SUBGROUPED_CHART,
+  DEFAULT_LOCK_LIMIT_FOR_INDIVIDUALS_CHART
 });
 
 export default constants;
