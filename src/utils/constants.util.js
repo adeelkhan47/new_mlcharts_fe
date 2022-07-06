@@ -1,4 +1,4 @@
-const API_BASE_URL =  "http://143.198.63.57:8090";;
+const API_BASE_URL =  "http://143.198.63.57:8090";
 const XMR_CHART_DATA_PATH = "/xmr-data";
 const X_BAR_R_CHART_PATH = "/x-bar-r";
 const DASHBOARD_CHART_PATH = "/dashboard-charts";
