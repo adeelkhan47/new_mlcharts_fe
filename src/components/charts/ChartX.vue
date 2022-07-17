@@ -1,12 +1,16 @@
 <template>
-  <div class="x-chart">
+  <div class="x-chart" id="v-container">
     <h3 class="chart-title">{{ title }}</h3>
     <template v-if="chartData && chartData.length">
       <v-chart :forceFit="true" :height="400" :data="chartData" :scale="scale">
-        <v-tooltip />
+        <v-tooltip :htmlContent="htmlContent" :showTitle="false" />
         <v-axis :label="label" data-key="key" />
-        <v-line position="key*value" color="id" />
-        <v-point position="key*value" color="id" />
+        <v-line
+          position="key*value"
+          :color="['id', lineColors]"
+          :shape="['id', lineShapes]"
+        />
+        <v-point position="key*value" :color="['id', lineColors]" />
         <v-legend position="bottom" />
       </v-chart>
     </template>
@@ -33,9 +37,26 @@ export default {
     formattedDataList: {
       type: Array
     },
-    showLCL: {
-      type: Boolean,
-      default: true
+    chartFields: {
+      type: Array,
+      default: () => []
+    },
+    lineColors: {
+      type: Array,
+      default: () => [
+        "#1890FF",
+        "#2FC25B",
+        "#FACC14",
+        "#223273",
+        "#8543E0",
+        "#13C2C2",
+        "#3436C7",
+        "#F04864"
+      ]
+    },
+    lineShapes: {
+      type: Array,
+      default: () => ["line"]
     }
   },
 
@@ -56,6 +77,51 @@ export default {
           rotate: 270
         },
         formatter: this.getLabel
+      },
+      htmlContent: function htmlContent(title, items) {
+        const listItems = items.map((item, i) => {
+          let note = "";
+          if (
+            items.length === 1 &&
+            item.point &&
+            item.point._origin &&
+            item.point._origin.note
+          ) {
+            note = `
+              <div class="note">
+                ${item.point._origin.note}
+              </div>
+            `;
+          }
+
+          return `
+            <li data-index=${i} class="list-item">
+              <div class="content">
+                <span
+                    style="background-color:${item.color};width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:8px;">
+                </span>
+                <span class="text-container">
+                  <span class="label">
+                    ${item.name}
+                  </span>
+                  <span class="value">
+                    ${item.value}
+                  </span>
+                </span>
+              </div>
+              ${note}
+            </li>
+          `;
+        });
+
+        return `
+          <div class="g2-tooltip">
+            <div class="g2-tooltip-title" style="margin-bottom: 4px;"></div>
+            <ul class="g2-tooltip-list">
+                ${listItems.join("")}
+            </ul>
+          </div>
+        `;
       }
     };
   },
@@ -63,13 +129,9 @@ export default {
   computed: {
     chartData() {
       const dv = new DataSet.View().source(this.formattedDataList);
-      let fields = ["Value", "CL", "UCL"];
-      if (this.showLCL) {
-        fields.push("LCL");
-      }
       dv.transform({
         type: "fold",
-        fields: fields,
+        fields: this.chartFields,
         key: "id",
         value: "value"
       });
@@ -104,5 +166,73 @@ export default {
 .no-data {
   color: grey;
   text-align: center;
+}
+</style>
+
+<style id="tooltip-custom-style">
+#v-container .g2-tooltip {
+  position: absolute;
+  background-color: rgba(255, 255, 255, 0.95);
+  border-radius: 3px;
+  color: rgb(87, 87, 87);
+  font-size: 12px;
+  line-height: 20px;
+  padding: 10px 10px 6px 10px;
+  box-shadow: 2px 2px 15px 4px lightgray;
+  min-width: 150px;
+  max-width: 350px;
+}
+
+#v-container .g2-tooltip-list {
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+}
+
+#v-container .g2-tooltip-value {
+  margin-left: 30px;
+  display: inline;
+  float: right;
+}
+
+#v-container .g2-tooltip-statistic {
+  font-size: 14px;
+  padding-bottom: 10px;
+  margin-top: 10px;
+  list-style-type: none;
+}
+
+#v-container .g2-tooltip-statistic-value {
+  font-weight: "bold";
+  display: "inline-block";
+  float: right;
+  margin-left: 30px;
+}
+
+#v-container .list-item {
+  margin: 5px 0;
+}
+
+#v-container .content {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+#v-container .text-container {
+  flex: 1;
+  width: 100%;
+  height: auto;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+#v-container .note {
+  margin-top: 10px;
+  width: 100%;
+  height: auto;
 }
 </style>

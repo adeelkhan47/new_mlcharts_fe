@@ -66,7 +66,7 @@ export default {
       let tickInterval = minWidth % 2 === 0 ? minWidth - 1 : minWidth;
 
       if (tickInterval < 1) tickInterval = 1;
-      if (minScale < minWidth) minScale = 0;
+      if (minScale > minWidth) minScale = minWidth;
       if (maxScale < minWidth) maxScale = minWidth + 1;
 
       this.scale[0].min = minScale;

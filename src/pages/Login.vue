@@ -9,12 +9,16 @@
       <div class="form">
         <md-field>
           <label>E-mail</label>
-          <md-input v-model="login.email" autofocus></md-input>
+          <md-input v-model="login.email" autofocus id="email"></md-input>
         </md-field>
 
         <md-field md-has-password>
           <label>Password</label>
-          <md-input v-model="login.password" type="password"></md-input>
+          <md-input
+            v-model="login.password"
+            type="password"
+            id="password"
+          ></md-input>
         </md-field>
       </div>
 
@@ -72,6 +76,14 @@ export default {
   created() {
     const userObj = storageHelper.getUserObj();
     if (userObj) this.$router.push("/dashboard");
+  },
+  mounted() {
+    document.getElementById("email").focus();
+    document.getElementById("password").addEventListener("keypress", (e) => {
+      if (e.key === "Enter") {
+        this.signIn();
+      }
+    });
   },
   methods: {
     navigateToRegister() {

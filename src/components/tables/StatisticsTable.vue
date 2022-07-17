@@ -47,6 +47,26 @@
           {{ item.value }}
         </md-table-cell>
       </md-table-row>
+      <md-table-row slot="md-table-row">
+        <md-table-cell md-label="Label"> Display Control Limits </md-table-cell>
+        <md-table-cell md-label="Value">
+          <md-checkbox
+            v-model="controlLimits"
+            class="checkbox-selection md-primary"
+            @change="handleLinesDisplayChange"
+          ></md-checkbox>
+        </md-table-cell>
+      </md-table-row>
+      <md-table-row slot="md-table-row">
+        <md-table-cell md-label="Label"> Display Center Lines </md-table-cell>
+        <md-table-cell md-label="Value">
+          <md-checkbox
+            v-model="centerLines"
+            class="checkbox-selection md-primary"
+            @change="handleLinesDisplayChange"
+          ></md-checkbox>
+        </md-table-cell>
+      </md-table-row>
     </md-table>
   </div>
 </template>
@@ -65,7 +85,39 @@ export default {
     },
     lowerSpecLimit: {
       required: true
+    },
+    displayControlLimits: {
+      type: Boolean,
+      default: true
+    },
+    displayCenterLines: {
+      type: Boolean,
+      default: true
     }
+  },
+
+  data() {
+    return {
+      controlLimits: true,
+      centerLines: true
+    };
+  },
+
+  watch: {
+    displayControlLimits() {
+      if (this.displayControlLimits !== this.controlLimits)
+        this.controlLimits = this.displayControlLimits;
+    },
+
+    displayCenterLines() {
+      if (this.displayCenterLines !== this.centerLines)
+        this.centerLines = this.displayCenterLines;
+    }
+  },
+
+  created() {
+    this.centerLines = this.displayCenterLines;
+    this.controlLimits = this.displayControlLimits;
   },
 
   methods: {
@@ -85,6 +137,13 @@ export default {
 
     saveLimits() {
       this.$emit("saveLimits");
+    },
+
+    handleLinesDisplayChange() {
+      this.$emit("updateChartLinesDisplay", {
+        displayControlLimits: this.controlLimits,
+        displayCenterLines: this.centerLines
+      });
     }
   }
 };
@@ -97,6 +156,10 @@ export default {
 
 .spec-input {
   width: 100px;
+}
+
+.checkbox-selection {
+  margin: 0px;
 }
 </style>
 

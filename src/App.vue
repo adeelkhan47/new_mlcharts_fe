@@ -32,4 +32,10 @@ export default {
 };
 </script>
 
-<style></style>
+<style>
+.jexcel_container .jexcel_content::-webkit-scrollbar {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+</style>

@@ -19,6 +19,7 @@
               :lowerSpecLimit="lowerSpecLimit"
               @specLimitChanged="handleSpecLimit"
               @saveLimits="saveLimits"
+              @updateChartLinesDisplay="handleChartLinesDisplay"
             />
             <x-bar-r-histogram-chart class="col-chart" />
           </div>
@@ -34,11 +35,27 @@
             title="Averages Chart"
             :dataList="dataList"
             :formattedDataList="formattedAverages"
+            :lineColors="averageChartColors"
+            :lineShapes="lineShapes"
+            :chartFields="averageChartFields"
+            :key="
+              []
+                .concat(averageChartColors, lineShapes, averageChartFields)
+                .join(':')
+            "
           />
           <chart-x
             title="Ranges Chart"
             :dataList="dataList"
             :formattedDataList="formattedRanges"
+            :lineColors="rangeChartColors"
+            :lineShapes="lineShapes"
+            :chartFields="rangeChartFields"
+            :key="
+              []
+                .concat(rangeChartColors, lineShapes, rangeChartFields)
+                .join(':')
+            "
           />
           <process-capability-ratios
             :dataList="dataList"
@@ -104,7 +121,12 @@ export default {
       statisticsData: [],
       formattedAverages: [],
       formattedDataCPK: [],
-      formattedRanges: []
+      formattedRanges: [],
+      averageChartColors: ["black", "red", "#a9a9a9", "red"],
+      rangeChartColors: ["black", "blue", "#a9a9a9", "blue"],
+      lineShapes: ["line", "dash"],
+      averageChartFields: ["Average", "Avg UCL", "Avg CL", "Avg LCL"],
+      rangeChartFields: ["Range", "Rng UCL", "Rng CL", "Rng LCL"]
     };
   },
 
@@ -306,10 +328,11 @@ export default {
         return {
           key: obj.id + "",
           label: obj.reference1,
-          Value: util.formatNumber(obj.average),
-          CL: util.formatNumber(this.xBarData.cl),
-          UCL: util.formatNumber(this.xBarData.ucl),
-          LCL: util.formatNumber(this.xBarData.lcl)
+          note: obj.note,
+          Average: util.formatNumber(obj.average),
+          "Avg CL": util.formatNumber(this.xBarData.cl),
+          "Avg UCL": util.formatNumber(this.xBarData.ucl),
+          "Avg LCL": util.formatNumber(this.xBarData.lcl)
         };
       });
 
@@ -317,7 +340,8 @@ export default {
         return {
           key: obj.id + "",
           label: obj.reference1,
-          cpk: util.formatNumber(obj.cumulativeCPK)
+          note: obj.note,
+          CPK: util.formatNumber(obj.cumulativeCPK)
         };
       });
 
@@ -325,10 +349,11 @@ export default {
         return {
           key: obj.id + "",
           label: obj.reference1,
-          Value: util.formatNumber(obj.range),
-          CL: util.formatNumber(this.rangeData.cl),
-          UCL: util.formatNumber(this.rangeData.ucl),
-          LCL: util.formatNumber(this.rangeData.lcl)
+          note: obj.note,
+          Range: util.formatNumber(obj.range),
+          "Rng CL": util.formatNumber(this.rangeData.cl),
+          "Rng UCL": util.formatNumber(this.rangeData.ucl),
+          "Rng LCL": util.formatNumber(this.rangeData.lcl)
         };
       });
     },
@@ -340,6 +365,34 @@ export default {
         this.$refs.xBarRExcelSheet.downloadData
       )
         this.$refs.xBarRExcelSheet.downloadData();
+    },
+
+    handleChartLinesDisplay({ displayControlLimits, displayCenterLines }) {
+      if (displayControlLimits && displayCenterLines) {
+        this.averageChartFields = ["Average", "Avg UCL", "Avg CL", "Avg LCL"];
+        this.rangeChartFields = ["Range", "Rng UCL", "Rng CL", "Rng LCL"];
+        this.averageChartColors = ["black", "red", "#a9a9a9", "red"];
+        this.rangeChartColors = ["black", "blue", "#a9a9a9", "blue"];
+        this.lineShapes = ["line", "dash"];
+      } else if (displayCenterLines) {
+        this.averageChartFields = ["Average", "Avg CL"];
+        this.rangeChartFields = ["Range", "Rng CL"];
+        this.averageChartColors = ["black", "#a9a9a9"];
+        this.rangeChartColors = ["black", "#a9a9a9"];
+        this.lineShapes = ["line"];
+      } else if (displayControlLimits) {
+        this.averageChartFields = ["Average", "Avg UCL", "Avg LCL"];
+        this.rangeChartFields = ["Range", "Rng UCL", "Rng LCL"];
+        this.averageChartColors = ["black", "red", "red"];
+        this.rangeChartColors = ["black", "blue", "blue"];
+        this.lineShapes = ["line", "dash", "dash"];
+      } else {
+        this.averageChartFields = ["Average"];
+        this.rangeChartFields = ["Range"];
+        this.averageChartColors = ["black"];
+        this.rangeChartColors = ["black"];
+        this.lineShapes = ["line"];
+      }
     }
   }
 };

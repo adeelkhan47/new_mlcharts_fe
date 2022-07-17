@@ -150,7 +150,8 @@ export default {
             id: this.item.id,
             label: this.item.label,
             value: this.num,
-            reference: this.item.reference
+            reference: this.item.reference,
+            note: this.item.note
           });
         else
           this.addDataItem({

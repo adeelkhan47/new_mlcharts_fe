@@ -3,7 +3,7 @@
     <h3 class="chart-title">{{ title }}</h3>
     <template v-if="chartData && chartData.length">
       <v-chart :forceFit="true" :height="400" :data="chartData" :scale="scale">
-        <v-tooltip />
+        <v-tooltip :showTitle="false" />
         <v-axis :label="label" data-key="key" />
         <v-line position="key*value" color="id" />
         <v-point position="key*value" color="id" />
@@ -60,7 +60,7 @@ export default {
   computed: {
     chartData() {
       const dv = new DataSet.View().source(this.formattedDataList);
-      let fields = ["cpk"];
+      let fields = ["CPK"];
       dv.transform({
         type: "fold",
         fields: fields,

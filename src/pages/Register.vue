@@ -9,7 +9,7 @@
       <div class="form">
         <md-field>
           <label>E-mail</label>
-          <md-input v-model="register.email" autofocus></md-input>
+          <md-input v-model="register.email" autofocus id="email"></md-input>
         </md-field>
 
         <md-field md-has-password>
@@ -29,7 +29,11 @@
 
         <md-field>
           <label>Company</label>
-          <md-input v-model="register.company" type="text"></md-input>
+          <md-input
+            v-model="register.company"
+            type="text"
+            id="company"
+          ></md-input>
         </md-field>
       </div>
 
@@ -90,6 +94,14 @@ export default {
   created() {
     const userObj = storageHelper.getUserObj();
     if (userObj) this.$router.push("/dashboard");
+  },
+  mounted() {
+    document.getElementById("email").focus();
+    document.getElementById("company").addEventListener("keypress", (e) => {
+      if (e.key === "Enter") {
+        this.signUp();
+      }
+    });
   },
   methods: {
     navigateToLogin() {

@@ -16,6 +16,23 @@ Vue.use(VueLoading);
 import ViserVue from "viser-vue";
 Vue.use(ViserVue);
 
+// import { Global } from 'viser-vue';
+// Global.setTheme({
+//   colors: [
+//     "black",
+//     "red",
+//     "grey",
+//     "#1890FF",
+//     "#2FC25B",
+//     "#FACC14",
+//     "#223273",
+//     "#8543E0",
+//     "#13C2C2",
+//     "#3436C7",
+//     "#F04864"
+//   ]
+// });
+
 import axios from "axios";
 axios.defaults.headers = {
   "Access-Control-Allow-Origin": "*"

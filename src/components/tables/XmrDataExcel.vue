@@ -32,8 +32,10 @@ export default {
       selectedItem: null,
       spreadsheet: null,
       records: [],
+      downloadableColsIndexes: [2, 3, 5, 6],
 
       options: {
+        csvFileName: "SPC Charts Data (Individuals)",
         includeHeadersOnDownload: true,
         allowInsertRow: true,
         columnSorting: false,
@@ -53,6 +55,11 @@ export default {
             width: "220px"
           },
           { type: "text", title: "Reference 2", width: "150px" },
+          {
+            type: "text",
+            title: "Notes",
+            width: "100px"
+          },
           {
             type: "numeric",
             title: "Value",
@@ -142,7 +149,7 @@ export default {
         ],
         tableOverflow: true,
         tableWidth: "755px",
-        tableHeight: "730px",
+        tableHeight: "830px",
         onpaste: this.handleChange,
         ondeleterow: this.handleChange,
         oneditionend: this.handleChange,
@@ -279,6 +286,7 @@ export default {
           lockLimit: false,
           label: obj.label,
           reference: obj.reference,
+          note: obj.note,
           value: obj.value,
           movingRange: util.formatNumber(obj.movingRange),
           cumulativeAverage: util.formatNumber(obj.cumulativeAverage),
@@ -309,6 +317,7 @@ export default {
           lockLimit: false,
           label: "",
           reference: "",
+          note: "",
           value: "",
           movingRange: "",
           cumulativeAverage: "",
@@ -429,7 +438,8 @@ export default {
           id: obj.id,
           label: obj.label,
           value: obj.value,
-          reference: obj.reference
+          reference: obj.reference,
+          note: obj.note
         }));
 
       return deletedRecords;
@@ -445,14 +455,16 @@ export default {
             oldData &&
             (oldData.label != currObj.label ||
               oldData.value != currObj.value ||
-              oldData.reference != currObj.reference)
+              oldData.reference != currObj.reference ||
+              oldData.note != currObj.note)
           );
         })
         .map((obj) => ({
           id: obj.id,
           label: obj.label,
           value: this.getParsedValue(obj.value),
-          reference: obj.reference
+          reference: obj.reference,
+          note: obj.note
         }));
 
       return updatedRecords;
@@ -466,7 +478,8 @@ export default {
           id: obj.id,
           label: obj.label,
           value: this.getParsedValue(obj.value),
-          reference: obj.reference
+          reference: obj.reference,
+          note: obj.note
         }));
 
       return newRecords;
@@ -501,7 +514,26 @@ export default {
 
     downloadData() {
       if (this.spreadsheet && this.spreadsheet.download) {
+        const self = this;
+        const officialHeaders = this.spreadsheet.headers;
+        const officialData = this.spreadsheet.options.data;
+
+        this.spreadsheet.headers = this.spreadsheet.headers.filter((_, index) =>
+          self.downloadableColsIndexes.includes(index)
+        );
+
+        this.spreadsheet.options.data = this.spreadsheet.options.data.map(
+          (rowArr) => {
+            return rowArr.filter((_, index) =>
+              self.downloadableColsIndexes.includes(index)
+            );
+          }
+        );
+
         this.spreadsheet.download();
+
+        this.spreadsheet.headers = officialHeaders;
+        this.spreadsheet.options.data = officialData;
       }
     }
   }

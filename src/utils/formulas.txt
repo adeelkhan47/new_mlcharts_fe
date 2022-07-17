@@ -1,0 +1,67 @@
+####################################################################################################
+## Individuals #####################################################################################
+####################################################################################################
+
+## CPL
+(CumulativeAverage - LowerSpecLimit) / (3 * CumulativeEstimatedStandardDeviation)
+
+## CPU
+(UpperSpecLimit - CumulativeAverage) / (3 * CumulativeEstimatedStandardDeviation)
+
+## CPK
+Minimum of => CPL & CPK
+
+
+## CPL (overall)
+(Average - LowerSpecLimit) / (3 * EstimatedStandardDeviation)
+
+## CPU (overall)
+(UpperSpecLimit - Average) / (3 * EstimatedStandardDeviation)
+
+## CPK (overall)
+Minimum of => CPL (overall) & CPK (overall)
+
+
+## CumulativeEstimatedStandardDeviation
+CumulativeAverageMovingRange / 1.128
+
+
+## EstimatedStandardDeviation
+AverageMovingRange / 1.128
+
+
+
+####################################################################################################
+## SubGrouped ######################################################################################
+####################################################################################################
+
+## CPL
+(CumulativeGrandAverage - LowerSpecLimit) / (3 * CumulativeEstimatedStandardDeviation)
+
+## CPU
+(UpperSpecLimit - CumulativeGrandAverage) / (3 * CumulativeEstimatedStandardDeviation)
+
+## CPK
+Minimum of => CPL & CPK
+
+
+## CPL (overall)
+(GrandGrandAverage - LowerSpecLimit) / (3 * EstimatedStandardDeviation)
+
+## CPU (overall)
+(UpperSpecLimit - GrandGrandAverage) / (3 * EstimatedStandardDeviation)
+
+## CPK (overall)
+Minimum of => CPL (overall) & CPK (overall)
+
+
+## GrandGrandAverage
+Average of CumulativeGrandAverage (column)
+
+
+## CumulativeEstimatedStandardDeviation [for subgroupSize 2]
+CumulativeAverageRange / 1.128
+
+
+## EstimatedStandardDeviation [for subgroupSize 2]
+AverageRange / 1.128

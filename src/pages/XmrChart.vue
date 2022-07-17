@@ -32,6 +32,7 @@
               :lowerSpecLimit="lowerSpecLimit"
               @specLimitChanged="handleSpecLimit"
               @saveLimits="saveLimits"
+              @updateChartLinesDisplay="handleChartLinesDisplay"
             />
             <chart-histogram class="col-chart" />
           </div>
@@ -42,12 +43,20 @@
             title="X Chart"
             :dataList="dataList"
             :formattedDataList="formattedDataList"
+            :lineColors="xChartColors"
+            :lineShapes="lineShapes"
+            :chartFields="xChartFields"
+            :key="[].concat(xChartColors, lineShapes, xChartFields).join(':')"
           />
           <chart-x
             title="MR Chart"
             :dataList="dataList"
             :formattedDataList="formattedMrDataList"
             :showLCL="false"
+            :lineColors="mrChartColors"
+            :lineShapes="lineShapes"
+            :chartFields="mrChartFields"
+            :key="[].concat(mrChartColors, lineShapes, mrChartFields).join(':')"
           />
           <process-capability-ratios
             :dataList="dataList"
@@ -117,7 +126,12 @@ export default {
       statisticsData: [],
       formattedDataList: [],
       formattedDataCPK: [],
-      formattedMrDataList: []
+      formattedMrDataList: [],
+      xChartColors: ["black", "red", "#a9a9a9", "red"],
+      mrChartColors: ["black", "blue", "#a9a9a9", "blue"],
+      lineShapes: ["line", "dash"],
+      xChartFields: ["Value", "UCL", "CL", "LCL"],
+      mrChartFields: ["Moving Range", "UCL", "CL"]
     };
   },
 
@@ -313,6 +327,7 @@ export default {
           key: obj.id + "",
           label: obj.label,
           Value: obj.value,
+          note: obj.note,
           CL: util.formatNumber(this.xChartData.cl),
           UCL: util.formatNumber(this.xChartData.ucl),
           LCL: util.formatNumber(this.xChartData.lcl)
@@ -324,10 +339,11 @@ export default {
           return {
             key: obj.id + "",
             label: obj.reference1,
-            cpk: util.formatNumber(obj.cumulativeCPK)
+            note: obj.note,
+            CPK: util.formatNumber(obj.cumulativeCPK)
           };
         })
-        .filter((obj) => typeof obj.cpk !== "string");
+        .filter((obj) => typeof obj.CPK !== "string");
 
       this.formattedMrDataList = this.dataList
         .filter((obj) => typeof obj.movingRange === "number")
@@ -335,7 +351,8 @@ export default {
           return {
             key: obj.id + "",
             label: obj.label,
-            Value: obj.movingRange,
+            "Moving Range": obj.movingRange,
+            note: obj.note,
             CL: util.formatNumber(this.mrChartData.cl),
             UCL: util.formatNumber(this.mrChartData.ucl)
           };
@@ -349,6 +366,34 @@ export default {
         this.$refs.xmrExcelSheet.downloadData
       )
         this.$refs.xmrExcelSheet.downloadData();
+    },
+
+    handleChartLinesDisplay({ displayControlLimits, displayCenterLines }) {
+      if (displayControlLimits && displayCenterLines) {
+        this.xChartFields = ["Value", "UCL", "CL", "LCL"];
+        this.mrChartFields = ["Moving Range", "UCL", "CL"];
+        this.xChartColors = ["black", "red", "#a9a9a9", "red"];
+        this.mrChartColors = ["black", "blue", "#a9a9a9", "blue"];
+        this.lineShapes = ["line", "dash"];
+      } else if (displayCenterLines) {
+        this.xChartFields = ["Value", "CL"];
+        this.mrChartFields = ["Moving Range", "CL"];
+        this.xChartColors = ["black", "#a9a9a9"];
+        this.mrChartColors = ["black", "#a9a9a9"];
+        this.lineShapes = ["line"];
+      } else if (displayControlLimits) {
+        this.xChartFields = ["Value", "UCL", "LCL"];
+        this.mrChartFields = ["Moving Range", "UCL"];
+        this.xChartColors = ["black", "red", "red"];
+        this.mrChartColors = ["black", "blue", "blue"];
+        this.lineShapes = ["line", "dash", "dash"];
+      } else {
+        this.xChartFields = ["Value"];
+        this.mrChartFields = ["Moving Range"];
+        this.xChartColors = ["black"];
+        this.mrChartColors = ["black"];
+        this.lineShapes = ["line"];
+      }
     }
   }
 };

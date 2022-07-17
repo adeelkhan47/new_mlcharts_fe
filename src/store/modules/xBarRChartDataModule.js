@@ -306,6 +306,7 @@ const xBarRChartDataModule = {
         obj.cumulativeCPL = cumulativeCPL;
         obj.cumulativeCPU = cumulativeCPU;
         obj.cumulativeCPK = cumulativeCPK;
+        obj.label = obj.reference1 || "";
 
         return obj;
       });
@@ -313,8 +314,8 @@ const xBarRChartDataModule = {
       const averageCPK = util.calculateAverage(
         list.map((obj) => obj.cumulativeCPK)
       );
-      const averageMR = list.length > 1 ? rangeSum / (list.length - 1) : "";
-      const stdDev = util.getStdDevForXBarR(averageMR, subgroupSize);
+      const averageRange = list.length > 1 ? rangeSum / list.length : "";
+      const stdDev = util.getStdDevForXBarR(averageRange, subgroupSize);
       const datasetAverage = util.calculateAverage(list.map(obj => obj.average));
       // methods are reused that's why they have cumulative in name
       const cpl = util.getCumulativeCPL(

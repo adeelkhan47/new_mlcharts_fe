@@ -330,7 +330,8 @@ const xmrChartDataModule = {
             chartId,
             label: "",
             value,
-            reference: ""
+            reference: "",
+            note: ""
           };
         });
 
@@ -361,7 +362,8 @@ const xmrChartDataModule = {
             chartId,
             label: itemObj.label || "",
             value: itemObj.value,
-            reference: itemObj.reference || ""
+            reference: itemObj.reference || "",
+            note: itemObj.note || ""
           };
         });
 
@@ -386,12 +388,12 @@ const xmrChartDataModule = {
 
     updateDataItem: (
       ctx,
-      { chartId, password, id, label, value, reference }
+      { chartId, password, id, label, value, reference, note }
     ) => {
       if (id && util.isNumber(value)) {
         ctx.commit("loading", true);
         xmrChartDataApi
-          .updateData(chartId, password, id, label, value, reference)
+          .updateData(chartId, password, id, label, value, reference, note)
           .then(() => {
             ctx.dispatch("init", { chartId, password });
           })

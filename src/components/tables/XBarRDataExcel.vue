@@ -15,6 +15,7 @@ const irrelevantKeys = [
   "id",
   "reference1",
   "reference2",
+  "note",
   "average",
   "range",
   "values",
@@ -52,8 +53,10 @@ export default {
       selectedItem: null,
       spreadsheet: null,
       records: [],
+      downloadableColsIndexes: [2, 3, 5, 6, 7, 8],
 
       options: {
+        csvFileName: "SPC Charts Data (Subgrouped)",
         includeHeadersOnDownload: true,
         allowInsertRow: true,
         columnSorting: false,
@@ -71,7 +74,7 @@ export default {
         ],
         tableOverflow: true,
         tableWidth: "755px",
-        tableHeight: "730px",
+        tableHeight: "830px",
         onpaste: this.handleChange,
         ondeleterow: this.handleChange,
         oneditionend: this.handleChange,
@@ -358,6 +361,7 @@ export default {
           (oldDataKeys.length !== currDataKeys.length ||
             oldData.reference1 != currObj.reference1 ||
             oldData.reference2 != currObj.reference2 ||
+            oldData.note != currObj.note ||
             changedKey)
         );
       });
@@ -417,6 +421,7 @@ export default {
             id: obj.id,
             reference1: obj.reference1,
             reference2: obj.reference2,
+            note: obj.note,
             values: values
           });
         });
@@ -437,7 +442,12 @@ export default {
           title: "Reference 1 (Appears on chart)",
           width: "220px"
         },
-        { type: "text", title: "Reference 2", width: "150px" }
+        { type: "text", title: "Reference 2", width: "150px" },
+        {
+          type: "text",
+          title: "Notes",
+          width: "100px"
+        }
       ];
 
       for (let i = 1; i <= this.subgroupSize; i++) {
@@ -562,7 +572,8 @@ export default {
           id: dataObj.id,
           lockLimit: false,
           reference1: dataObj.reference1,
-          reference2: dataObj.reference2
+          reference2: dataObj.reference2,
+          note: dataObj.note
         };
 
         average =
@@ -603,7 +614,8 @@ export default {
           id: "",
           lockLimit: false,
           reference1: "",
-          reference2: ""
+          reference2: "",
+          note: ""
         };
 
         append = {
@@ -643,7 +655,26 @@ export default {
 
     downloadData() {
       if (this.spreadsheet && this.spreadsheet.download) {
+        const self = this;
+        const officialHeaders = this.spreadsheet.headers;
+        const officialData = this.spreadsheet.options.data;
+
+        this.spreadsheet.headers = this.spreadsheet.headers.filter((_, index) =>
+          self.downloadableColsIndexes.includes(index)
+        );
+
+        this.spreadsheet.options.data = this.spreadsheet.options.data.map(
+          (rowArr) => {
+            return rowArr.filter((_, index) =>
+              self.downloadableColsIndexes.includes(index)
+            );
+          }
+        );
+
         this.spreadsheet.download();
+
+        this.spreadsheet.headers = officialHeaders;
+        this.spreadsheet.options.data = officialData;
       }
     }
   }

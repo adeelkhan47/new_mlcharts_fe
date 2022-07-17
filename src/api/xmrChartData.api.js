@@ -21,7 +21,7 @@ function createData(dataList, password = "") {
   return axios.post(URL, dataList);
 }
 
-function updateData(chartId, password, dataId, label, value, reference) {
+function updateData(chartId, password, dataId, label, value, reference, note) {
   const URL =
     constants.API_BASE_URL +
     constants.XMR_CHART_DATA_PATH +
@@ -32,7 +32,8 @@ function updateData(chartId, password, dataId, label, value, reference) {
     dataId,
     label,
     value,
-    reference
+    reference,
+    note
   });
 }
 
