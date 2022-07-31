@@ -13,6 +13,7 @@
           <md-button
             class="md-icon-button md-dense md-raised md-primary"
             @click="createChart"
+            v-show="charts && charts.length"
           >
             <md-icon>add</md-icon>
           </md-button>

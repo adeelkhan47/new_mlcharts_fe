@@ -1,6 +1,16 @@
 <template>
   <div class="x-chart" id="v-container">
-    <h3 class="chart-title">{{ title }}</h3>
+    <div class="chart-title-wrapper">
+      <h3 class="chart-title">
+        {{ title }}
+      </h3>
+      <md-button
+        class="md-icon-button md-dense md-primary chart-title-action"
+        @click="() => setEditModel(true)"
+      >
+        <md-icon>edit</md-icon>
+      </md-button>
+    </div>
     <template v-if="chartData && chartData.length">
       <v-chart :forceFit="true" :height="400" :data="chartData" :scale="scale">
         <v-tooltip :htmlContent="htmlContent" :showTitle="false" />
@@ -17,19 +27,33 @@
     <template v-else>
       <h4 class="no-data">No Data found</h4>
     </template>
+    <heading-edit-popup
+      title="Edit Chart Title"
+      :fields="formFields"
+      :visibility="titleEditVisibility"
+      @onClose="() => setEditModel(false)"
+      @onSubmit="saveChartTitle"
+    />
   </div>
 </template>
 
 <script>
 const DataSet = require("@antv/data-set");
 import colors from "../../utils/colors.util";
+import HeadingEditPopup from "../utility/HeadingEditPopup.vue";
 
 export default {
   name: "ChartX",
 
+  components: { HeadingEditPopup },
+
   props: {
     title: {
       type: String
+    },
+    chartKey: {
+      type: String,
+      default: ""
     },
     dataList: {
       type: Array
@@ -122,7 +146,8 @@ export default {
             </ul>
           </div>
         `;
-      }
+      },
+      titleEditVisibility: false
     };
   },
 
@@ -137,6 +162,16 @@ export default {
       });
 
       return dv.rows;
+    },
+
+    formFields() {
+      return [
+        {
+          label: "Chart Title",
+          key: this.chartKey,
+          value: this.title || ""
+        }
+      ];
     }
   },
 
@@ -147,6 +182,18 @@ export default {
         if (found) return found.label;
         else return "";
       } else return "";
+    },
+
+    setEditModel(visibility) {
+      this.titleEditVisibility = visibility;
+    },
+
+    saveChartTitle(content) {
+      this.setEditModel(false);
+      const obj = content[0];
+      this.$emit("onTitleChange", {
+        [obj.key]: obj.value
+      });
     }
   }
 };
@@ -159,8 +206,24 @@ export default {
   width: 100%;
 }
 
+.chart-title-wrapper {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+
 .chart-title {
   text-align: center;
+}
+
+.chart-title-action {
+  display: none;
+  display: block;
+}
+
+.chart-title-wrapper:hover .chart-title-action {
+  display: block;
 }
 
 .no-data {

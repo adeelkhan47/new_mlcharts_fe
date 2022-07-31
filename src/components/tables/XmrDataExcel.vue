@@ -21,7 +21,7 @@ export default {
     jexcel
   },
 
-  props: ["saveBtn"],
+  props: ["saveBtn", "headings"],
 
   data() {
     return {
@@ -42,111 +42,7 @@ export default {
         columnResize: false,
         allowToolbar: true,
         rowDrag: false,
-        columns: [
-          { type: "text", title: "ID", width: "0px", readOnly: true },
-          {
-            type: "radio",
-            title: "Lock Limit",
-            width: "100px"
-          },
-          {
-            type: "text",
-            title: "Reference 1 (Appears on chart)",
-            width: "220px"
-          },
-          { type: "text", title: "Reference 2", width: "150px" },
-          {
-            type: "text",
-            title: "Notes",
-            width: "100px"
-          },
-          {
-            type: "numeric",
-            title: "Value",
-            width: "100px",
-            mask: "#,##.00",
-            decimal: "."
-          },
-          {
-            type: "text",
-            title: "Moving Range",
-            width: "100px",
-            readOnly: true
-          },
-          {
-            type: "text",
-            title: "Cumul. Avg",
-            width: "100px",
-            readOnly: true
-          },
-          {
-            type: "text",
-            title: "Cumul. Avg mR",
-            width: "110px",
-            readOnly: true
-          },
-          {
-            type: "text",
-            title: "Cumul. Est SD",
-            width: "100px",
-            readOnly: true
-          },
-
-          {
-            type: "text",
-            title: "x UCL",
-            width: "100px",
-            readOnly: true
-          },
-          {
-            type: "text",
-            title: "x CL",
-            width: "100px",
-            readOnly: true
-          },
-          {
-            type: "text",
-            title: "x LCL",
-            width: "100px",
-            readOnly: true
-          },
-          {
-            type: "text",
-            title: "mR UCL",
-            width: "100px",
-            readOnly: true
-          },
-          {
-            type: "text",
-            title: "mR CL",
-            width: "100px",
-            readOnly: true
-          },
-          {
-            type: "text",
-            title: "CPL",
-            width: "100px",
-            readOnly: true
-          },
-          {
-            type: "text",
-            title: "CPU",
-            width: "100px",
-            readOnly: true
-          },
-          {
-            type: "text",
-            title: "CPK",
-            width: "100px",
-            readOnly: true
-          },
-          {
-            type: "text",
-            title: "Avg Cpk (overall)",
-            width: "120px",
-            readOnly: true
-          }
-        ],
+        columns: this.getExcelColumns(),
         tableOverflow: true,
         tableWidth: "755px",
         tableHeight: "830px",
@@ -347,6 +243,13 @@ export default {
       }
 
       this.init();
+    },
+
+    headings() {
+      if (this.headings && Object.keys(this.headings).length) {
+        this.options.columns = this.getExcelColumns();
+        this.init();
+      }
     }
   },
 
@@ -377,8 +280,10 @@ export default {
     },
 
     init() {
-      let el = document.getElementById(this.excelId);
+      const el = document.getElementById(this.excelId);
       if (el) {
+        if (this.spreadsheet && this.spreadsheet.destroy)
+          this.spreadsheet.destroy();
         el.innerHTML = "";
         this.spreadsheet = null;
         this.spreadsheet = jexcel(el, this.options);
@@ -535,6 +440,119 @@ export default {
         this.spreadsheet.headers = officialHeaders;
         this.spreadsheet.options.data = officialData;
       }
+    },
+
+    getExcelColumns() {
+      const headings = this.headings || {};
+      return [
+        { type: "text", title: "ID", width: "0px", readOnly: true },
+        {
+          type: "radio",
+          title: "Lock Limits",
+          width: "100px"
+        },
+        {
+          type: "text",
+          title: headings.col2
+            ? headings.col2.endsWith("(Appears on chart)")
+              ? headings.col2
+              : headings.col2 + " (Appears on chart)"
+            : "Reference 1 (Appears on chart)",
+          width: "220px"
+        },
+        { type: "text", title: headings.col3 || "Reference 2", width: "150px" },
+        {
+          type: "text",
+          title: "Notes",
+          width: "100px"
+        },
+        {
+          type: "numeric",
+          title: "Value",
+          width: "100px",
+          mask: "#,##.00",
+          decimal: "."
+        },
+        {
+          type: "text",
+          title: "Moving Range",
+          width: "100px",
+          readOnly: true
+        },
+        {
+          type: "text",
+          title: "Cumul. Avg",
+          width: "100px",
+          readOnly: true
+        },
+        {
+          type: "text",
+          title: "Cumul. Avg mR",
+          width: "110px",
+          readOnly: true
+        },
+        {
+          type: "text",
+          title: "Cumul. Est SD",
+          width: "100px",
+          readOnly: true
+        },
+
+        {
+          type: "text",
+          title: "x UCL",
+          width: "100px",
+          readOnly: true
+        },
+        {
+          type: "text",
+          title: "x CL",
+          width: "100px",
+          readOnly: true
+        },
+        {
+          type: "text",
+          title: "x LCL",
+          width: "100px",
+          readOnly: true
+        },
+        {
+          type: "text",
+          title: "mR UCL",
+          width: "100px",
+          readOnly: true
+        },
+        {
+          type: "text",
+          title: "mR CL",
+          width: "100px",
+          readOnly: true
+        },
+        {
+          type: "text",
+          title: "CPL",
+          width: "100px",
+          readOnly: true
+        },
+        {
+          type: "text",
+          title: "CPU",
+          width: "100px",
+          readOnly: true
+        },
+        {
+          type: "text",
+          title: "CPK",
+          width: "100px",
+          readOnly: true
+        },
+        {
+          type: "text",
+          title: "Avg Cpk (overall)",
+          width: "120px",
+          readOnly: true
+        }
+      ];
     }
   }
 };

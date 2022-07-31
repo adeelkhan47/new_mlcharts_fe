@@ -42,7 +42,7 @@ export default {
     jexcel
   },
 
-  props: ["saveBtn", "subgroupSize"],
+  props: ["saveBtn", "subgroupSize", "headings"],
 
   data() {
     return {
@@ -234,6 +234,14 @@ export default {
       }
 
       this.init();
+    },
+
+    headings() {
+      if (this.headings && Object.keys(this.headings).length) {
+        this.options.columns = this.getExcelColumns();
+        this.options = JSON.parse(JSON.stringify(this.options));
+        this.init();
+      }
     }
   },
 
@@ -265,8 +273,10 @@ export default {
     },
 
     init() {
-      let el = document.getElementById(this.excelId);
+      const el = document.getElementById(this.excelId);
       if (el) {
+        if (this.spreadsheet && this.spreadsheet.destroy)
+          this.spreadsheet.destroy();
         el.innerHTML = "";
         this.spreadsheet = null;
         this.spreadsheet = jexcel(el, this.options);
@@ -430,19 +440,24 @@ export default {
     },
 
     getExcelColumns() {
+      const headings = this.headings || {};
       let columns = [
         { type: "text", title: "Row ID", width: "0px", readOnly: true },
         {
           type: "radio",
-          title: "Lock Limit",
+          title: "Lock Limits",
           width: "100px"
         },
         {
           type: "text",
-          title: "Reference 1 (Appears on chart)",
+          title: headings.col2
+            ? headings.col2.endsWith("(Appears on chart)")
+              ? headings.col2
+              : headings.col2 + " (Appears on chart)"
+            : "Reference 1 (Appears on chart)",
           width: "220px"
         },
-        { type: "text", title: "Reference 2", width: "150px" },
+        { type: "text", title: headings.col3 || "Reference 2", width: "150px" },
         {
           type: "text",
           title: "Notes",

@@ -1,4 +1,4 @@
-const API_BASE_URL =  "http://143.198.63.57:8090";
+const API_BASE_URL = "http://143.198.63.57:8090";
 const XMR_CHART_DATA_PATH = "/xmr-data";
 const X_BAR_R_CHART_PATH = "/x-bar-r";
 const DASHBOARD_CHART_PATH = "/dashboard-charts";
@@ -22,6 +22,20 @@ const CONST_BY_SUBGROUP_SIZE = {
   10: { a2: 0.308, d2: 3.078, d3: 0.223, d4: 1.777 }
 };
 
+const INDIVIDUALS_CHART_DEFAULT_HEADINGS = {
+  col2: "Reference 1 (Appears on chart)",
+  col3: "Reference 2",
+  chart1: "X Chart",
+  chart2: "MR Chart"
+};
+const SUB_GROUPED_CHART_DEFAULT_HEADINGS = {
+  col2: "Reference 1 (Appears on chart)",
+  col3: "Reference 2",
+  chart1: "Averages Chart",
+  chart2: "Ranges Chart"
+};
+
+
 const constants = Object.freeze({
   API_BASE_URL,
   XMR_CHART_DATA_PATH,
@@ -33,7 +47,9 @@ const constants = Object.freeze({
   X_VALUE_CONSTANT,
   MR_VALUE_CONSTANT,
   DEFAULT_LOCK_LIMIT_FOR_SUBGROUPED_CHART,
-  DEFAULT_LOCK_LIMIT_FOR_INDIVIDUALS_CHART
+  DEFAULT_LOCK_LIMIT_FOR_INDIVIDUALS_CHART,
+  INDIVIDUALS_CHART_DEFAULT_HEADINGS,
+  SUB_GROUPED_CHART_DEFAULT_HEADINGS
 });
 
 export default constants;

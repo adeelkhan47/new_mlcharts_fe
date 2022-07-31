@@ -138,6 +138,7 @@ import {
   minValue,
   maxValue
 } from "vuelidate/lib/validators";
+import constants from "../../utils/constants.util";
 import { mapActions } from "vuex";
 
 export default {
@@ -293,6 +294,11 @@ export default {
 
       if (!this.$v.$invalid) {
         this.loading = true;
+        const headings =
+          this.form.subgroupSize === 1
+            ? constants.INDIVIDUALS_CHART_DEFAULT_HEADINGS
+            : constants.SUB_GROUPED_CHART_DEFAULT_HEADINGS;
+
         this.isUpdate
           ? this.updateChart({
               chartId: this.dashboardChart.chartId,
@@ -300,7 +306,7 @@ export default {
               cb: this.displayMessage
             })
           : this.createChart({
-              body: { ...this.form },
+              body: { ...this.form, headings: JSON.stringify(headings) },
               cb: this.displayMessage
             });
       }

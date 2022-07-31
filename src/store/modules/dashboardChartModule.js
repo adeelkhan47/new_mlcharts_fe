@@ -11,7 +11,13 @@ const dashboardChartModule = {
     loading: false
   }),
 
-  getters: {},
+  getters: {
+    currentChartHeadings: (state) => {
+      if (state.currentChart && state.currentChart.headings)
+        return JSON.parse(state.currentChart.headings);
+      else return {};
+    }
+  },
 
   actions: {
     init(ctx) {
@@ -33,8 +39,8 @@ const dashboardChartModule = {
       {
         chartId,
         moduleName = "xmrChartDataModule",
-        cb = () => {},
-        getMeThePassword = () => {}
+        cb = () => { },
+        getMeThePassword = () => { }
       }
     ) {
       ctx.commit("LOADING", true);
@@ -77,7 +83,7 @@ const dashboardChartModule = {
 
     actuallyGetChart(
       ctx,
-      { chartId, password = "", moduleName, cb = () => {} }
+      { chartId, password = "", moduleName, cb = () => { } }
     ) {
       dashboardChartApi
         .getDashboardChartById(chartId, password)
@@ -108,7 +114,7 @@ const dashboardChartModule = {
         });
     },
 
-    createChart(ctx, { body, cb = () => {} }) {
+    createChart(ctx, { body, cb = () => { } }) {
       let requestBody = { ...body };
 
       requestBody.upperSpecLimit = "";
@@ -132,7 +138,7 @@ const dashboardChartModule = {
         });
     },
 
-    updateChart(ctx, { chartId, body, cb = () => {} }) {
+    updateChart(ctx, { chartId, body, cb = () => { } }) {
       dashboardChartApi
         .updateDashboardChart(chartId, body)
         .then((res) => {
@@ -154,7 +160,7 @@ const dashboardChartModule = {
         });
     },
 
-    deleteChart(ctx, { chartId, cb = () => {} }) {
+    deleteChart(ctx, { chartId, cb = () => { } }) {
       dashboardChartApi
         .deleteDashboardChart(chartId)
         .then(() => {
@@ -169,6 +175,35 @@ const dashboardChartModule = {
           cb({
             success: false,
             message: error?.response?.data || "Unable to deleted chart"
+          });
+        });
+    },
+
+    saveChartHeadings(ctx, { chartId, headings, cb = () => { } }) {
+      const body = {
+        headings: JSON.stringify(headings)
+      };
+
+      dashboardChartApi
+        .updateChartHeadings(chartId, body)
+        .then((res) => {
+          ctx.commit("UPDATE_DASHBOARD_CHART", {
+            chartId,
+            chartObj: res.data.data[0]
+          });
+          const currentChart = JSON.parse(JSON.stringify(ctx.state.currentChart));
+          currentChart.headings = JSON.stringify(headings);
+          ctx.commit("CURRENT_CHART", currentChart);
+          cb({
+            success: true,
+            message: "Successfully updated data"
+          });
+        })
+        .catch((error) => {
+          console.error("Unable to update data :: ", error);
+          cb({
+            success: false,
+            message: error?.response?.data || "Unable to update data"
           });
         });
     }

@@ -4,13 +4,20 @@
       <div class="content-body">
         <div class="tables">
           <div class="column-row">
-            <div class="chart-action">
+            <div class="chart-actions">
               <md-button
                 class="md-primary md-raised no-transform chart-action-btn"
                 @click="downloadData"
               >
                 <md-icon>download</md-icon>
                 Export to excel
+              </md-button>
+              <md-button
+                class="md-primary md-raised no-transform chart-action-btn"
+                @click="() => setEditModel(true)"
+              >
+                <md-icon>edit</md-icon>
+                Edit Columns
               </md-button>
             </div>
             <statistics-table
@@ -27,12 +34,14 @@
             <x-bar-r-data-excel
               :subgroupSize="subgroupSize"
               ref="xBarRExcelSheet"
+              :headings="currentChartHeadings"
             />
           </template>
         </div>
         <div class="charts">
           <chart-x
-            title="Averages Chart"
+            chartKey="chart1"
+            :title="currentChartHeadings.chart1"
             :dataList="dataList"
             :formattedDataList="formattedAverages"
             :lineColors="averageChartColors"
@@ -43,9 +52,11 @@
                 .concat(averageChartColors, lineShapes, averageChartFields)
                 .join(':')
             "
+            @onTitleChange="saveDashboardHeadings"
           />
           <chart-x
-            title="Ranges Chart"
+            chartKey="chart2"
+            :title="currentChartHeadings.chart2"
             :dataList="dataList"
             :formattedDataList="formattedRanges"
             :lineColors="rangeChartColors"
@@ -56,6 +67,7 @@
                 .concat(rangeChartColors, lineShapes, rangeChartFields)
                 .join(':')
             "
+            @onTitleChange="saveDashboardHeadings"
           />
           <process-capability-ratios
             :dataList="dataList"
@@ -85,10 +97,18 @@
         >
       </md-dialog-actions>
     </md-dialog>
+    <heading-edit-popup
+      title="Edit Column Titles"
+      :fields="colFields"
+      :visibility="colEditVisibility"
+      @onClose="() => setEditModel(false)"
+      @onSubmit="saveColumnTitles"
+    />
   </div>
 </template>
 
 <script>
+import constants from "../utils/constants.util";
 import XBarRDataExcel from "../components/tables/XBarRDataExcel.vue";
 import StatisticsTable from "../components/tables/StatisticsTable.vue";
 import ChartX from "../components/charts/ChartX.vue";
@@ -98,6 +118,7 @@ import { mapActions, mapGetters, mapState } from "vuex";
 import util from "../utils";
 import { dashboardChartApi } from "../api";
 import XBarRHistogramChart from "../components/charts/XBarRHistogramChart.vue";
+import HeadingEditPopup from "../components/utility/HeadingEditPopup.vue";
 
 export default {
   name: "XBarRChart",
@@ -107,11 +128,13 @@ export default {
     XBarRDataExcel,
     ChartX,
     ProcessCapabilityRatios,
-    XBarRHistogramChart
+    XBarRHistogramChart,
+    HeadingEditPopup
   },
 
   data() {
     return {
+      colEditVisibility: false,
       loader: null,
       showAddDialog: false,
       chartId: "",
@@ -142,6 +165,8 @@ export default {
       "lockedRowIndex"
     ]),
 
+    ...mapGetters("dashboardChartModule", ["currentChartHeadings"]),
+
     ...mapGetters("xBarRChartDataModule", [
       "cpu",
       "cpl",
@@ -151,7 +176,25 @@ export default {
       "cumulativeAverageRange",
       "cumulativeGrandAverage",
       "cumulativeStdDev"
-    ])
+    ]),
+
+    colFields() {
+      const headings = this.currentChartHeadings || {};
+      return [
+        {
+          label: "Reference 1 title",
+          key: "col2",
+          value: headings.col2
+            ? headings.col2.replace("(Appears on chart)", "")
+            : ""
+        },
+        {
+          label: "Reference 2 title",
+          key: "col3",
+          value: headings.col3 || ""
+        }
+      ];
+    }
   },
 
   watch: {
@@ -236,7 +279,7 @@ export default {
       "setUpperSpecLimit",
       "setLowerSpecLimit"
     ]),
-    ...mapActions("dashboardChartModule", ["getChart"]),
+    ...mapActions("dashboardChartModule", ["getChart", "saveChartHeadings"]),
     ...mapActions("responseMessageModule", ["setShow", "setMessage"]),
 
     handleSpecLimit({ key, value }) {
@@ -393,6 +436,50 @@ export default {
         this.rangeChartColors = ["black"];
         this.lineShapes = ["line"];
       }
+    },
+
+    saveDashboardHeadings(newObj) {
+      const defaultHeadings = constants.SUB_GROUPED_CHART_DEFAULT_HEADINGS;
+
+      const newHeading = {};
+      for (const key in newObj) {
+        let value = newObj[key];
+        if (!value) value = defaultHeadings[key];
+        newHeading[key] = value;
+      }
+
+      const headings = Object.assign({}, this.currentChartHeadings, newHeading);
+      const changed =
+        JSON.stringify(this.currentChartHeadings) !== JSON.stringify(headings);
+
+      if (changed)
+        this.saveChartHeadings({
+          chartId: this.chartId,
+          headings: headings,
+          cb: (response) => {
+            if (response && !response.success) {
+              if (response.message) {
+                this.setMessage(response.message);
+                this.setShow(true);
+              }
+            }
+          }
+        });
+    },
+
+    setEditModel(visibility) {
+      this.colEditVisibility = visibility;
+    },
+
+    saveColumnTitles(cols) {
+      this.setEditModel(false);
+
+      const payload = cols.reduce((finalObj, colObj) => {
+        finalObj[colObj.key] = colObj.value;
+        return finalObj;
+      }, {});
+
+      this.saveDashboardHeadings(payload);
     }
   }
 };
@@ -457,16 +544,20 @@ export default {
   width: 350px;
 }
 
-.chart-action {
+.chart-actions {
   width: 100%;
   padding: 8px;
   padding-top: 0;
   margin-bottom: 20px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .chart-action-btn {
   margin-top: 2px;
-  width: calc(100% - 16px);
+  flex: 1;
 }
 
 .col-chart {
