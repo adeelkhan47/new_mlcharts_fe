@@ -3,6 +3,7 @@ import VueRouter from "vue-router";
 import MainLayout from "../Layouts/MainLayout.vue";
 import Dashboard from "../pages/Dashboard.vue";
 import About from "../pages/About.vue";
+import Account from "../pages/Account.vue";
 import Login from "../pages/Login.vue";
 import Register from "../pages/Register.vue";
 import XmrChart from "../pages/XmrChart.vue";
@@ -25,6 +26,11 @@ const routes = [
         path: "/about",
         name: "About",
         component: About
+      },
+      {
+        path: "/account",
+        name: "Account",
+        component: Account
       },
       {
         path: "/i/:chartId",

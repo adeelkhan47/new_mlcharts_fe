@@ -37,6 +37,11 @@
                   </md-menu-item> -->
 
                   <md-menu-item class="header-menu-item">
+                    <md-icon>settings</md-icon>
+                    <router-link to="/account"> Account </router-link>
+                  </md-menu-item>
+
+                  <md-menu-item class="header-menu-item">
                     <md-icon>logout</md-icon>
                     <a @click="logout">Logout</a>
                   </md-menu-item>
@@ -138,7 +143,8 @@ export default {
 
     logout() {
       storageHelper.removeUserObj();
-      this.$router.push("/login");
+      localStorage.clear();
+      window.location = "/login";
     }
   }
 };

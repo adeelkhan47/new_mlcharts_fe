@@ -14,7 +14,7 @@ export default {
   data() {
     return {
       // "About",
-      paths: ["Dashboard", "XmrChart", "XBarRChart"]
+      paths: ["Dashboard", "XmrChart", "XBarRChart", "Account"]
     };
   },
 
@@ -25,7 +25,11 @@ export default {
       setDefaultHeader("user-id", storageHelper.getUserId());
     }
 
-    if (!userObj && this.$route.name != "Login") this.$router.push("/login");
+    if (
+      !userObj &&
+      !(this.$route.name === "Login" || this.$route.name === "Register")
+    )
+      this.$router.push("/login");
     else if (userObj && !this.paths.includes(this.$route.name))
       this.$router.push("/dashboard");
   }

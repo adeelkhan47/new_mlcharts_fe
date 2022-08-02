@@ -16,7 +16,7 @@ function getUserObj() {
 function setUserObj(userObj) {
   if (userObj && typeof userObj == "object" && Object.keys(userObj).length) {
     localStorage.setItem(USER_DATA_KEY, JSON.stringify(userObj));
-    setDefaultHeader("user-id", userObj.email);
+    setDefaultHeader("user-id", userObj.id);
   }
 }
 
@@ -26,7 +26,7 @@ function removeUserObj() {
 
 function getUserId() {
   const userObj = getUserObj();
-  if (userObj && userObj.email) return userObj.email;
+  if (userObj && userObj.id) return userObj.id;
   else return null;
 }
 

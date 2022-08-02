@@ -46,9 +46,23 @@ function register(email, password, firstName, lastName, company) {
   });
 }
 
+function updateUser(userId, updatedUserObj) {
+  const URL = constants.API_BASE_URL + constants.USER_PATH + "/" + userId;
+  return axios.put(URL, updatedUserObj);
+}
+
+function deleteUser(userId, password) {
+  const URL = constants.API_BASE_URL + constants.USER_PATH + "/delete/" + userId;
+  return axios.post(URL, {
+    password: password
+  });
+}
+
 const userApi = Object.freeze({
   login,
-  register
+  register,
+  updateUser,
+  deleteUser
 });
 
 export default userApi;
