@@ -58,11 +58,17 @@ function deleteUser(userId, password) {
   });
 }
 
+function getAllUsers_admin() {
+  const URL = constants.API_BASE_URL + constants.USER_PATH;
+  return axios.get(URL);
+}
+
 const userApi = Object.freeze({
   login,
   register,
   updateUser,
-  deleteUser
+  deleteUser,
+  getAllUsers_admin
 });
 
 export default userApi;

@@ -386,10 +386,10 @@ export default {
             key: obj.id + "",
             label: obj.reference1,
             note: obj.note,
-            CPK: util.formatNumber(obj.cumulativeCPK)
+            Cpk: util.formatNumber(obj.cumulativeCPK)
           };
         })
-        .filter((obj) => typeof obj.CPK !== "string");
+        .filter((obj) => typeof obj.Cpk !== "string");
 
       this.formattedMrDataList = this.dataList
         .filter((obj) => typeof obj.movingRange === "number")

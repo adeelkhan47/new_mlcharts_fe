@@ -4,6 +4,7 @@ import MainLayout from "../Layouts/MainLayout.vue";
 import Dashboard from "../pages/Dashboard.vue";
 import About from "../pages/About.vue";
 import Account from "../pages/Account.vue";
+import UsersAdmin from "../pages/UsersAdmin.vue";
 import Login from "../pages/Login.vue";
 import Register from "../pages/Register.vue";
 import XmrChart from "../pages/XmrChart.vue";
@@ -31,6 +32,11 @@ const routes = [
         path: "/account",
         name: "Account",
         component: Account
+      },
+      {
+        path: "/users",
+        name: "Users",
+        component: UsersAdmin
       },
       {
         path: "/i/:chartId",

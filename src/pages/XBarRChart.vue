@@ -379,14 +379,16 @@ export default {
         };
       });
 
-      this.formattedDataCPK = this.dataList.map((obj) => {
-        return {
-          key: obj.id + "",
-          label: obj.reference1,
-          note: obj.note,
-          CPK: util.formatNumber(obj.cumulativeCPK)
-        };
-      });
+      this.formattedDataCPK = this.dataList
+        .map((obj) => {
+          return {
+            key: obj.id + "",
+            label: obj.reference1,
+            note: obj.note,
+            Cpk: util.formatNumber(obj.cumulativeCPK)
+          };
+        })
+        .filter((obj) => typeof obj.Cpk !== "string");
 
       this.formattedRanges = this.dataList.map((obj) => {
         return {

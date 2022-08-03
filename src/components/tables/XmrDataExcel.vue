@@ -32,7 +32,7 @@ export default {
       selectedItem: null,
       spreadsheet: null,
       records: [],
-      downloadableColsIndexes: [2, 3, 5, 6],
+      downloadableColsIndexes: [2, 3, 4, 6],
 
       options: {
         csvFileName: "SPC Charts Data (Individuals)",
@@ -42,7 +42,7 @@ export default {
         columnResize: false,
         allowToolbar: true,
         rowDrag: false,
-        columns: this.getExcelColumns(),
+        columns: [],
         tableOverflow: true,
         tableWidth: "755px",
         tableHeight: "830px",
@@ -182,8 +182,8 @@ export default {
           lockLimit: false,
           label: obj.label,
           reference: obj.reference,
-          note: obj.note,
           value: obj.value,
+          note: obj.note,
           movingRange: util.formatNumber(obj.movingRange),
           cumulativeAverage: util.formatNumber(obj.cumulativeAverage),
           cumulativeAverageMR: util.formatNumber(obj.cumulativeAverageMR),
@@ -213,8 +213,8 @@ export default {
           lockLimit: false,
           label: "",
           reference: "",
-          note: "",
           value: "",
+          note: "",
           movingRange: "",
           cumulativeAverage: "",
           cumulativeAverageMR: "",
@@ -247,7 +247,6 @@ export default {
 
     headings() {
       if (this.headings && Object.keys(this.headings).length) {
-        this.options.columns = this.getExcelColumns();
         this.init();
       }
     }
@@ -286,6 +285,7 @@ export default {
           this.spreadsheet.destroy();
         el.innerHTML = "";
         this.spreadsheet = null;
+        this.options.columns = this.getExcelColumns();
         this.spreadsheet = jexcel(el, this.options);
       }
     },
@@ -462,16 +462,16 @@ export default {
         },
         { type: "text", title: headings.col3 || "Reference 2", width: "150px" },
         {
-          type: "text",
-          title: "Notes",
-          width: "100px"
-        },
-        {
           type: "numeric",
           title: "Value",
           width: "100px",
           mask: "#,##.00",
           decimal: "."
+        },
+        {
+          type: "text",
+          title: "Notes",
+          width: "100px"
         },
         {
           type: "text",
@@ -548,7 +548,7 @@ export default {
         },
         {
           type: "text",
-          title: "Avg Cpk (overall)",
+          title: "Avg CPK (overall)",
           width: "120px",
           readOnly: true
         }

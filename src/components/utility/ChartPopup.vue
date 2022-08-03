@@ -109,7 +109,7 @@
               class="md-primary"
               :disabled="loading"
             >
-              Password-protected?
+              Keep chart password-protected?
             </md-checkbox>
           </md-card-content>
 

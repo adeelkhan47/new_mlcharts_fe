@@ -14,7 +14,7 @@ export default {
   data() {
     return {
       // "About",
-      paths: ["Dashboard", "XmrChart", "XBarRChart", "Account"]
+      paths: ["Dashboard", "XmrChart", "XBarRChart", "Account", "Users"]
     };
   },
 

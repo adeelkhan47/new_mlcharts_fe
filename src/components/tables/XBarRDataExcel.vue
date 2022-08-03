@@ -53,7 +53,6 @@ export default {
       selectedItem: null,
       spreadsheet: null,
       records: [],
-      downloadableColsIndexes: [2, 3, 5, 6, 7, 8],
 
       options: {
         csvFileName: "SPC Charts Data (Subgrouped)",
@@ -457,12 +456,7 @@ export default {
             : "Reference 1 (Appears on chart)",
           width: "220px"
         },
-        { type: "text", title: headings.col3 || "Reference 2", width: "150px" },
-        {
-          type: "text",
-          title: "Notes",
-          width: "100px"
-        }
+        { type: "text", title: headings.col3 || "Reference 2", width: "150px" }
       ];
 
       for (let i = 1; i <= this.subgroupSize; i++) {
@@ -476,6 +470,11 @@ export default {
       }
 
       return columns.concat([
+        {
+          type: "text",
+          title: "Notes",
+          width: "100px"
+        },
         {
           type: "text",
           title: "Average",
@@ -587,8 +586,7 @@ export default {
           id: dataObj.id,
           lockLimit: false,
           reference1: dataObj.reference1,
-          reference2: dataObj.reference2,
-          note: dataObj.note
+          reference2: dataObj.reference2
         };
 
         average =
@@ -604,6 +602,7 @@ export default {
         }
 
         append = {
+          note: dataObj.note,
           average: util.formatNumber(average),
           range: util.formatNumber(range),
           cumulativeGrandAverage: util.formatNumber(
@@ -629,11 +628,11 @@ export default {
           id: "",
           lockLimit: false,
           reference1: "",
-          reference2: "",
-          note: ""
+          reference2: ""
         };
 
         append = {
+          note: "",
           average: "",
           range: "",
           cumulativeGrandAverage: "",
@@ -670,18 +669,25 @@ export default {
 
     downloadData() {
       if (this.spreadsheet && this.spreadsheet.download) {
-        const self = this;
+        const downloadableColsIndexes = [2, 3];
+        let i = 0;
+        for (i = 0; i < this.subgroupSize; i++) {
+          downloadableColsIndexes.push(i + 4);
+        }
+        downloadableColsIndexes.push(i + 5);
+        downloadableColsIndexes.push(i + 6);
+
         const officialHeaders = this.spreadsheet.headers;
         const officialData = this.spreadsheet.options.data;
 
         this.spreadsheet.headers = this.spreadsheet.headers.filter((_, index) =>
-          self.downloadableColsIndexes.includes(index)
+          downloadableColsIndexes.includes(index)
         );
 
         this.spreadsheet.options.data = this.spreadsheet.options.data.map(
           (rowArr) => {
             return rowArr.filter((_, index) =>
-              self.downloadableColsIndexes.includes(index)
+              downloadableColsIndexes.includes(index)
             );
           }
         );

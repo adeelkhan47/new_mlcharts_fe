@@ -41,6 +41,14 @@
                     <router-link to="/account"> Account </router-link>
                   </md-menu-item>
 
+                  <md-menu-item
+                    class="header-menu-item"
+                    v-if="user && user.role === 'admin'"
+                  >
+                    <md-icon>group</md-icon>
+                    <router-link to="/users"> Users </router-link>
+                  </md-menu-item>
+
                   <md-menu-item class="header-menu-item">
                     <md-icon>logout</md-icon>
                     <a @click="logout">Logout</a>
@@ -212,6 +220,10 @@ export default {
   font-size: 14px;
   letter-spacing: 2px;
   text-transform: uppercase;
+}
+
+.app-content {
+  height: 100%;
 }
 </style>
 
