@@ -227,6 +227,10 @@ const xmrChartDataModule = {
       let cumulativeCPL = 0;
       let cumulativeCPU = 0;
       let cumulativeCPK = 0;
+      let sampleStdDev = 0;
+      let cumulativePPL = 0;
+      let cumulativePPU = 0;
+      let cumulativePPK = 0;
 
       list = list.map((obj, i) => {
         prev = curr;
@@ -246,6 +250,10 @@ const xmrChartDataModule = {
           cumulativeCPL = "";
           cumulativeCPU = "";
           cumulativeCPK = "";
+          sampleStdDev = "";
+          cumulativePPL = "";
+          cumulativePPU = "";
+          cumulativePPK = "";
         } else {
           mrSum += movingRange;
           cumulativeAverageMR = util.getCumulativeAverage(mrSum, i);
@@ -265,6 +273,18 @@ const xmrChartDataModule = {
             upperSpecLimit
           );
           cumulativeCPK = util.getCumulativeCPK(cumulativeCPL, cumulativeCPU);
+          sampleStdDev = util.calculateSampleStdDev(list.slice(0, i + 1).map(obj => obj.value));
+          cumulativePPL = util.getCPL_ForXMR(
+            cumulativeAverage,
+            sampleStdDev,
+            lowerSpecLimit
+          );;
+          cumulativePPU = util.getCPU_ForXMR(
+            cumulativeAverage,
+            sampleStdDev,
+            upperSpecLimit
+          );
+          cumulativePPK = util.getCumulativeCPK(cumulativePPL, cumulativePPU);
         }
 
         obj.movingRange = movingRange;
@@ -279,12 +299,19 @@ const xmrChartDataModule = {
         obj.cumulativeCPL = cumulativeCPL;
         obj.cumulativeCPU = cumulativeCPU;
         obj.cumulativeCPK = cumulativeCPK;
+        obj.sampleStdDev = sampleStdDev;
+        obj.cumulativePPL = cumulativePPL;
+        obj.cumulativePPU = cumulativePPU;
+        obj.cumulativePPK = cumulativePPK;
 
         return obj;
       });
 
       const averageCumulativeCPK = util.calculateAverage(
         list.map((obj) => obj.cumulativeCPK)
+      );
+      const averageCumulativePPK = util.calculateAverage(
+        list.map((obj) => obj.cumulativePPK)
       );
       const averageMR = list.length > 1 ? mrSum / (list.length - 1) : "";
       const stdDev = util.getStdDevForXMR(averageMR);
@@ -303,6 +330,7 @@ const xmrChartDataModule = {
 
       list = list.map((obj) => {
         obj.averageCumulativeCPK = averageCumulativeCPK;
+        obj.averageCumulativePPK = averageCumulativePPK;
         return obj;
       });
 

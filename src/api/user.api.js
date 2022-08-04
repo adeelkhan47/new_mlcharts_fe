@@ -63,12 +63,20 @@ function getAllUsers_admin() {
   return axios.get(URL);
 }
 
+function changePassword(oldPassword, newPassword) {
+  const URL = constants.API_BASE_URL + constants.USER_PATH + "/password";
+  return axios.put(URL, {
+    oldPassword, newPassword
+  });
+}
+
 const userApi = Object.freeze({
   login,
   register,
   updateUser,
   deleteUser,
-  getAllUsers_admin
+  getAllUsers_admin,
+  changePassword
 });
 
 export default userApi;

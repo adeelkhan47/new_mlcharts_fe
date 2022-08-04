@@ -221,6 +221,22 @@ function getCPU_ForXMR(cumulativeAverage, cumulativeStdDev, upperSpecLimit) {
   return (upperSpecLimit - cumulativeAverage) / (3 * cumulativeStdDev);
 }
 
+function calculateSampleStdDev(numbersArr) {
+  // CALCULATE AVERAGE
+  let total = 0;
+  for (let key in numbersArr)
+    total += numbersArr[key];
+  let meanVal = total / numbersArr.length;
+
+  // CALCULATE STANDARD DEVIATION
+  let SDprep = 0;
+  for (let key in numbersArr)
+    SDprep += Math.pow((parseFloat(numbersArr[key]) - meanVal), 2);
+  let SDresult = Math.sqrt(SDprep / (numbersArr.length - 1));
+
+  return SDresult;
+}
+
 const util = {
   isNumber,
   isString,
@@ -248,7 +264,8 @@ const util = {
   getX_LCL_ForXMR,
   getMrUCLForXMR,
   getCPL_ForXMR,
-  getCPU_ForXMR
+  getCPU_ForXMR,
+  calculateSampleStdDev
 };
 
 export default util;

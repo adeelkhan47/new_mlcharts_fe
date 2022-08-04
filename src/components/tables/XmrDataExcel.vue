@@ -196,7 +196,12 @@ export default {
           cumulativeCPL: util.formatNumber(obj.cumulativeCPL),
           cumulativeCPU: util.formatNumber(obj.cumulativeCPU),
           cumulativeCPK: util.formatNumber(obj.cumulativeCPK),
-          averageCumulativeCPK: util.formatNumber(obj.averageCumulativeCPK)
+          averageCumulativeCPK: util.formatNumber(obj.averageCumulativeCPK),
+          sampleStdDev: util.formatNumber(obj.sampleStdDev),
+          cumulativePPL: util.formatNumber(obj.cumulativePPL),
+          cumulativePPU: util.formatNumber(obj.cumulativePPU),
+          cumulativePPK: util.formatNumber(obj.cumulativePPK),
+          averageCumulativePPK: util.formatNumber(obj.averageCumulativePPK)
         };
       });
 
@@ -227,7 +232,12 @@ export default {
           cumulativeCPL: "",
           cumulativeCPU: "",
           cumulativeCPK: "",
-          averageCumulativeCPK: ""
+          averageCumulativeCPK: "",
+          sampleStdDev: "",
+          cumulativePPL: "",
+          cumulativePPU: "",
+          cumulativePPK: "",
+          averageCumulativePPK: ""
         });
       }
 
@@ -549,6 +559,36 @@ export default {
         {
           type: "text",
           title: "Avg CPK (overall)",
+          width: "120px",
+          readOnly: true
+        },
+        {
+          type: "text",
+          title: "Sample Std Dev",
+          width: "120px",
+          readOnly: true
+        },
+        {
+          type: "text",
+          title: "Ppl",
+          width: "100px",
+          readOnly: true
+        },
+        {
+          type: "text",
+          title: "Ppu",
+          width: "100px",
+          readOnly: true
+        },
+        {
+          type: "text",
+          title: "Ppk",
+          width: "100px",
+          readOnly: true
+        },
+        {
+          type: "text",
+          title: "Avg Ppk (overall)",
           width: "120px",
           readOnly: true
         }

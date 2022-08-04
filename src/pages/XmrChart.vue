@@ -48,7 +48,7 @@
             :headings="currentChartHeadings"
           />
         </div>
-        <div class="charts">
+        <div class="charts" :key="refresh">
           <chart-x
             chartKey="chart1"
             :title="currentChartHeadings.chart1"
@@ -74,7 +74,7 @@
           />
           <process-capability-ratios
             :dataList="dataList"
-            :formattedDataList="formattedDataCPK"
+            :formattedDataList="processCapabilityRatiosData"
           />
         </div>
       </div>
@@ -142,6 +142,7 @@ export default {
 
   data() {
     return {
+      refresh: 1,
       colEditVisibility: false,
       loader: null,
       // showAddDialog: false,
@@ -151,7 +152,7 @@ export default {
       askPassword: false,
       statisticsData: [],
       formattedDataList: [],
-      formattedDataCPK: [],
+      processCapabilityRatiosData: [],
       formattedMrDataList: [],
       xChartColors: ["black", "red", "#a9a9a9", "red"],
       mrChartColors: ["black", "blue", "#a9a9a9", "blue"],
@@ -218,6 +219,7 @@ export default {
     },
 
     dataList() {
+      this.refresh = Math.random();
       this.setChartData();
     },
 
@@ -380,16 +382,19 @@ export default {
         };
       });
 
-      this.formattedDataCPK = this.dataList
+      this.processCapabilityRatiosData = this.dataList
         .map((obj) => {
           return {
             key: obj.id + "",
             label: obj.reference1,
             note: obj.note,
-            Cpk: util.formatNumber(obj.cumulativeCPK)
+            Cpk: util.formatNumber(obj.cumulativeCPK),
+            Ppk: util.formatNumber(obj.cumulativePPK)
           };
         })
-        .filter((obj) => typeof obj.Cpk !== "string");
+        .filter(
+          (obj) => typeof obj.Cpk !== "string" && typeof obj.Ppk !== "string"
+        );
 
       this.formattedMrDataList = this.dataList
         .filter((obj) => typeof obj.movingRange === "number")

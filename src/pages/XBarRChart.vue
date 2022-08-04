@@ -38,7 +38,7 @@
             />
           </template>
         </div>
-        <div class="charts">
+        <div class="charts" :key="refresh">
           <chart-x
             chartKey="chart1"
             :title="currentChartHeadings.chart1"
@@ -134,6 +134,7 @@ export default {
 
   data() {
     return {
+      refresh: 1,
       colEditVisibility: false,
       loader: null,
       showAddDialog: false,
@@ -211,6 +212,7 @@ export default {
     },
 
     dataList() {
+      this.refresh = Math.random();
       this.setChartData();
     },
 

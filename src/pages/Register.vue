@@ -38,9 +38,9 @@
       </div>
 
       <div class="actions md-layout md-alignment-center-space-between">
-        <md-button class="md-raised md-primary" @click="navigateToLogin"
-          >Log in</md-button
-        >
+        <md-button class="md-raised md-primary" @click="navigateToLogin">
+          Log in
+        </md-button>
         <md-button class="md-raised md-primary" @click="signUp">
           Sign up
         </md-button>

@@ -57,14 +57,51 @@
         </div>
       </div>
     </div>
+    <div class="update">
+      <div class="head">
+        <h2 class="title">Change Password</h2>
+      </div>
+      <div class="body">
+        <div class="form">
+          <md-field>
+            <label>Old Password</label>
+            <md-input
+              v-model="oldPassword"
+              type="text"
+              :disabled="loading"
+            ></md-input>
+          </md-field>
+          <md-field>
+            <label>New Password</label>
+            <md-input
+              v-model="newPassword"
+              type="text"
+              :disabled="loading"
+            ></md-input>
+          </md-field>
+
+          <div>
+            <md-button
+              class="md-raised"
+              @click="clearPasswords"
+              :disabled="!(oldPassword || newPassword) || loading"
+            >
+              Clear
+            </md-button>
+            <md-button
+              class="md-raised md-primary"
+              :disabled="!(oldPassword && newPassword) || loading"
+              @click="changePassword"
+            >
+              Change Password
+            </md-button>
+          </div>
+        </div>
+      </div>
+    </div>
     <div class="danger">
       <div class="head">
         <h2 class="title">Delete Your account</h2>
-        <ul class="actions">
-          <li class="action">
-            <md-button @click="password = ''">Clear</md-button>
-          </li>
-        </ul>
       </div>
       <div class="body">
         <div class="form">
@@ -116,7 +153,9 @@ export default {
         lastName: "",
         company: ""
       },
-      password: ""
+      password: "",
+      oldPassword: "",
+      newPassword: ""
     };
   },
 
@@ -190,6 +229,29 @@ export default {
             this.loading = false;
           });
       }
+    },
+
+    clearPasswords() {
+      this.oldPassword = "";
+      this.newPassword = "";
+    },
+
+    changePassword() {
+      this.loading = true;
+      userApi
+        .changePassword(this.oldPassword, this.newPassword)
+        .then(() => {
+          this.clearPasswords();
+          this.loading = false;
+          this.setMessage("Successfully changed password");
+          this.setShow(true);
+        })
+        .catch((err) => {
+          console.error(err);
+          this.loading = false;
+          this.setMessage(err?.response?.data || "Unable to change password");
+          this.setShow(true);
+        });
     }
   }
 };

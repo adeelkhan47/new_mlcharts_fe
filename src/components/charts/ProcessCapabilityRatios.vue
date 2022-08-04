@@ -60,7 +60,7 @@ export default {
   computed: {
     chartData() {
       const dv = new DataSet.View().source(this.formattedDataList);
-      let fields = ["Cpk"];
+      let fields = ["Cpk", "Ppk"];
       dv.transform({
         type: "fold",
         fields: fields,
