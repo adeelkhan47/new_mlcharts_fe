@@ -57,7 +57,13 @@
             :lineColors="xChartColors"
             :lineShapes="lineShapes"
             :chartFields="xChartFields"
-            :key="[].concat(xChartColors, lineShapes, xChartFields).join(':')"
+            :key="
+              []
+                .concat(xChartColors, lineShapes, xChartFields, [
+                  currentChartHeadings.chart1
+                ])
+                .join(':')
+            "
             @onTitleChange="saveDashboardHeadings"
           />
           <chart-x
@@ -69,7 +75,13 @@
             :lineColors="mrChartColors"
             :lineShapes="lineShapes"
             :chartFields="mrChartFields"
-            :key="[].concat(mrChartColors, lineShapes, mrChartFields).join(':')"
+            :key="
+              []
+                .concat(mrChartColors, lineShapes, mrChartFields, [
+                  currentChartHeadings.chart2
+                ])
+                .join(':')
+            "
             @onTitleChange="saveDashboardHeadings"
           />
           <process-capability-ratios

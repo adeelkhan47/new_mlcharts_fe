@@ -49,7 +49,9 @@
             :chartFields="averageChartFields"
             :key="
               []
-                .concat(averageChartColors, lineShapes, averageChartFields)
+                .concat(averageChartColors, lineShapes, averageChartFields, [
+                  currentChartHeadings.chart1
+                ])
                 .join(':')
             "
             @onTitleChange="saveDashboardHeadings"
@@ -64,7 +66,9 @@
             :chartFields="rangeChartFields"
             :key="
               []
-                .concat(rangeChartColors, lineShapes, rangeChartFields)
+                .concat(rangeChartColors, lineShapes, rangeChartFields, [
+                  currentChartHeadings.chart2
+                ])
                 .join(':')
             "
             @onTitleChange="saveDashboardHeadings"
@@ -387,10 +391,13 @@ export default {
             key: obj.id + "",
             label: obj.reference1,
             note: obj.note,
-            Cpk: util.formatNumber(obj.cumulativeCPK)
+            Cpk: util.formatNumber(obj.cumulativeCPK),
+            Ppk: util.formatNumber(obj.cumulativePPK)
           };
         })
-        .filter((obj) => typeof obj.Cpk !== "string");
+        .filter(
+          (obj) => typeof obj.Cpk !== "string" && typeof obj.Ppk !== "string"
+        );
 
       this.formattedRanges = this.dataList.map((obj) => {
         return {

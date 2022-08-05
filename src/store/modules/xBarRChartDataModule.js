@@ -217,6 +217,7 @@ const xBarRChartDataModule = {
       const subgroupSize = ctx.state.subgroupSize;
       const lowerSpecLimit = util.getNumValOrStr(ctx.state.lowerSpecLimit);
       const upperSpecLimit = util.getNumValOrStr(ctx.state.upperSpecLimit);
+      let dataValues = [];
       let values = {};
       let range = 0;
       let average = 0;
@@ -234,6 +235,10 @@ const xBarRChartDataModule = {
       let cumulativeCPL = 0;
       let cumulativeCPU = 0;
       let cumulativeCPK = 0;
+      let sampleStdDev = 0;
+      let cumulativePPL = 0;
+      let cumulativePPU = 0;
+      let cumulativePPK = 0;
 
       list = list.map((obj, i) => {
         range = 0;
@@ -247,10 +252,20 @@ const xBarRChartDataModule = {
         cumulativeCPL = 0;
         cumulativeCPU = 0;
         cumulativeCPK = 0;
+        sampleStdDev = 0;
+        cumulativePPL = 0;
+        cumulativePPU = 0;
+        cumulativePPK = 0;
 
         if (Object.keys(values).length) {
           range = util.getRangeForXBarR(values);
           average = util.getAverageForXBarR(values);
+        }
+
+        // adding to data-values
+        for (const key in obj.values) {
+          const value = obj.values[key];
+          if (typeof value === "number") dataValues.push(value);
         }
 
         rangeSum += range;
@@ -285,6 +300,19 @@ const xBarRChartDataModule = {
         );
         cumulativeCPK = util.getCumulativeCPK(cumulativeCPL, cumulativeCPU);
 
+        sampleStdDev = util.calculateSampleStdDev(dataValues);
+        cumulativePPL = util.getCumulativeCPL(
+          cumulativeGrandAverage,
+          sampleStdDev,
+          lowerSpecLimit
+        );
+        cumulativePPU = util.getCumulativeCPU(
+          cumulativeGrandAverage,
+          sampleStdDev,
+          upperSpecLimit
+        );
+        cumulativePPK = util.getCumulativeCPK(cumulativePPL, cumulativePPU);
+
         if (averageCL === null) {
           averageCL = average;
         }
@@ -306,6 +334,10 @@ const xBarRChartDataModule = {
         obj.cumulativeCPL = cumulativeCPL;
         obj.cumulativeCPU = cumulativeCPU;
         obj.cumulativeCPK = cumulativeCPK;
+        obj.sampleStdDev = sampleStdDev;
+        obj.cumulativePPL = cumulativePPL;
+        obj.cumulativePPU = cumulativePPU;
+        obj.cumulativePPK = cumulativePPK;
         obj.label = obj.reference1 || "";
 
         return obj;
@@ -313,6 +345,9 @@ const xBarRChartDataModule = {
 
       const averageCPK = util.calculateAverage(
         list.map((obj) => obj.cumulativeCPK)
+      );
+      const averagePPK = util.calculateAverage(
+        list.map((obj) => obj.cumulativePPK)
       );
       const averageRange = list.length > 1 ? rangeSum / list.length : "";
       const stdDev = util.getStdDevForXBarR(averageRange, subgroupSize);
@@ -332,6 +367,7 @@ const xBarRChartDataModule = {
 
       list = list.map((obj) => {
         obj.averageCPK = averageCPK;
+        obj.averagePPK = averagePPK;
         return obj;
       });
 

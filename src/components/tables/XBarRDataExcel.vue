@@ -32,7 +32,12 @@ const irrelevantKeys = [
   "cumulativeCPL",
   "cumulativeCPU",
   "cumulativeCPK",
-  "averageCPK"
+  "averageCPK",
+  "sampleStdDev",
+  "cumulativePPL",
+  "cumulativePPU",
+  "cumulativePPK",
+  "averagePPK"
 ];
 
 export default {
@@ -507,6 +512,12 @@ export default {
         },
         {
           type: "text",
+          title: "Sample Std Dev",
+          width: "120px",
+          readOnly: true
+        },
+        {
+          type: "text",
           title: "Avg UCL",
           width: "100px",
           readOnly: true
@@ -564,6 +575,30 @@ export default {
           title: "Avg CPK",
           width: "100px",
           readOnly: true
+        },
+        {
+          type: "text",
+          title: "Ppl",
+          width: "100px",
+          readOnly: true
+        },
+        {
+          type: "text",
+          title: "Ppu",
+          width: "100px",
+          readOnly: true
+        },
+        {
+          type: "text",
+          title: "Ppk",
+          width: "100px",
+          readOnly: true
+        },
+        {
+          type: "text",
+          title: "Avg Ppk",
+          width: "100px",
+          readOnly: true
         }
       ]);
     },
@@ -612,6 +647,7 @@ export default {
             dataObj.cumulativeAverageRange
           ),
           cumulativeStdDev: util.formatNumber(dataObj.cumulativeStdDev),
+          sampleStdDev: util.formatNumber(dataObj.sampleStdDev),
           averageUCL: util.formatNumber(dataObj.averageUCL),
           averageCL: util.formatNumber(dataObj.averageCL),
           averageLCL: util.formatNumber(dataObj.averageLCL),
@@ -621,7 +657,11 @@ export default {
           cumulativeCPL: util.formatNumber(dataObj.cumulativeCPL),
           cumulativeCPU: util.formatNumber(dataObj.cumulativeCPU),
           cumulativeCPK: util.formatNumber(dataObj.cumulativeCPK),
-          averageCPK: util.formatNumber(dataObj.averageCPK)
+          averageCPK: util.formatNumber(dataObj.averageCPK),
+          cumulativePPL: util.formatNumber(dataObj.cumulativePPL),
+          cumulativePPU: util.formatNumber(dataObj.cumulativePPU),
+          cumulativePPK: util.formatNumber(dataObj.cumulativePPK),
+          averagePPK: util.formatNumber(dataObj.averagePPK)
         };
       } else {
         record = {
@@ -638,6 +678,7 @@ export default {
           cumulativeGrandAverage: "",
           cumulativeAverageRange: "",
           cumulativeStdDev: "",
+          sampleStdDev: "",
           averageUCL: "",
           averageCL: "",
           averageLCL: "",
@@ -647,7 +688,11 @@ export default {
           cumulativeCPL: "",
           cumulativeCPU: "",
           cumulativeCPK: "",
-          averageCPK: ""
+          averageCPK: "",
+          cumulativePPL: "",
+          cumulativePPU: "",
+          cumulativePPK: "",
+          averagePPK: ""
         };
       }
 
