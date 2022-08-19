@@ -44,15 +44,11 @@
             :title="currentChartHeadings.chart1"
             :dataList="dataList"
             :formattedDataList="formattedAverages"
-            :lineColors="averageChartColors"
-            :lineShapes="lineShapes"
-            :chartFields="averageChartFields"
+            :lineColors="averageChartConfig.colors"
+            :lineShapes="averageChartConfig.lineShapes"
+            :chartFields="averageChartConfig.fields"
             :key="
-              []
-                .concat(averageChartColors, lineShapes, averageChartFields, [
-                  currentChartHeadings.chart1
-                ])
-                .join(':')
+              JSON.stringify(averageChartConfig) + currentChartHeadings.chart1
             "
             @onTitleChange="saveDashboardHeadings"
           />
@@ -61,15 +57,11 @@
             :title="currentChartHeadings.chart2"
             :dataList="dataList"
             :formattedDataList="formattedRanges"
-            :lineColors="rangeChartColors"
-            :lineShapes="lineShapes"
-            :chartFields="rangeChartFields"
+            :lineColors="rangeChartConfig.colors"
+            :lineShapes="rangeChartConfig.lineShapes"
+            :chartFields="rangeChartConfig.fields"
             :key="
-              []
-                .concat(rangeChartColors, lineShapes, rangeChartFields, [
-                  currentChartHeadings.chart2
-                ])
-                .join(':')
+              JSON.stringify(rangeChartConfig) + currentChartHeadings.chart2
             "
             @onTitleChange="saveDashboardHeadings"
           />
@@ -150,11 +142,16 @@ export default {
       formattedAverages: [],
       formattedDataCPK: [],
       formattedRanges: [],
-      averageChartColors: ["black", "red", "#a9a9a9", "red"],
-      rangeChartColors: ["black", "blue", "#a9a9a9", "blue"],
-      lineShapes: ["line", "dash"],
-      averageChartFields: ["Average", "Avg UCL", "Avg CL", "Avg LCL"],
-      rangeChartFields: ["Range", "Rng UCL", "Rng CL", "Rng LCL"]
+      averageChartConfig: {
+        colors: ["red", "#a9a9a9", "red", "black"],
+        fields: ["Avg UCL", "Avg CL", "Avg LCL", "Average"],
+        lineShapes: ["dash", "line"]
+      },
+      rangeChartConfig: {
+        colors: ["blue", "#a9a9a9", "blue", "black"],
+        fields: ["Rng UCL", "Rng CL", "Rng LCL", "Range"],
+        lineShapes: ["dash", "line"]
+      }
     };
   },
 
@@ -423,29 +420,49 @@ export default {
 
     handleChartLinesDisplay({ displayControlLimits, displayCenterLines }) {
       if (displayControlLimits && displayCenterLines) {
-        this.averageChartFields = ["Average", "Avg UCL", "Avg CL", "Avg LCL"];
-        this.rangeChartFields = ["Range", "Rng UCL", "Rng CL", "Rng LCL"];
-        this.averageChartColors = ["black", "red", "#a9a9a9", "red"];
-        this.rangeChartColors = ["black", "blue", "#a9a9a9", "blue"];
-        this.lineShapes = ["line", "dash"];
+        this.averageChartConfig = {
+          colors: ["red", "#a9a9a9", "red", "black"],
+          fields: ["Avg UCL", "Avg CL", "Avg LCL", "Average"],
+          lineShapes: ["dash", "line"]
+        };
+        this.rangeChartConfig = {
+          colors: ["blue", "#a9a9a9", "blue", "black"],
+          fields: ["Rng UCL", "Rng CL", "Rng LCL", "Range"],
+          lineShapes: ["dash", "line"]
+        };
       } else if (displayCenterLines) {
-        this.averageChartFields = ["Average", "Avg CL"];
-        this.rangeChartFields = ["Range", "Rng CL"];
-        this.averageChartColors = ["black", "#a9a9a9"];
-        this.rangeChartColors = ["black", "#a9a9a9"];
-        this.lineShapes = ["line"];
+        this.averageChartConfig = {
+          colors: ["#a9a9a9", "black"],
+          fields: ["Avg CL", "Average"],
+          lineShapes: ["line"]
+        };
+        this.rangeChartConfig = {
+          colors: ["#a9a9a9", "black"],
+          fields: ["Rng CL", "Range"],
+          lineShapes: ["line"]
+        };
       } else if (displayControlLimits) {
-        this.averageChartFields = ["Average", "Avg UCL", "Avg LCL"];
-        this.rangeChartFields = ["Range", "Rng UCL", "Rng LCL"];
-        this.averageChartColors = ["black", "red", "red"];
-        this.rangeChartColors = ["black", "blue", "blue"];
-        this.lineShapes = ["line", "dash", "dash"];
+        this.averageChartConfig = {
+          colors: ["red", "red", "black"],
+          fields: ["Avg UCL", "Avg LCL", "Average"],
+          lineShapes: ["dash", "dash", "line"]
+        };
+        this.rangeChartConfig = {
+          colors: ["blue", "blue", "black"],
+          fields: ["Rng UCL", "Rng LCL", "Range"],
+          lineShapes: ["dash", "dash", "line"]
+        };
       } else {
-        this.averageChartFields = ["Average"];
-        this.rangeChartFields = ["Range"];
-        this.averageChartColors = ["black"];
-        this.rangeChartColors = ["black"];
-        this.lineShapes = ["line"];
+        this.averageChartConfig = {
+          colors: ["black"],
+          fields: ["Average"],
+          lineShapes: ["line"]
+        };
+        this.rangeChartConfig = {
+          colors: ["black"],
+          fields: ["Range"],
+          lineShapes: ["line"]
+        };
       }
     },
 

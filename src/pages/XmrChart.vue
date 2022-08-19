@@ -54,16 +54,10 @@
             :title="currentChartHeadings.chart1"
             :dataList="dataList"
             :formattedDataList="formattedDataList"
-            :lineColors="xChartColors"
-            :lineShapes="lineShapes"
-            :chartFields="xChartFields"
-            :key="
-              []
-                .concat(xChartColors, lineShapes, xChartFields, [
-                  currentChartHeadings.chart1
-                ])
-                .join(':')
-            "
+            :lineColors="xChartConfig.colors"
+            :lineShapes="xChartConfig.lineShapes"
+            :chartFields="xChartConfig.fields"
+            :key="JSON.stringify(xChartConfig) + currentChartHeadings.chart1"
             @onTitleChange="saveDashboardHeadings"
           />
           <chart-x
@@ -72,16 +66,10 @@
             :dataList="dataList"
             :formattedDataList="formattedMrDataList"
             :showLCL="false"
-            :lineColors="mrChartColors"
-            :lineShapes="lineShapes"
-            :chartFields="mrChartFields"
-            :key="
-              []
-                .concat(mrChartColors, lineShapes, mrChartFields, [
-                  currentChartHeadings.chart2
-                ])
-                .join(':')
-            "
+            :lineColors="mrChartConfig.colors"
+            :lineShapes="mrChartConfig.lineShapes"
+            :chartFields="mrChartConfig.fields"
+            :key="JSON.stringify(mrChartConfig) + currentChartHeadings.chart2"
             @onTitleChange="saveDashboardHeadings"
           />
           <process-capability-ratios
@@ -166,11 +154,16 @@ export default {
       formattedDataList: [],
       processCapabilityRatiosData: [],
       formattedMrDataList: [],
-      xChartColors: ["black", "red", "#a9a9a9", "red"],
-      mrChartColors: ["black", "blue", "#a9a9a9", "blue"],
-      lineShapes: ["line", "dash"],
-      xChartFields: ["Value", "UCL", "CL", "LCL"],
-      mrChartFields: ["Moving Range", "UCL", "CL"]
+      xChartConfig: {
+        colors: ["red", "#a9a9a9", "red", "black"],
+        fields: ["UCL", "CL", "LCL", "Value"],
+        lineShapes: ["dash", "line"]
+      },
+      mrChartConfig: {
+        colors: ["blue", "#a9a9a9", "black"],
+        fields: ["UCL", "CL", "Moving Range"],
+        lineShapes: ["dash", "line", "line"]
+      }
     };
   },
 
@@ -433,29 +426,49 @@ export default {
 
     handleChartLinesDisplay({ displayControlLimits, displayCenterLines }) {
       if (displayControlLimits && displayCenterLines) {
-        this.xChartFields = ["Value", "UCL", "CL", "LCL"];
-        this.mrChartFields = ["Moving Range", "UCL", "CL"];
-        this.xChartColors = ["black", "red", "#a9a9a9", "red"];
-        this.mrChartColors = ["black", "blue", "#a9a9a9", "blue"];
-        this.lineShapes = ["line", "dash"];
+        this.xChartConfig = {
+          colors: ["red", "#a9a9a9", "red", "black"],
+          fields: ["UCL", "CL", "LCL", "Value"],
+          lineShapes: ["dash", "line"]
+        };
+        this.mrChartConfig = {
+          colors: ["blue", "#a9a9a9", "black"],
+          fields: ["UCL", "CL", "Moving Range"],
+          lineShapes: ["dash", "line", "line"]
+        };
       } else if (displayCenterLines) {
-        this.xChartFields = ["Value", "CL"];
-        this.mrChartFields = ["Moving Range", "CL"];
-        this.xChartColors = ["black", "#a9a9a9"];
-        this.mrChartColors = ["black", "#a9a9a9"];
-        this.lineShapes = ["line"];
+        this.xChartConfig = {
+          colors: ["#a9a9a9", "black"],
+          fields: ["CL", "Value"],
+          lineShapes: ["line"]
+        };
+        this.mrChartConfig = {
+          colors: ["#a9a9a9", "black"],
+          fields: ["CL", "Moving Range"],
+          lineShapes: ["line"]
+        };
       } else if (displayControlLimits) {
-        this.xChartFields = ["Value", "UCL", "LCL"];
-        this.mrChartFields = ["Moving Range", "UCL"];
-        this.xChartColors = ["black", "red", "red"];
-        this.mrChartColors = ["black", "blue", "blue"];
-        this.lineShapes = ["line", "dash", "dash"];
+        this.xChartConfig = {
+          colors: ["red", "red", "black"],
+          fields: ["UCL", "LCL", "Value"],
+          lineShapes: ["dash", "dash", "line"]
+        };
+        this.mrChartConfig = {
+          colors: ["blue", "black"],
+          fields: ["UCL", "Moving Range"],
+          lineShapes: ["dash", "line"]
+        };
       } else {
-        this.xChartFields = ["Value"];
-        this.mrChartFields = ["Moving Range"];
-        this.xChartColors = ["black"];
-        this.mrChartColors = ["black"];
-        this.lineShapes = ["line"];
+        this.xChartConfig = {
+          colors: ["black"],
+          fields: ["Value"],
+          lineShapes: ["line"]
+        };
+        this.mrChartConfig = {
+          colors: ["black"],
+          fields: ["Moving Range"],
+          lineShapes: ["line"]
+        };
       }
     },
 
