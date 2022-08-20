@@ -212,7 +212,15 @@ const xBarRChartDataModule = {
         });
     },
 
-    populateData: (ctx, list) => {
+    populateData: (ctx, dataList) => {
+      let list = dataList;
+      if (list instanceof Array) {
+        list = list.map(obj => {
+          obj.values = getNonNullValues(obj.values);
+          return obj;
+        });
+      }
+      else list = [];
       ctx.commit("loading", true);
       const subgroupSize = ctx.state.subgroupSize;
       const lowerSpecLimit = util.getNumValOrStr(ctx.state.lowerSpecLimit);
@@ -507,6 +515,18 @@ function getLockedRow(lockedRowIndex, dataList) {
     lockedRow = dataList[dataList.length - 1];
 
   return lockedRow;
+}
+
+function getNonNullValues(obj) {
+  let newObj = {};
+  if (obj && typeof obj === 'object' && Object.keys(obj).length) {
+    for (const key in obj) {
+      const val = obj[key];
+      if (val !== null)
+        newObj[key] = val;
+    }
+  }
+  return newObj;
 }
 
 export default xBarRChartDataModule;

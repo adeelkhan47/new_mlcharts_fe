@@ -51,6 +51,7 @@ export default {
 
   data() {
     return {
+      newRowAdded: false,
       chartId: "",
       mounted: false,
       excelId: "x-bar-r-data-excel-spreadsheet",
@@ -71,6 +72,7 @@ export default {
         tableOverflow: true,
         tableWidth: "755px",
         tableHeight: "830px",
+        oninsertrow: this.onInsertRow,
         onpaste: this.handleChange,
         ondeleterow: this.handleChange,
         oneditionend: this.handleChange,
@@ -214,8 +216,9 @@ export default {
       else blankRows = blankRows - this.records.length;
 
       // adding blank rows
+      const blankRow = this.getExcelRecord();
       for (let i = 0; i < blankRows; i++) {
-        this.options.data.push(this.getExcelRecord());
+        this.options.data.push(blankRow);
       }
 
       if (
@@ -281,18 +284,55 @@ export default {
       this.showEdit = true;
     },
 
+    onInsertRow() {
+      this.newRowAdded = true;
+    },
+
     handleChange() {
       let currentData = this.spreadsheet.getJson();
-      currentData = currentData.map((obj) => {
-        const dataKeys = this.getDataKeys(obj);
-        dataKeys.forEach((key) => {
-          let val = obj[key];
-          if (val && typeof val === "string")
-            val = Number.parseFloat(val.replaceAll(",", ""));
-          obj[key] = val;
+      if (!(currentData && currentData.length)) return;
+
+      const hasNewRow = this.newRowAdded;
+      this.newRowAdded = false;
+
+      const dataKeys = this.getDataKeys(currentData[0]);
+
+      currentData = currentData
+        .filter((obj) => {
+          let filter = false;
+          for (let i = 0; i < dataKeys.length; i++) {
+            const val = obj[dataKeys[i]];
+            if (val || val === 0) {
+              filter = true;
+              break;
+            }
+          }
+          return filter;
+        })
+        .map((obj) => {
+          dataKeys.forEach((key) => {
+            let val = obj[key];
+            if (val && typeof val === "string")
+              val = Number.parseFloat(val.replaceAll(",", ""));
+            obj[key] = val;
+          });
+          return obj;
         });
-        return obj;
-      });
+
+      if (hasNewRow) {
+        const newRowIndex = currentData.findIndex((obj) => obj.id === "");
+        // found index & its not the last index
+        if (newRowIndex !== -1 && newRowIndex !== currentData.length - 1) {
+          let secArr = currentData.slice(newRowIndex, currentData.length);
+          const dataObjList = secArr.filter((obj) => obj.id);
+          secArr = secArr.map((obj, index) => {
+            if (index < dataObjList.length) obj.id = dataObjList[index].id;
+            else obj.id = "";
+            return obj;
+          });
+          currentData = [].concat(currentData.slice(0, newRowIndex), secArr);
+        }
+      }
 
       const deletedRecords = this.getDeletedRecords(currentData);
       const updatedRecords = this.getUpdatedRecords(currentData);
@@ -427,6 +467,8 @@ export default {
                 values[keyName] = val;
               } else if (val && !isNaN(val)) {
                 values[keyName] = Number.parseFloat(val);
+              } else {
+                values[keyName] = null;
               }
             });
           }

@@ -25,6 +25,7 @@ export default {
 
   data() {
     return {
+      newRowAdded: false,
       chartId: "",
       mounted: false,
       excelId: "data-excel-spreadsheet",
@@ -46,6 +47,7 @@ export default {
         tableOverflow: true,
         tableWidth: "755px",
         tableHeight: "830px",
+        oninsertrow: this.onInsertRow,
         onpaste: this.handleChange,
         ondeleterow: this.handleChange,
         oneditionend: this.handleChange,
@@ -305,13 +307,40 @@ export default {
       this.showEdit = true;
     },
 
+    onInsertRow() {
+      this.newRowAdded = true;
+    },
+
     handleChange() {
       let currentData = this.spreadsheet.getJson();
-      currentData = currentData.map((obj) => {
-        if (obj.value && typeof obj.value === "string")
-          obj.value = Number.parseFloat(obj.value.replaceAll(",", ""));
-        return obj;
-      });
+      if (!(currentData && currentData.length)) return;
+
+      const hasNewRow = this.newRowAdded;
+      this.newRowAdded = false;
+
+      currentData = currentData
+        .filter((obj) => obj.value !== "")
+        .map((obj) => {
+          if (obj.value && typeof obj.value === "string")
+            obj.value = Number.parseFloat(obj.value.replaceAll(",", ""));
+          return obj;
+        });
+
+      if (hasNewRow) {
+        const newRowIndex = currentData.findIndex((obj) => obj.id === "");
+        // found index & its not the last index
+        if (newRowIndex !== -1 && newRowIndex !== currentData.length - 1) {
+          let secArr = currentData.slice(newRowIndex, currentData.length);
+          const dataObjList = secArr.filter((obj) => obj.id);
+          secArr = secArr.map((obj, index) => {
+            if (index < dataObjList.length) obj.id = dataObjList[index].id;
+            else obj.id = "";
+            return obj;
+          });
+          currentData = [].concat(currentData.slice(0, newRowIndex), secArr);
+        }
+      }
+
       const deletedRecords = this.getDeletedRecords(currentData);
       const updatedRecords = this.getUpdatedRecords(currentData);
       const newRecords = this.getNewRecords(currentData);
