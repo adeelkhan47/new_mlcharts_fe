@@ -1,7 +1,7 @@
 <template>
   <div class="histogram">
     <h3 class="chart-title">Histogram Chart</h3>
-    <template v-if="dataList && dataList.length > 1">
+    <template v-if="dataList && dataList.length">
       <v-chart
         :forceFit="true"
         :height="height"
@@ -58,16 +58,16 @@ export default {
     chartData() {
       let values = this.dataList.map((obj) => Object.values(obj.values));
       values = [].concat(...values);
-      const stdDev = this.dataset.stdDev;
-      const minWidth = Math.ceil(stdDev);
+      const dataAverage = Math.floor(this.dataset.average);
+      const binWidth = Math.ceil(dataAverage);
       let minScale = Math.min(...values) || 0;
-      let maxScale = Math.max(...values) + 1 || 1;
+      let maxScale = Math.max(...values) + binWidth;
       // must be an odd number
-      let tickInterval = minWidth % 2 === 0 ? minWidth - 1 : minWidth;
+      let tickInterval = binWidth % 2 === 0 ? binWidth - 1 : binWidth;
 
       if (tickInterval < 1) tickInterval = 1;
-      if (minScale > minWidth) minScale = minWidth;
-      if (maxScale < minWidth) maxScale = minWidth + 1;
+      if (minScale < binWidth) minScale = 0;
+      if (maxScale < binWidth) maxScale = binWidth;
 
       this.scale[0].min = minScale;
       this.scale[0].max = maxScale;
@@ -79,7 +79,7 @@ export default {
       dv.transform({
         type: "bin.histogram",
         field: "value",
-        minWidth,
+        binWidth,
         as: ["value", "count"]
       });
 

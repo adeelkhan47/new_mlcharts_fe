@@ -306,7 +306,12 @@ export default {
     },
 
     handleChange() {
-      const currentData = this.spreadsheet.getJson();
+      let currentData = this.spreadsheet.getJson();
+      currentData = currentData.map((obj) => {
+        if (obj.value && typeof obj.value === "string")
+          obj.value = Number.parseFloat(obj.value.replaceAll(",", ""));
+        return obj;
+      });
       const deletedRecords = this.getDeletedRecords(currentData);
       const updatedRecords = this.getUpdatedRecords(currentData);
       const newRecords = this.getNewRecords(currentData);

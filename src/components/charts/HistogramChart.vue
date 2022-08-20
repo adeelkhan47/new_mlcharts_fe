@@ -58,15 +58,15 @@ export default {
     chartData() {
       const values = this.dataList.map((obj) => obj.value);
       const stdDev = this.dataset.stdDev;
-      const minWidth = Math.ceil(stdDev);
+      const binWidth = Math.ceil(stdDev);
       let minScale = Math.min(...values) || 0;
-      let maxScale = Math.max(...values) + 1 || 1;
+      let maxScale = Math.max(...values) + binWidth;
       // must be an odd number
-      let tickInterval = minWidth % 2 === 0 ? minWidth - 1 : minWidth;
+      let tickInterval = binWidth % 2 === 0 ? binWidth - 1 : binWidth;
 
       if (tickInterval < 1) tickInterval = 1;
-      if (minScale < minWidth) minScale = 0;
-      if (maxScale < minWidth) maxScale = minWidth + 1;
+      if (minScale < binWidth) minScale = 0;
+      if (maxScale < binWidth) maxScale = binWidth + 1;
 
       this.scale[0].min = minScale;
       this.scale[0].max = maxScale;
@@ -78,7 +78,7 @@ export default {
       dv.transform({
         type: "bin.histogram",
         field: "value",
-        minWidth,
+        binWidth,
         as: ["value", "count"]
       });
 

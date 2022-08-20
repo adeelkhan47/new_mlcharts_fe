@@ -67,15 +67,7 @@ export default {
         columnResize: false,
         allowToolbar: true,
         rowDrag: false,
-        columns: [
-          { type: "text", title: "ID", width: "0px", readOnly: true },
-          {
-            type: "text",
-            title: "Reference 1 (Appears on chart)",
-            width: "220px"
-          },
-          { type: "text", title: "Reference 2", width: "150px" }
-        ],
+        columns: [],
         tableOverflow: true,
         tableWidth: "755px",
         tableHeight: "830px",
@@ -242,8 +234,6 @@ export default {
 
     headings() {
       if (this.headings && Object.keys(this.headings).length) {
-        this.options.columns = this.getExcelColumns();
-        this.options = JSON.parse(JSON.stringify(this.options));
         this.init();
       }
     }
@@ -272,8 +262,6 @@ export default {
       pathname = pathname.split("/");
 
       this.chartId = pathname[pathname.length - 1] || "";
-      this.options.columns = this.getExcelColumns();
-      this.options = { ...this.options };
     },
 
     init() {
@@ -283,6 +271,7 @@ export default {
           this.spreadsheet.destroy();
         el.innerHTML = "";
         this.spreadsheet = null;
+        this.options.columns = this.getExcelColumns();
         this.spreadsheet = jexcel(el, this.options);
       }
     },
@@ -293,7 +282,18 @@ export default {
     },
 
     handleChange() {
-      const currentData = this.spreadsheet.getJson();
+      let currentData = this.spreadsheet.getJson();
+      currentData = currentData.map((obj) => {
+        const dataKeys = this.getDataKeys(obj);
+        dataKeys.forEach((key) => {
+          let val = obj[key];
+          if (val && typeof val === "string")
+            val = Number.parseFloat(val.replaceAll(",", ""));
+          obj[key] = val;
+        });
+        return obj;
+      });
+
       const deletedRecords = this.getDeletedRecords(currentData);
       const updatedRecords = this.getUpdatedRecords(currentData);
       const newRecords = this.getNewRecords(currentData);

@@ -157,7 +157,7 @@ function getCumulativeCPL(
   cumulativeStdDev,
   lowerSpecLimit
 ) {
-  if (typeof lowerSpecLimit === "string") return "";
+  if (typeof lowerSpecLimit === "string" || typeof cumulativeStdDev === "string") return "";
   else if (cumulativeStdDev === 0) return ""; // infinity
   return (cumulativeGrandAverage - lowerSpecLimit) / (3 * cumulativeStdDev);
 }
@@ -167,7 +167,7 @@ function getCumulativeCPU(
   cumulativeStdDev,
   upperSpecLimit
 ) {
-  if (typeof upperSpecLimit === "string") return "";
+  if (typeof upperSpecLimit === "string" || typeof cumulativeStdDev === "string") return "";
   else if (cumulativeStdDev === 0) return ""; // infinity
   return (upperSpecLimit - cumulativeGrandAverage) / (3 * cumulativeStdDev);
 }

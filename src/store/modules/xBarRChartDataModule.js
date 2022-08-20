@@ -382,16 +382,6 @@ const xBarRChartDataModule = {
       ctx.commit("loading", false);
     },
 
-    setUpperSpecLimit: (ctx, val) => {
-      ctx.commit("upperSpecLimit", val);
-      ctx.dispatch("populateData", ctx.state.dataList);
-    },
-
-    setLowerSpecLimit: (ctx, val) => {
-      ctx.commit("lowerSpecLimit", val);
-      ctx.dispatch("populateData", ctx.state.dataList);
-    },
-
     addDataItems: (ctx, { chartId, password, records, cb = () => { } }) => {
       if (records instanceof Array && records.length) {
         ctx.commit("loading", true);
@@ -443,6 +433,16 @@ const xBarRChartDataModule = {
             ctx.commit("loading", false);
           });
       }
+    },
+
+    setUpperSpecLimit: (ctx, val) => {
+      ctx.commit("upperSpecLimit", val);
+      ctx.dispatch("populateData", ctx.state.dataList);
+    },
+
+    setLowerSpecLimit: (ctx, val) => {
+      ctx.commit("lowerSpecLimit", val);
+      ctx.dispatch("populateData", ctx.state.dataList);
     },
 
     setLockedRowIndex: (ctx, { value, chartId }) => {
