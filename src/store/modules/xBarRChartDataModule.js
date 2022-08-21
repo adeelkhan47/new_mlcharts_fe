@@ -3,7 +3,7 @@ import { xBarRChartDataApi } from "../../api";
 import constants from "../../utils/constants.util";
 import storageHelper from "../../utils/storageHelper.util";
 
-const LOCK_LIMIT_KEY = "X_BAR_R_LOCKED_ROW_INDEX__";
+const LOCK_LIMIT_KEY = constants.SUB_GROUPED_CHART_LOCK_LIMIT_KEY;
 
 const xBarRChartDataModule = {
   namespaced: true,
@@ -89,7 +89,9 @@ const xBarRChartDataModule = {
         lcl: 0
       };
 
-      const lockedRow = getLockedRow(state.lockedRowIndex, state.dataList);
+      const lockedRowIndex = state.lockedRowIndex === "NONE" ? constants.DEFAULT_LOCK_LIMIT_FOR_SUB_GROUPED_CHART : state.lockedRowIndex;
+      const lockedRow = getLockedRow(lockedRowIndex, state.dataList);
+
       if (
         lockedRow &&
         typeof lockedRow === "object" &&
@@ -171,10 +173,6 @@ const xBarRChartDataModule = {
   },
 
   actions: {
-    reset: (ctx) => {
-      ctx.commit("reset");
-    },
-
     init: (ctx, { chartId, password, currentChart = {} }) => {
       ctx.commit("loading", true);
 
@@ -197,6 +195,7 @@ const xBarRChartDataModule = {
           lockedRow = Number.parseInt(lockedRow);
           ctx.commit("lockedRowIndex", lockedRow);
         }
+        else ctx.commit("lockedRowIndex", "NONE");
       }
 
       xBarRChartDataApi
@@ -456,6 +455,10 @@ const xBarRChartDataModule = {
     setLockedRowIndex: (ctx, { value, chartId }) => {
       ctx.commit("lockedRowIndex", value);
       storageHelper.storeData(LOCK_LIMIT_KEY + chartId, value);
+    },
+
+    reset: (ctx) => {
+      ctx.commit("reset");
     }
   },
 

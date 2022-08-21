@@ -1,4 +1,6 @@
 import { dashboardChartApi } from "../../api";
+import constants from "../../utils/constants.util";
+import storageHelperUtil from "../../utils/storageHelper.util";
 
 const dashboardChartModule = {
   namespaced: true,
@@ -245,6 +247,8 @@ const dashboardChartModule = {
       state.dashboardCharts = state.dashboardCharts.filter(
         (obj) => obj.chartId !== chartId
       );
+      storageHelperUtil.removeStoredData(constants.INDIVIDUALS_CHART_LOCK_LIMIT_KEY + chartId);
+      storageHelperUtil.removeStoredData(constants.SUB_GROUPED_CHART_LOCK_LIMIT_KEY + chartId);
     }
   }
 };

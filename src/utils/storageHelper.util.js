@@ -39,6 +39,10 @@ function getStoredData(key) {
   return localStorage.getItem(key);
 }
 
+function removeStoredData(key) {
+  return localStorage.removeItem(key);
+}
+
 export default {
   USER_DATA_KEY,
 
@@ -47,5 +51,6 @@ export default {
   removeUserObj,
   getUserId,
   storeData,
-  getStoredData
+  getStoredData,
+  removeStoredData
 };

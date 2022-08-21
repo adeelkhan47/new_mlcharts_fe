@@ -209,18 +209,20 @@ export default {
         return this.getExcelRecord(obj);
       });
 
+      // don't modify records after that. Its used to detect new records
       this.options.data = JSON.parse(JSON.stringify(this.records));
 
+      // adding blank rows
       let blankRows = 29;
       if (this.records.length > 22) blankRows = 5;
       else blankRows = blankRows - this.records.length;
 
-      // adding blank rows
       const blankRow = this.getExcelRecord();
       for (let i = 0; i < blankRows; i++) {
-        this.options.data.push(blankRow);
+        this.options.data.push({ ...blankRow });
       }
 
+      // setting locked row
       if (
         typeof this.lockedRowIndex === "number" &&
         this.lockedRowIndex <= this.options.data.length
@@ -228,10 +230,11 @@ export default {
         this.options.data[this.lockedRowIndex].lockLimit = true;
       } else {
         this.options.data[
-          constants.DEFAULT_LOCK_LIMIT_FOR_SUBGROUPED_CHART
+          constants.DEFAULT_LOCK_LIMIT_FOR_SUB_GROUPED_CHART
         ].lockLimit = true;
       }
 
+      // generating excel table
       this.init();
     },
 

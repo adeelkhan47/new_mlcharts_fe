@@ -241,6 +241,7 @@ export default {
     },
 
     lockedRowIndex() {
+      this.refresh = Math.random();
       this.setStatisticsData();
       this.setChartData();
     },

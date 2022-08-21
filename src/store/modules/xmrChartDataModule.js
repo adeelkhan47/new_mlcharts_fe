@@ -3,10 +3,7 @@ import { xmrChartDataApi } from "../../api";
 import constants from "../../utils/constants.util";
 import storageHelper from "../../utils/storageHelper.util";
 
-const X_CONTROL_LIMITS_CONST = 1.128;
-const MR_UCL_CONST = 3.268;
-const toFixed = 3;
-const LOCK_LIMIT_KEY = "X_MR_LOCKED_ROW_INDEX__";
+const LOCK_LIMIT_KEY = constants.INDIVIDUALS_CHART_LOCK_LIMIT_KEY;
 
 const xmrChartDataModule = {
   namespaced: true,
@@ -90,8 +87,8 @@ const xmrChartDataModule = {
         cl: 0,
         lcl: 0
       };
-
-      const lockedRow = getLockedRow(state.lockedRowIndex, state.dataList);
+      const lockedRowIndex = state.lockedRowIndex === "NONE" ? constants.DEFAULT_LOCK_LIMIT_FOR_INDIVIDUALS_CHART : state.lockedRowIndex;
+      const lockedRow = getLockedRow(lockedRowIndex, state.dataList);
       if (
         lockedRow &&
         typeof lockedRow === "object" &&
@@ -191,6 +188,7 @@ const xmrChartDataModule = {
           lockedRow = Number.parseInt(lockedRow);
           ctx.commit("lockedRowIndex", lockedRow);
         }
+        else ctx.commit("lockedRowIndex", "NONE");
       }
 
       xmrChartDataApi
