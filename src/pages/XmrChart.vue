@@ -30,7 +30,7 @@
                 @click="() => setEditModel(true)"
               >
                 <md-icon>edit</md-icon>
-                Edit Columns
+                Column Titles
               </md-button>
             </div>
             <statistics-table
@@ -312,19 +312,19 @@ export default {
         {
           key: "Data Count",
           value: this.dataList.length
-        },
-        {
-          key: "Cpu (overall)",
-          value: util.formatNumber(this.dataset.cpu)
-        },
-        {
-          key: "Cpl (overall)",
-          value: util.formatNumber(this.dataset.cpl)
-        },
-        {
-          key: "Cpk (overall)",
-          value: util.formatNumber(this.dataset.cpk)
         }
+        // {
+        //   key: "Cpu (overall)",
+        //   value: util.formatNumber(this.dataset.cpu)
+        // },
+        // {
+        //   key: "Cpl (overall)",
+        //   value: util.formatNumber(this.dataset.cpl)
+        // },
+        // {
+        //   key: "Cpk (overall)",
+        //   value: util.formatNumber(this.dataset.cpk)
+        // }
       ];
     },
 

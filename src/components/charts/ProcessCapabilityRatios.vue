@@ -26,7 +26,7 @@ export default {
   props: {
     title: {
       type: String,
-      default: "Process Capability Ratios (Cumulative)"
+      default: "Process Capability & Performance Ratios (Cumulative)"
     },
     dataList: {
       type: Array
