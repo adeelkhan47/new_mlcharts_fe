@@ -76,7 +76,7 @@ export default {
         onpaste: this.handleChange,
         ondeleterow: this.handleChange,
         oneditionend: this.handleChange,
-        onchange: this.handleLockLimit,
+        onchange: this.onChange,
         contextMenu: function (obj, x, y, e) {
           var items = [];
 
@@ -370,21 +370,14 @@ export default {
       }
     },
 
-    handleLockLimit(
-      container,
-      dataRow,
-      colIndex,
-      rowIndex,
-      currentVal,
-      prevVal
-    ) {
+    onChange(container, dataRow, colIndex, rowIndex, currentVal, prevVal) {
       // id = 0, lockLimit = 1
       if (colIndex === "1" && currentVal !== prevVal) {
         this.setLockedRowIndex({
           value: currentVal ? Number.parseInt(rowIndex) : "NONE",
           chartId: this.chartId
         });
-      }
+      } else this.handleChange();
     },
 
     handleResponse(response) {
