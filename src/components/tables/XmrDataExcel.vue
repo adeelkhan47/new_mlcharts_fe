@@ -451,7 +451,7 @@ export default {
           value: currentVal ? Number.parseInt(rowIndex) : "NONE",
           chartId: this.chartId
         });
-      } else this.handleChange();
+      } else if (currentVal === "") this.handleChange();
     },
 
     downloadData() {
