@@ -33,6 +33,32 @@
                 Column Titles
               </md-button>
             </div>
+            <div class="chart-actions">
+              <md-button
+                class="md-primary md-raised no-transform chart-action-btn"
+                @click="() => callExcelMethod('undo')"
+              >
+                <md-icon>undo</md-icon>
+                Undo Changes
+              </md-button>
+              <md-button
+                class="md-primary md-raised no-transform chart-action-btn"
+                @click="() => callExcelMethod('redo')"
+              >
+                <md-icon>redo</md-icon>
+                Redo Changes
+              </md-button>
+            </div>
+            <div class="chart-actions">
+              <md-button
+                class="md-primary md-raised no-transform chart-action-btn"
+                :class="{ 'save-modified-data': blinkSaveBtn }"
+                @click="() => callExcelMethod('handleChange')"
+              >
+                <md-icon>save</md-icon>
+                Save Data
+              </md-button>
+            </div>
             <statistics-table
               :statisticsData="statisticsData"
               :upperSpecLimit="upperSpecLimit"
@@ -40,12 +66,14 @@
               @specLimitChanged="handleSpecLimit"
               @saveLimits="saveLimits"
               @updateChartLinesDisplay="handleChartLinesDisplay"
+              @updateRatioLinesDisplay="handleRatioChartLinesDisplay"
             />
             <chart-histogram class="col-chart" />
           </div>
           <xmr-data-excel
             ref="xmrExcelSheet"
             :headings="currentChartHeadings"
+            @onDataChanged="notifyToSaveData"
           />
         </div>
         <div class="charts" :key="refresh">
@@ -75,6 +103,8 @@
           <process-capability-ratios
             :dataList="dataList"
             :formattedDataList="processCapabilityRatiosData"
+            :chartFields="ratioChartConfig.fields"
+            :key="JSON.stringify(ratioChartConfig)"
           />
         </div>
       </div>
@@ -142,6 +172,7 @@ export default {
 
   data() {
     return {
+      blinkSaveBtn: false,
       refresh: 1,
       colEditVisibility: false,
       loader: null,
@@ -163,6 +194,9 @@ export default {
         colors: ["blue", "#a9a9a9", "black"],
         fields: ["UCL", "CL", "Moving Range"],
         lineShapes: ["dash", "line", "line"]
+      },
+      ratioChartConfig: {
+        fields: ["Cpk", "Cp", "Ppk", "Pp"]
       }
     };
   },
@@ -395,11 +429,17 @@ export default {
             label: obj.reference1,
             note: obj.note,
             Cpk: util.formatNumber(obj.cumulativeCPK),
-            Ppk: util.formatNumber(obj.cumulativePPK)
+            Cp: util.formatNumber(obj.cp),
+            Ppk: util.formatNumber(obj.cumulativePPK),
+            Pp: util.formatNumber(obj.pp)
           };
         })
         .filter(
-          (obj) => typeof obj.Cpk !== "string" && typeof obj.Ppk !== "string"
+          (obj) =>
+            typeof obj.Cpk !== "string" &&
+            typeof obj.Cp !== "string" &&
+            typeof obj.Ppk !== "string" &&
+            typeof obj.Pp !== "string"
         );
 
       this.formattedMrDataList = this.dataList
@@ -426,6 +466,7 @@ export default {
     },
 
     handleChartLinesDisplay({ displayControlLimits, displayCenterLines }) {
+      // for chart1 & chart2
       if (displayControlLimits && displayCenterLines) {
         this.xChartConfig = {
           colors: ["red", "#a9a9a9", "red", "black"],
@@ -473,6 +514,29 @@ export default {
       }
     },
 
+    handleRatioChartLinesDisplay({
+      displayCPK,
+      displayCP,
+      displayPPK,
+      displayPP
+    }) {
+      // for chart3
+      let ratiosChartFields = ["Cpk", "Cp", "Ppk", "Pp"];
+
+      if (!displayCPK)
+        ratiosChartFields = ratiosChartFields.filter((v) => v !== "Cpk");
+      if (!displayCP)
+        ratiosChartFields = ratiosChartFields.filter((v) => v !== "Cp");
+      if (!displayPPK)
+        ratiosChartFields = ratiosChartFields.filter((v) => v !== "Ppk");
+      if (!displayPP)
+        ratiosChartFields = ratiosChartFields.filter((v) => v !== "Pp");
+
+      this.ratioChartConfig = {
+        fields: ratiosChartFields
+      };
+    },
+
     saveDashboardHeadings(newObj) {
       const defaultHeadings = constants.INDIVIDUALS_CHART_DEFAULT_HEADINGS;
       const newHeading = {};
@@ -514,6 +578,34 @@ export default {
       }, {});
 
       this.saveDashboardHeadings(payload);
+    },
+
+    callExcelMethod(methodName) {
+      if (
+        this.$refs &&
+        this.$refs.xmrExcelSheet &&
+        this.$refs.xmrExcelSheet[methodName]
+      ) {
+        this.$refs.xmrExcelSheet[methodName]();
+      }
+
+      switch (methodName) {
+        case "handleChange":
+          this.blinkSaveBtn = false;
+          break;
+
+        case "undo":
+          this.blinkSaveBtn = true;
+          break;
+
+        case "redo":
+          this.blinkSaveBtn = true;
+          break;
+      }
+    },
+
+    notifyToSaveData() {
+      this.blinkSaveBtn = true;
     }
   }
 };
@@ -582,7 +674,6 @@ export default {
   width: 100%;
   padding: 8px;
   padding-top: 0;
-  margin-bottom: 20px;
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -612,5 +703,27 @@ export default {
 
 .input-field {
   padding: 5px 15px;
+}
+
+.save-modified-data {
+  animation: blinker 0.5s linear infinite;
+}
+
+@keyframes blinker {
+  0% {
+    background-color: green;
+  }
+  25% {
+    background-color: #006600;
+  }
+  50% {
+    background-color: green;
+  }
+  75% {
+    background-color: #339933;
+  }
+  100% {
+    background-color: green;
+  }
 }
 </style>

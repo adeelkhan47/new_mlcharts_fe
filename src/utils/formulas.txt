@@ -30,6 +30,13 @@ CumulativeAverageMovingRange / 1.128
 AverageMovingRange / 1.128
 
 
+## Cp
+(UpperSpecLimit - LowerSpecLimit) / (6 * CumulativeEstimatedStandardDeviation)
+
+## Pp
+(UpperSpecLimit - LowerSpecLimit) / (6 * CumulativeSampleStandardDeviation)
+
+
 
 ####################################################################################################
 ## SubGrouped ######################################################################################
@@ -65,3 +72,10 @@ CumulativeAverageRange / 1.128
 
 ## EstimatedStandardDeviation [for subgroupSize 2]
 AverageRange / 1.128
+
+
+## Cp
+(UpperSpecLimit - LowerSpecLimit) / (6 * CumulativeEstimatedStandardDeviation)
+
+## Pp
+(UpperSpecLimit - LowerSpecLimit) / (6 * CumulativeSampleStandardDeviation)

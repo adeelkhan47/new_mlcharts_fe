@@ -237,6 +237,28 @@ function calculateSampleStdDev(numbersArr) {
   return SDresult;
 }
 
+function getCP(upperSpecLimit, lowerSpecLimit, cumulativeEstimatedStdDev) {
+  const types = [
+    typeof upperSpecLimit,
+    typeof lowerSpecLimit,
+    typeof cumulativeEstimatedStdDev
+  ];
+  if (types.includes("string") || cumulativeEstimatedStdDev === 0 /* infinity */) return "";
+
+  return ((upperSpecLimit - lowerSpecLimit) / (6 * cumulativeEstimatedStdDev));
+}
+
+function getPP(upperSpecLimit, lowerSpecLimit, cumulativeSampleStdDev) {
+  const types = [
+    typeof upperSpecLimit,
+    typeof lowerSpecLimit,
+    typeof cumulativeSampleStdDev
+  ];
+  if (types.includes("string") || cumulativeSampleStdDev === 0 /* infinity */) return "";
+
+  return ((upperSpecLimit - lowerSpecLimit) / (6 * cumulativeSampleStdDev));
+}
+
 const util = {
   isNumber,
   isString,
@@ -265,7 +287,9 @@ const util = {
   getMrUCLForXMR,
   getCPL_ForXMR,
   getCPU_ForXMR,
-  calculateSampleStdDev
+  calculateSampleStdDev,
+  getCP,
+  getPP
 };
 
 export default util;

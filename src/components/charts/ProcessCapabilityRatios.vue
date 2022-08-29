@@ -1,7 +1,9 @@
 <template>
   <div class="x-chart">
     <h3 class="chart-title">{{ title }}</h3>
-    <template v-if="chartData && chartData.length">
+    <template
+      v-if="chartData && chartData.length && chartFields && chartFields.length"
+    >
       <v-chart :forceFit="true" :height="400" :data="chartData" :scale="scale">
         <v-tooltip :showTitle="false" />
         <v-axis :label="label" data-key="key" />
@@ -11,7 +13,10 @@
       </v-chart>
     </template>
     <template v-else>
-      <h4 class="no-data">No Data found</h4>
+      <h4 class="no-data" v-if="!chartData || chartData.length === 0">
+        No Data found
+      </h4>
+      <h4 class="no-data" v-else>No Lines Selected</h4>
     </template>
   </div>
 </template>
@@ -30,6 +35,10 @@ export default {
     },
     dataList: {
       type: Array
+    },
+    chartFields: {
+      type: Array,
+      default: () => []
     },
     formattedDataList: {
       type: Array
@@ -60,10 +69,9 @@ export default {
   computed: {
     chartData() {
       const dv = new DataSet.View().source(this.formattedDataList);
-      let fields = ["Cpk", "Ppk"];
       dv.transform({
         type: "fold",
-        fields: fields,
+        fields: this.chartFields,
         key: "id",
         value: "value"
       });

@@ -246,6 +246,8 @@ const xBarRChartDataModule = {
       let cumulativePPL = 0;
       let cumulativePPU = 0;
       let cumulativePPK = 0;
+      let cp = 0;
+      let pp = 0;
 
       list = list.map((obj, i) => {
         range = 0;
@@ -263,6 +265,8 @@ const xBarRChartDataModule = {
         cumulativePPL = 0;
         cumulativePPU = 0;
         cumulativePPK = 0;
+        cp = 0;
+        pp = 0;
 
         if (Object.keys(values).length) {
           range = util.getRangeForXBarR(values);
@@ -319,6 +323,8 @@ const xBarRChartDataModule = {
           upperSpecLimit
         );
         cumulativePPK = util.getCumulativeCPK(cumulativePPL, cumulativePPU);
+        cp = util.getCP(upperSpecLimit, lowerSpecLimit, cumulativeStdDev);
+        pp = util.getPP(upperSpecLimit, lowerSpecLimit, sampleStdDev);
 
         if (averageCL === null) {
           averageCL = average;
@@ -345,6 +351,8 @@ const xBarRChartDataModule = {
         obj.cumulativePPL = cumulativePPL;
         obj.cumulativePPU = cumulativePPU;
         obj.cumulativePPK = cumulativePPK;
+        obj.cp = cp;
+        obj.pp = pp;
         obj.label = obj.reference1 || "";
 
         return obj;

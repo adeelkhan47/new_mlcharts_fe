@@ -90,7 +90,14 @@ export default {
       this.$router.push("/register");
     },
     navigateToHome() {
-      this.$router.push("/dashboard");
+      let redirectPath = storageHelper.getStoredData(
+        storageHelper.LOGIN_REDIRECT_PATH_KEY
+      );
+      if (redirectPath)
+        storageHelper.removeStoredData(storageHelper.LOGIN_REDIRECT_PATH_KEY);
+      else redirectPath = "/dashboard";
+
+      this.$router.push(redirectPath);
     },
     reset() {
       this.login.email = "";

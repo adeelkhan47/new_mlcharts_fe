@@ -1,5 +1,7 @@
-const USER_DATA_KEY = "userData";
 import { setDefaultHeader } from "../api";
+
+const LOGIN_REDIRECT_PATH_KEY = 'redirectAfterLogin';
+const USER_DATA_KEY = "userData";
 
 function getUserObj() {
   try {
@@ -44,6 +46,7 @@ function removeStoredData(key) {
 }
 
 export default {
+  LOGIN_REDIRECT_PATH_KEY,
   USER_DATA_KEY,
 
   getUserObj,

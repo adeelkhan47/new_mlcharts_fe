@@ -229,6 +229,8 @@ const xmrChartDataModule = {
       let cumulativePPL = 0;
       let cumulativePPU = 0;
       let cumulativePPK = 0;
+      let cp = 0;
+      let pp = 0;
 
       list = list.map((obj, i) => {
         prev = curr;
@@ -252,6 +254,8 @@ const xmrChartDataModule = {
           cumulativePPL = "";
           cumulativePPU = "";
           cumulativePPK = "";
+          cp = "";
+          pp = "";
         } else {
           mrSum += movingRange;
           cumulativeAverageMR = util.getCumulativeAverage(mrSum, i);
@@ -283,6 +287,8 @@ const xmrChartDataModule = {
             upperSpecLimit
           );
           cumulativePPK = util.getCumulativeCPK(cumulativePPL, cumulativePPU);
+          cp = util.getCP(upperSpecLimit, lowerSpecLimit, cumulativeStdDev);
+          pp = util.getPP(upperSpecLimit, lowerSpecLimit, sampleStdDev);
         }
 
         obj.movingRange = movingRange;
@@ -301,6 +307,8 @@ const xmrChartDataModule = {
         obj.cumulativePPL = cumulativePPL;
         obj.cumulativePPU = cumulativePPU;
         obj.cumulativePPK = cumulativePPK;
+        obj.cp = cp;
+        obj.pp = pp;
 
         return obj;
       });

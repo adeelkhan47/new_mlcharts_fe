@@ -37,20 +37,19 @@ const irrelevantKeys = [
   "cumulativePPL",
   "cumulativePPU",
   "cumulativePPK",
-  "averagePPK"
+  "averagePPK",
+  "cp",
+  "pp"
 ];
 
 export default {
   name: "XBarRDataExcel",
 
-  components: {
-    jexcel
-  },
-
   props: ["saveBtn", "subgroupSize", "headings"],
 
   data() {
     return {
+      valueMapping: null,
       newRowAdded: false,
       chartId: "",
       mounted: false,
@@ -68,15 +67,17 @@ export default {
         columnResize: false,
         allowToolbar: true,
         rowDrag: false,
+        data: [],
         columns: [],
         tableOverflow: true,
         tableWidth: "755px",
-        tableHeight: "830px",
+        tableHeight: "980px",
         oninsertrow: this.onInsertRow,
-        onpaste: this.handleChange,
+        onpaste: this.notifyToSaveData,
         ondeleterow: this.handleChange,
-        oneditionend: this.handleChange,
+        oneditionend: this.afterEdition,
         onchange: this.onChange,
+        oncreateeditor: this.handleZeroCellValue,
         contextMenu: function (obj, x, y, e) {
           var items = [];
 
@@ -213,8 +214,8 @@ export default {
       this.options.data = JSON.parse(JSON.stringify(this.records));
 
       // adding blank rows
-      let blankRows = 29;
-      if (this.records.length > 22) blankRows = 5;
+      let blankRows = 40;
+      if (this.records.length > 33) blankRows = 5;
       else blankRows = blankRows - this.records.length;
 
       const blankRow = this.getExcelRecord();
@@ -234,12 +235,21 @@ export default {
         ].lockLimit = true;
       }
 
-      // generating excel table
-      this.init();
+      // setting excel table data
+      if (this.spreadsheet) {
+        const finalData = JSON.parse(JSON.stringify(this.options.data));
+        this.spreadsheet.setData(finalData);
+      }
     },
 
     headings() {
       if (this.headings && Object.keys(this.headings).length) {
+        this.init();
+      }
+    },
+
+    subgroupSize() {
+      if (this.subgroupSize) {
         this.init();
       }
     }
@@ -251,6 +261,7 @@ export default {
 
   mounted() {
     this.setPageData();
+    this.init();
   },
 
   methods: {
@@ -273,8 +284,6 @@ export default {
     init() {
       const el = document.getElementById(this.excelId);
       if (el) {
-        if (this.spreadsheet && this.spreadsheet.destroy)
-          this.spreadsheet.destroy();
         el.innerHTML = "";
         this.spreadsheet = null;
         this.options.columns = this.getExcelColumns();
@@ -302,12 +311,14 @@ export default {
 
       currentData = currentData
         .filter((obj) => {
-          let filter = false;
-          for (let i = 0; i < dataKeys.length; i++) {
-            const val = obj[dataKeys[i]];
-            if (val || val === 0) {
-              filter = true;
-              break;
+          let filter = !!(obj.reference1 || obj.reference2 || obj.note);
+          if (!filter) {
+            for (let i = 0; i < dataKeys.length; i++) {
+              const val = obj[dataKeys[i]];
+              if (val || val === 0) {
+                filter = true;
+                break;
+              }
             }
           }
           return filter;
@@ -425,7 +436,13 @@ export default {
         const addition = Object.values(currObj).filter(
           (val) => (val || typeof val === "number") && typeof val !== "boolean"
         );
-        return addition.length && !oldIds.includes(currObj.id);
+        return (
+          (addition.length ||
+            currObj.reference1 ||
+            currObj.reference2 ||
+            currObj.note) &&
+          !oldIds.includes(currObj.id)
+        );
       });
 
       return this.getFormattedData(newRecords);
@@ -484,13 +501,21 @@ export default {
     getExcelColumns() {
       const headings = this.headings || {};
       let columns = [
-        { type: "text", title: "Row ID", width: "0px", readOnly: true },
         {
+          name: "id", // data key
+          type: "text",
+          title: "Row ID",
+          width: "0px",
+          readOnly: true
+        },
+        {
+          name: "lockLimit",
           type: "radio",
           title: "Lock Limits",
           width: "100px"
         },
         {
+          name: "reference1",
           type: "text",
           title: headings.col2
             ? headings.col2.endsWith("(Appears on chart)")
@@ -499,142 +524,184 @@ export default {
             : "Reference 1 (Appears on chart)",
           width: "220px"
         },
-        { type: "text", title: headings.col3 || "Reference 2", width: "150px" }
+        {
+          name: "reference2",
+          type: "text",
+          title: headings.col3 || "Reference 2",
+          width: "150px"
+        }
       ];
 
       for (let i = 1; i <= this.subgroupSize; i++) {
         columns.push({
-          type: "numeric",
+          name: "x" + i,
+          type: "text",
           title: "x" + i,
           width: "100px",
-          mask: "#,##.00",
-          decimal: "."
+          mask: "#,##",
+          decimal: ".",
+          options: { reverse: true }
         });
       }
 
       return columns.concat([
         {
+          name: "note",
           type: "text",
           title: "Notes",
           width: "100px"
         },
         {
+          name: "average",
           type: "text",
           title: "Average",
           width: "100px",
           readOnly: true
         },
         {
+          name: "range",
           type: "text",
           title: "Range",
           width: "100px",
           readOnly: true
         },
         {
+          name: "cumulativeGrandAverage",
           type: "text",
           title: "Cumul. Grand Avg",
           width: "125px",
           readOnly: true
         },
         {
+          name: "cumulativeAverageRange",
           type: "text",
           title: "Cumul. Avg range",
           width: "125px",
           readOnly: true
         },
         {
+          name: "cumulativeStdDev",
           type: "text",
           title: "Cumul. Est SD",
           width: "110px",
           readOnly: true
         },
         {
+          name: "sampleStdDev",
           type: "text",
           title: "Sample Std Dev",
           width: "120px",
           readOnly: true
         },
         {
+          name: "averageUCL",
           type: "text",
           title: "Avg UCL",
           width: "100px",
           readOnly: true
         },
         {
+          name: "averageCL",
           type: "text",
           title: "Avg CL",
           width: "100px",
           readOnly: true
         },
         {
+          name: "averageLCL",
           type: "text",
           title: "Avg LCL",
           width: "100px",
           readOnly: true
         },
         {
+          name: "rangeUCL",
           type: "text",
           title: "Rng UCL",
           width: "100px",
           readOnly: true
         },
         {
+          name: "rangeCL",
           type: "text",
           title: "Rng CL",
           width: "100px",
           readOnly: true
         },
         {
+          name: "rangeLCL",
           type: "text",
           title: "Rng LCL",
           width: "100px",
           readOnly: true
         },
         {
+          name: "cumulativeCPL",
           type: "text",
           title: "CPL",
           width: "100px",
           readOnly: true
         },
         {
+          name: "cumulativeCPU",
           type: "text",
           title: "CPU",
           width: "100px",
           readOnly: true
         },
         {
+          name: "cumulativeCPK",
           type: "text",
           title: "CPK",
           width: "100px",
           readOnly: true
         },
         {
+          name: "averageCPK",
           type: "text",
           title: "Avg CPK",
           width: "100px",
           readOnly: true
         },
         {
+          name: "cumulativePPL",
           type: "text",
           title: "Ppl",
           width: "100px",
           readOnly: true
         },
         {
+          name: "cumulativePPU",
           type: "text",
           title: "Ppu",
           width: "100px",
           readOnly: true
         },
         {
+          name: "cumulativePPK",
           type: "text",
           title: "Ppk",
           width: "100px",
           readOnly: true
         },
         {
+          name: "averagePPK",
           type: "text",
           title: "Avg Ppk",
+          width: "100px",
+          readOnly: true
+        },
+        {
+          name: "cp",
+          type: "text",
+          title: "Cp",
+          width: "100px",
+          readOnly: true
+        },
+        {
+          name: "pp",
+          type: "text",
+          title: "Pp",
           width: "100px",
           readOnly: true
         }
@@ -699,7 +766,9 @@ export default {
           cumulativePPL: util.formatNumber(dataObj.cumulativePPL),
           cumulativePPU: util.formatNumber(dataObj.cumulativePPU),
           cumulativePPK: util.formatNumber(dataObj.cumulativePPK),
-          averagePPK: util.formatNumber(dataObj.averagePPK)
+          averagePPK: util.formatNumber(dataObj.averagePPK),
+          cp: util.formatNumber(dataObj.cp),
+          pp: util.formatNumber(dataObj.pp)
         };
       } else {
         record = {
@@ -730,7 +799,9 @@ export default {
           cumulativePPL: "",
           cumulativePPU: "",
           cumulativePPK: "",
-          averagePPK: ""
+          averagePPK: "",
+          cp: "",
+          pp: ""
         };
       }
 
@@ -780,6 +851,50 @@ export default {
         this.spreadsheet.headers = officialHeaders;
         this.spreadsheet.options.data = officialData;
       }
+    },
+
+    notifyToSaveData() {
+      this.$emit("onDataChanged");
+    },
+
+    undo() {
+      if (this.spreadsheet && this.spreadsheet.undo) this.spreadsheet.undo();
+    },
+
+    redo() {
+      if (this.spreadsheet && this.spreadsheet.redo) this.spreadsheet.redo();
+    },
+
+    handleZeroCellValue(_, __, col, row, input) {
+      const oldValue = this.spreadsheet.getValueFromCoords(col, row);
+      if (oldValue === 0) {
+        const self = this;
+        input.addEventListener("change", (e) => {
+          self.valueMapping = {
+            oldValue,
+            newValue: e.target.value,
+            col,
+            row
+          };
+        });
+      }
+    },
+
+    afterEdition() {
+      if (
+        this.spreadsheet &&
+        this.valueMapping &&
+        this.valueMapping.newValue === ""
+      ) {
+        this.spreadsheet.setValueFromCoords(
+          this.valueMapping.col,
+          this.valueMapping.row,
+          "",
+          false
+        );
+      }
+      this.valueMapping = null;
+      this.notifyToSaveData();
     }
   }
 };
@@ -788,8 +903,7 @@ export default {
 <style scoped>
 .data-table {
   min-width: 550px;
-  min-height: 795px;
-  min-height: 725px;
+  min-height: 980px;
   max-width: 755px;
   border-radius: 5px;
   background: #eee;

@@ -45,7 +45,7 @@ export default {
           tickInterval: 1
         }
       ],
-      height: 440,
+      height: 350,
       label: {
         formatter: formatter
       }

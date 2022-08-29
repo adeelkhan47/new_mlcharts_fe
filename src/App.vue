@@ -28,9 +28,13 @@ export default {
     if (
       !userObj &&
       !(this.$route.name === "Login" || this.$route.name === "Register")
-    )
+    ) {
+      storageHelper.storeData(
+        storageHelper.LOGIN_REDIRECT_PATH_KEY,
+        this.$route.path
+      );
       this.$router.push("/login");
-    else if (userObj && !this.paths.includes(this.$route.name))
+    } else if (userObj && !this.paths.includes(this.$route.name))
       this.$router.push("/dashboard");
   }
 };

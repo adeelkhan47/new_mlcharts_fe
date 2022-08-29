@@ -1,14 +1,14 @@
 <template>
   <div class="data-table" :class="{ loading }">
     <div :id="excelId" />
-    <add-data :visibility="showEdit" @hide="closed" :item="selectedItem" />
+    <!-- <add-data :visibility="showEdit" @hide="closed" :item="selectedItem" />  // FOR=>add-data -->
   </div>
 </template>
 
 <script>
 import { mapActions, mapState } from "vuex";
 import constants from "../../utils/constants.util";
-import AddData from "../inputs/AddData.vue";
+// import AddData from "../inputs/AddData.vue"; // FOR=>add-data
 import "jexcel/dist/jexcel.css";
 import jexcel from "jexcel";
 import util from "../../utils";
@@ -17,20 +17,20 @@ export default {
   name: "XmrDataExcel",
 
   components: {
-    AddData,
-    jexcel
+    // AddData  // FOR=>add-data
   },
 
   props: ["saveBtn", "headings"],
 
   data() {
     return {
+      valueMapping: null,
       newRowAdded: false,
       chartId: "",
       mounted: false,
       excelId: "data-excel-spreadsheet",
-      showEdit: false,
-      selectedItem: null,
+      // showEdit: false, // FOR=>add-data
+      // selectedItem: null, // FOR=>add-data
       spreadsheet: null,
       records: [],
       downloadableColsIndexes: [2, 3, 4, 6],
@@ -43,15 +43,17 @@ export default {
         columnResize: false,
         allowToolbar: true,
         rowDrag: false,
+        data: [],
         columns: [],
         tableOverflow: true,
         tableWidth: "755px",
-        tableHeight: "830px",
+        tableHeight: "980px",
         oninsertrow: this.onInsertRow,
-        onpaste: this.handleChange,
+        onpaste: this.notifyToSaveData,
         ondeleterow: this.handleChange,
-        oneditionend: this.handleChange,
+        oneditionend: this.afterEdition,
         onchange: this.onChange,
+        oncreateeditor: this.handleZeroCellValue,
         contextMenu: function (obj, x, y, e) {
           var items = [];
 
@@ -203,14 +205,16 @@ export default {
           cumulativePPL: util.formatNumber(obj.cumulativePPL),
           cumulativePPU: util.formatNumber(obj.cumulativePPU),
           cumulativePPK: util.formatNumber(obj.cumulativePPK),
-          averageCumulativePPK: util.formatNumber(obj.averageCumulativePPK)
+          averageCumulativePPK: util.formatNumber(obj.averageCumulativePPK),
+          cp: util.formatNumber(obj.cp),
+          pp: util.formatNumber(obj.pp)
         };
       });
 
       this.options.data = JSON.parse(JSON.stringify(this.records));
 
-      let blankRows = 29;
-      if (this.records.length > 22) blankRows = 5;
+      let blankRows = 40;
+      if (this.records.length > 33) blankRows = 5;
       else blankRows = blankRows - this.records.length;
 
       // adding blank rows
@@ -239,7 +243,9 @@ export default {
           cumulativePPL: "",
           cumulativePPU: "",
           cumulativePPK: "",
-          averageCumulativePPK: ""
+          averageCumulativePPK: "",
+          cp: "",
+          pp: ""
         });
       }
 
@@ -254,7 +260,11 @@ export default {
         ].lockLimit = true;
       }
 
-      this.init();
+      // setting data
+      if (this.spreadsheet) {
+        const finalData = JSON.parse(JSON.stringify(this.options.data));
+        this.spreadsheet.setData(finalData);
+      }
     },
 
     headings() {
@@ -270,6 +280,7 @@ export default {
 
   mounted() {
     this.setPageData();
+    this.init();
   },
 
   methods: {
@@ -293,8 +304,6 @@ export default {
     init() {
       const el = document.getElementById(this.excelId);
       if (el) {
-        if (this.spreadsheet && this.spreadsheet.destroy)
-          this.spreadsheet.destroy();
         el.innerHTML = "";
         this.spreadsheet = null;
         this.options.columns = this.getExcelColumns();
@@ -302,10 +311,10 @@ export default {
       }
     },
 
-    edit(item) {
-      this.selectedItem = JSON.parse(JSON.stringify(item));
-      this.showEdit = true;
-    },
+    // edit(item) { // FOR=>add-data
+    //   this.selectedItem = JSON.parse(JSON.stringify(item));
+    //   this.showEdit = true;
+    // },
 
     onInsertRow() {
       this.newRowAdded = true;
@@ -319,7 +328,14 @@ export default {
       this.newRowAdded = false;
 
       currentData = currentData
-        .filter((obj) => obj.value !== "")
+        .filter((obj) => {
+          return (
+            obj.value !== "" ||
+            obj.label !== "" ||
+            obj.reference !== "" ||
+            obj.note !== ""
+          );
+        })
         .map((obj) => {
           if (obj.value && typeof obj.value === "string")
             obj.value = Number.parseFloat(obj.value.replaceAll(",", ""));
@@ -422,7 +438,15 @@ export default {
     getNewRecords(currentData) {
       const oldIds = this.records.map((obj) => obj.id);
       const newRecords = currentData
-        .filter((currObj) => currObj.value && !oldIds.includes(currObj.id))
+        .filter(
+          (currObj) =>
+            (currObj.value ||
+              typeof currObj.value === "number" ||
+              currObj.label ||
+              currObj.reference ||
+              currObj.note) &&
+            !oldIds.includes(currObj.id)
+        )
         .map((obj) => ({
           id: obj.id,
           label: obj.label,
@@ -439,10 +463,10 @@ export default {
       return val;
     },
 
-    closed() {
-      this.showEdit = false;
-      this.selectedItem = null;
-    },
+    // closed() { // FOR=>add-data
+    //   this.showEdit = false;
+    //   this.selectedItem = null;
+    // },
 
     onChange(container, dataRow, colIndex, rowIndex, currentVal, prevVal) {
       // id = 0, lockLimit = 1
@@ -482,13 +506,21 @@ export default {
     getExcelColumns() {
       const headings = this.headings || {};
       return [
-        { type: "text", title: "ID", width: "0px", readOnly: true },
         {
+          name: "id", // data key
+          type: "text",
+          title: "ID",
+          width: "0px",
+          readOnly: true
+        },
+        {
+          name: "lockLimit",
           type: "radio",
           title: "Lock Limits",
           width: "100px"
         },
         {
+          name: "label",
           type: "text",
           title: headings.col2
             ? headings.col2.endsWith("(Appears on chart)")
@@ -497,129 +529,212 @@ export default {
             : "Reference 1 (Appears on chart)",
           width: "220px"
         },
-        { type: "text", title: headings.col3 || "Reference 2", width: "150px" },
         {
-          type: "numeric",
-          title: "Value",
-          width: "100px",
-          mask: "#,##.00",
-          decimal: "."
+          name: "reference",
+          type: "text",
+          title: headings.col3 || "Reference 2",
+          width: "150px"
         },
         {
+          name: "value",
+          type: "text",
+          title: "Value",
+          width: "100px",
+          mask: "#,##",
+          decimal: ".",
+          options: { reverse: true }
+        },
+        {
+          name: "note",
           type: "text",
           title: "Notes",
           width: "100px"
         },
         {
+          name: "movingRange",
           type: "text",
           title: "Moving Range",
           width: "100px",
           readOnly: true
         },
         {
+          name: "cumulativeAverage",
           type: "text",
           title: "Cumul. Avg",
           width: "100px",
           readOnly: true
         },
         {
+          name: "cumulativeAverageMR",
           type: "text",
           title: "Cumul. Avg mR",
           width: "110px",
           readOnly: true
         },
         {
+          name: "cumulativeStdDev",
           type: "text",
           title: "Cumul. Est SD",
           width: "100px",
           readOnly: true
         },
-
         {
+          name: "xUCL",
           type: "text",
           title: "x UCL",
           width: "100px",
           readOnly: true
         },
         {
+          name: "xCL",
           type: "text",
           title: "x CL",
           width: "100px",
           readOnly: true
         },
         {
+          name: "xLCL",
           type: "text",
           title: "x LCL",
           width: "100px",
           readOnly: true
         },
         {
+          name: "mrUCL",
           type: "text",
           title: "mR UCL",
           width: "100px",
           readOnly: true
         },
         {
+          name: "mrCL",
           type: "text",
           title: "mR CL",
           width: "100px",
           readOnly: true
         },
         {
+          name: "cumulativeCPL",
           type: "text",
           title: "CPL",
           width: "100px",
           readOnly: true
         },
         {
+          name: "cumulativeCPU",
           type: "text",
           title: "CPU",
           width: "100px",
           readOnly: true
         },
         {
+          name: "cumulativeCPK",
           type: "text",
           title: "CPK",
           width: "100px",
           readOnly: true
         },
         {
+          name: "averageCumulativeCPK",
           type: "text",
           title: "Avg CPK (overall)",
           width: "120px",
           readOnly: true
         },
         {
+          name: "sampleStdDev",
           type: "text",
           title: "Sample Std Dev",
           width: "120px",
           readOnly: true
         },
         {
+          name: "cumulativePPL",
           type: "text",
           title: "Ppl",
           width: "100px",
           readOnly: true
         },
         {
+          name: "cumulativePPU",
           type: "text",
           title: "Ppu",
           width: "100px",
           readOnly: true
         },
         {
+          name: "cumulativePPK",
           type: "text",
           title: "Ppk",
           width: "100px",
           readOnly: true
         },
         {
+          name: "averageCumulativePPK",
           type: "text",
           title: "Avg Ppk (overall)",
           width: "120px",
           readOnly: true
+        },
+        {
+          name: "cp",
+          type: "text",
+          title: "Cp",
+          width: "100px",
+          readOnly: true
+        },
+        {
+          name: "pp",
+          type: "text",
+          title: "Pp",
+          width: "100px",
+          readOnly: true
         }
       ];
+    },
+
+    notifyToSaveData() {
+      this.$emit("onDataChanged");
+    },
+
+    undo() {
+      if (this.spreadsheet && this.spreadsheet.undo) this.spreadsheet.undo();
+    },
+
+    redo() {
+      if (this.spreadsheet && this.spreadsheet.redo) this.spreadsheet.redo();
+    },
+
+    handleZeroCellValue(_, __, col, row, input) {
+      const oldValue = this.spreadsheet.getValueFromCoords(col, row);
+      if (oldValue === 0) {
+        const self = this;
+        input.addEventListener("change", (e) => {
+          self.valueMapping = {
+            oldValue,
+            newValue: e.target.value,
+            col,
+            row
+          };
+        });
+      }
+    },
+
+    afterEdition() {
+      if (
+        this.spreadsheet &&
+        this.valueMapping &&
+        this.valueMapping.newValue === ""
+      ) {
+        this.spreadsheet.setValueFromCoords(
+          this.valueMapping.col,
+          this.valueMapping.row,
+          "",
+          false
+        );
+      }
+      this.valueMapping = null;
+      this.notifyToSaveData();
     }
   }
 };
@@ -628,8 +743,7 @@ export default {
 <style scoped>
 .data-table {
   min-width: 500px;
-  min-height: 795px;
-  min-height: 725px;
+  min-height: 980px;
   border-radius: 5px;
   background: #eee;
   position: relative;
